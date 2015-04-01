@@ -1,0 +1,8 @@
+set terminal postscript
+set output "@FILE@"
+set xrange[-10:10]
+set xlabel "error: disksim - disk (ms)"
+set ylabel "percent of requests"
+set title "@FULLNAME@\n (\"@CNAME@\")\n @WORKLOAD@ (@DATE@)" 
+plot "@HIST@" using 1:2 with boxes
+

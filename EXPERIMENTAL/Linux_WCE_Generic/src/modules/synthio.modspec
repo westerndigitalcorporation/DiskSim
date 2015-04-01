@@ -1,0 +1,85 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE synthio
+HEADER \#include "../disksim_synthio.h"
+RESTYPE int
+PROTO int disksim_synthio_loadparams(struct lp_block *b);
+
+PARAM Number of I/O requests to generate	I	1 
+TEST i > 0
+INIT SYNTHIO_ENDIOCNT = i;
+
+This specifies the number of independent, concurrent, request-generating
+processes.
+
+PARAM Maximum time of trace generated		D	1 
+TEST d > 0.0
+INIT SYNTHIO_ENDTIME = d; SYNTHIO_ENDTIME *= 1000.0;
+
+This specifies the maximum number of I/O requests to generate before
+ending the simulation run.  A simulation run continues until either
+the specified number of requests is generated or the maximum
+simulation time (see below) is reached.
+
+PARAM System call/return with each request	I	1 
+TEST RANGE(i,0,1)
+INIT SYNTHIO_SYSCALLS = i;
+
+This specifies whether or not each request occurs within the context of a
+system call (which may affect the behavior of the associated process
+in the system-level model).  If true~(1), each request will be
+preceded by a system call event and followed by a system call return
+event.
+
+PARAM Think time from call to request		D	1 
+TEST d >= 0.0
+INIT SYNTHIO_SYSCALL_TIME = d;
+
+This specifies the think time (i.e., computation time) between the system
+call event and the disk request event.  This parameter is only
+relevant if the above Boolean parameter is set to true~(1).
+
+PARAM Think time from request to return		D	1 
+TEST d >= 0.0
+INIT SYNTHIO_SYSRET_TIME = d;
+
+This specifies the think time (i.e., computation time) between the disk
+request event and the system call return event.  This parameter is
+only relevant if the above Boolean parameter is set to true~(1).
+
+PARAM Generators				LIST	1 
+TEST !loadsynthgenerators(0,l)
+
+A list of synthgen block values describing the generators.
+
+# End of file

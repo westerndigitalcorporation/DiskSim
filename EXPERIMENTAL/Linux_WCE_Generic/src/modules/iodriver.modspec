@@ -1,0 +1,86 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE iodriver
+HEADER \#include "../disksim_iodriver.h"
+RESTYPE struct iodriver *
+PROTO struct iodriver *disksim_iodriver_loadparams(struct lp_block *b);
+PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+
+PARAM type				I	1
+TEST i >= 0 
+INIT result->type = i;
+This is included for extensibility purposes.
+
+PARAM Constant access time		D	1
+TEST (d >= 0.0) || (d == -3.0) || (d == -2.0) || (d == -1.0)
+INIT result->consttime = d;
+
+This specifies any of several forms of storage simulation abstraction.
+A positive value indicates a fixed access time (after any queueing
+delays) for each disk request.  With this option, requests do not
+propagate to lower levels of the storage subsystem (and the stats and
+configuration of lower levels are therefore meaningless).  $-1.0$
+indicates that the trace provides a measured access time for each
+request, which should be used instead of any simulated access times.
+$-2.0$ indicates that the trace provides a measured queue time for
+each request, which should be used instead of any simulated queue
+times.  (Note: This can cause problems if multiple requests are
+simultaneously issued to to disks that don't support queueing.)
+$-3.0$ indicates that the trace provides measured values for both the
+access time and the queue time.  Finally, $0.0$ indicates that the
+simulation should compute all access and queue times as appropriate
+given the changing state of the storage subsystem.
+
+
+PARAM Use queueing in subsystem		I	1 
+TEST RANGE(i,0,1)
+INIT result->usequeue = i;
+
+This specifies whether or not the device driver allows more than one
+request to be outstanding (in the storage subsystem) at any point in
+time.  During initialization, this parameter is combined with the
+parameterized capabilities of the subsystem itself to determine
+whether or not queueing in the subsystem is appropriate.
+
+
+PARAM Scheduler				BLOCK	1
+TEST result->queue = disksim_ioqueue_loadparams(blk, drv_printqueuestats, drv_printcritstats, drv_printidlestats, drv_printintarrstats, drv_printsizestats)
+# INIT ioqueue_initialize(result->queue, 0);
+
+This is an ioqueue; see section \ref{param.queue}.
+
+
+
+
+
+

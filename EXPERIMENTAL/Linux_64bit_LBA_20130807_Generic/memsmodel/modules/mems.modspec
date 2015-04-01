@@ -1,0 +1,301 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+PARAM MODULE mems
+HEADER \#include "../mems_global.h"
+RESTYPE struct mems *
+PROTO struct mems *memsmodel_mems_loadparams(struct lp_block *b, int *num);
+PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+
+PARAM Scheduler					BLOCK	1 
+TEST result->queue = disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats)
+# INIT ioqueue_initialize(result->queue, 0);
+
+An ioqueue; see Section \ref{param.queue}
+
+# PARAM Block count				I	1
+# TEST (i > 0)
+# INIT result->numblocks = i;
+
+PARAM Points in precomputed seek curve		I	1
+TEST (i >= 0)
+INIT result->precompute_seek_count = (i == 0) ? 0 : i+1;
+
+Specifies the number of points in a precomputed seek curve.  If set to
+zero, then the seek time is calculated for each seek.  If not zero,
+then the seek curve is pre-computed at initialization time between
+zero and the maximum seek distance for the given number of points.
+Seek time is then interpolated from this curve.
+
+PARAM Seek function				I	1
+TEST RANGE(i,0,1)
+INIT result->seek_function = i;
+
+Specifies the function used to calculate the seek time.
+Piecewise-linear approximation is used if this value is set to~0, and
+Hong's formula is used if this is set to~1.
+
+PARAM Max queue length				I	1 
+TEST (i >= 0)
+INIT result->maxqlen = i;
+
+Specifies the maximum number of requests that can be outstanding at
+the device's queue.
+
+PARAM Bulk sector transfer time			D	1 
+TEST (d >= 0.0)
+INIT result->blktranstime = d;
+
+Specifies the bulk sector transfer time in milliseconds.  This is the
+time that it takes to transfer a single sector from the media.
+
+PARAM Segment size (in blks)			I	1 
+TEST (i >= 0)
+INIT result->segsize = i;
+
+Specifies the size (in blocks) of buffer segments.
+
+PARAM Number of buffer segments			I	1 
+TEST (i >= 0)
+INIT result->numsegs = i;
+
+Specifies the number of buffer segments that the device supports.
+
+PARAM Print stats				I	1 
+TEST RANGE(i,0,1)
+INIT result->printstats = i;
+
+This specifies whether or not statistics for the device will be reported.
+
+PARAM Command overhead				D	1 
+TEST (d >= 0.0)
+INIT result->overhead = d;
+
+This specifies a per-request processing overhead that takes place
+immediately after the arrival of a new request at the device.
+
+PARAM Number of sleds				I	1 
+TEST (i >= 0)
+INIT result->num_sleds = i; 
+INIT result->sled = malloc(i * sizeof(mems_sled_t)); 
+INIT bzero(result->sled, i * sizeof(mems_sled_t));
+# INIT return 0;
+
+Specifies the number of media sleds in the device.
+
+PARAM Layout policy				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].layout_policy = i;
+
+Specifies the data layout policy.  Only two simple layouts are
+supported: Simple, which arranges blocks linearly on the media, and
+Streaming, which reverses every other track, elminiating seeks between
+tracks.  Setting this parameter to~6 enables Simple layout and setting
+it to~7 enables the Streaming layout.
+
+PARAM Sled movement X				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].x_length_nm = i;
+
+Defines the size of sled sweep area along the X dimension, specified
+in nanometers.  Along with the "Sled movement Y" and "Bit cell length"
+parameters, this defines the capacity of the device.
+
+PARAM Sled movement Y				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].y_length_nm = i;
+
+Defines the size of sled sweep area along the Y dimension, specified
+in nanometers.  Along with the "Sled movement X" and "Bit cell length"
+parameters, this defines the raw capacity of the device.
+
+PARAM Bit cell length				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].bit_length_nm = i;
+
+Defines the size of a bit in nanometers.  The area of a single bit is
+the length squared, since bit width is assumed to be equal to length.
+This parameter, combined with the "Sled movement X/Y" parameters
+determine the raw capacity of the device.
+
+PARAM Tip sector length				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].tip_sector_length_bits = i;
+
+Specifies the number of bits in a tip sector, which is the unit of
+striping in the device.  Multiplying this parameter by the "Tip
+sectors per lbn" gives the logical block size in bits.
+
+PARAM Servo burst length			I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].servo_burst_length_bits = i;
+
+Specifies the number of bits added to a tip sector for the preceeding
+servo burst.  This could also be considered a generic storage overhead
+for other functions such as ECC.
+
+PARAM Tip sectors per lbn			I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].tip_sectors_per_lbn = i;
+
+Specifies the number of tip sectors that are combined to form a single
+logical block.
+
+PARAM Number of usable tips			I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].tips_usable = i;
+
+Specifies the total number of read/write tips in the device.
+
+PARAM Simultaneously active tips		I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].tips_simultaneous = i;
+
+Specifies the number of read/write tips that can be active
+simultaneously.  This is usually lower than the total number of tips
+in the device because of power constraints.
+
+PARAM Bidirectional access			I	1 
+DEPEND Number of sleds
+TEST RANGE(i,0,1)
+INIT result->sled[0].bidirectional_access = i;
+
+If this is set to~1, then data can be read in either direction, +Y or
+-Y.  If set to~0, then data can only be read in the +Y direction.
+
+PARAM Sled acceleration X			D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].x_accel_nm_s2 = d * 1000000000.0;
+
+Specifies the maximum acceleration of the media sled in the X
+direction in~G's.
+
+PARAM Sled acceleration Y			D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].y_accel_nm_s2 = d * 1000000000.0;
+
+Specifies the maximum acceleration of the media sled in the Y
+direction in~G's.
+
+PARAM Sled access speed				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].y_access_speed_bit_s = i;
+
+Specifies the constant access speed of the media sled during data
+transfer, in terms of bits per second.
+
+PARAM Sled resonant frequency			I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].sled_resonant_freq_hz = i;
+
+Specifies the resonant frequency of the media sled in Hz.  This
+determines the settle time after a seek.
+
+PARAM Settling time constants			D	1 
+DEPEND Number of sleds
+TEST (d >= 0)
+INIT result->sled[0].num_time_constants = d;
+
+Specifies the number of settling time constants added after a seek.
+
+PARAM Spring constant factor			D	1 
+DEPEND Number of sleds
+TEST (d >= 0)
+INIT result->sled[0].spring_factor = d;
+
+The spring constant factor represents the spring constant of the
+suspension springs.  Since the spring constant isn't known for real
+devices, this is expressed as a fraction of the actuator force at full
+displacement.  That is, if the spring constant factor is~0.5, then at
+full displacement the springs push back with one half of the force of
+the actuators.
+
+PARAM Prefetch depth				I	1 
+DEPEND Number of sleds
+TEST (i >= 0)
+INIT result->sled[0].prefetch_depth = i;
+
+Specifies the number of sectors that are prefetched after a read,
+given that there are no other requests in the queue.
+
+PARAM Time before sled inactive			D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].inactive_delay_ms = d;
+
+Specifies the amount of idle time in milliseconds before the sled is
+stopped and put into the low-power mode.
+
+PARAM Startup delay				D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].startup_time_ms = d;
+
+Specifies the delay in milliseconds that it takes to transition the
+sled from low-power mode to active mode when a request arrives.
+
+PARAM Sled active power				D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].active_power_mw = d;
+
+Specifies in milliwatts the power consumption of the media sled while
+in the active mode.
+
+PARAM Sled inactive power			D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].inactive_power_mw = d;
+
+Specifies in milliwatts the power consumption of the media sled while
+in the low-power mode.
+
+PARAM Tip access power				D	1 
+DEPEND Number of sleds
+TEST (d >= 0.0)
+INIT result->sled[0].tip_power_mw = d;
+
+Specifies in milliwatts the power consumption of a single read/write
+tip when accessing data.

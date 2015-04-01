@@ -1,0 +1,122 @@
+
+MODULE layout_g2_zone
+HEADER \#include "../layout_g2.h"
+RESTYPE struct dm_layout_g2_zone *
+PROTO int dm_layout_g2_zone_loadparams(struct lp_block *b);
+
+PARAM First cylinder number		I	1 
+TEST i >= 0
+INIT result->cyllow = i;
+
+This specifies the first physical cylinder in the zone.
+
+PARAM Last cylinder number		I	1  
+TEST i >= 0
+INIT result->cylhigh = i;
+
+This specifies the last physical cylinder in the zone.
+	
+PARAM First LBN				I	1
+TEST i >= 0
+INIT result->lbnlow = i;
+
+The first LBN in this zone.
+
+PARAM Last LBN				I	1
+TEST i >= 0
+INIT result->lbnhigh = i;
+
+The first LBN in this zone.
+
+
+PARAM Blocks per track			I	1  
+TEST i > 0
+INIT result->st = i;
+INIT result->sector_width = (dm_angle_t)(((long long)1 << 32) / result->st);
+
+This specifies the number of sectors (independent of logical-to-physical
+mappings) on each physical track in the zone.
+
+ 
+PARAM Zone Skew				D	0
+DEPEND Blocks per track
+# DEPEND Skew units
+INIT {
+INIT   switch(result->skew_units) {
+INIT   case DM_SU_REVOLUTIONS:
+INIT     result->zskew = dm_angle_dtoi(d);
+INIT     break;
+INIT   case DM_SU_SECTORS:
+INIT   default:
+INIT     result->zskew = (int)d * result->sector_width;
+INIT     break;
+INIT   }
+INIT }
+
+This specifies the physical offset of the first logical sector in the
+zone.  Physical sector 0 of every track is assumed to begin at the
+same angle of rotation.  This may be in either sectors or revolutions
+according to the ''Skew units'' parameter.
+
+
+PARAM Skew units			S	0 
+INIT if(!strcmp(s, "revolutions")) { result->skew_units = DM_SU_REVOLUTIONS; } 
+INIT else if(!strcmp(s, "sectors")) { result->skew_units = DM_SU_SECTORS; }
+INIT else { ddbg_assert(0); }
+
+Default is \texttt{sectors}.  This value overrides any set in the
+surrounding layout block.
+
+
+#PARAM Empty space at zone front		I	1 
+#INIT result->deadspace = i;
+
+#This specifies the size of the ``management area'' allocated at the
+#beginning of the zone for internal data structures.  This area can not
+#be accessed during normal activity and is not part of the disk's
+#logical-to-physical mapping.
+
+
+PARAM Skew for track switch		D	0 
+DEPEND Blocks per track
+
+INIT {
+INIT   switch(result->skew_units) {
+INIT   case DM_SU_REVOLUTIONS:
+INIT     result->hsskew = dm_angle_dtoi(d);
+INIT     break;
+INIT   case DM_SU_SECTORS:
+INIT   default:
+INIT     result->hsskew = (int)d * result->sector_width;
+INIT     break;
+INIT   }
+INIT }
+
+This specifies the number of physical sectors that are skipped when
+assigning logical block numbers to physical sectors at a track
+crossing point.  Track skew is computed by the manufacturer to
+optimize sequential access. This may be in either sectors or
+revolutions according to the ''Skew units'' parameter.
+
+ 
+PARAM Skew for cylinder switch		D	0 
+DEPEND Blocks per track
+INIT {
+INIT   switch(result->skew_units) {
+INIT   case DM_SU_REVOLUTIONS:
+INIT     result->csskew = dm_angle_dtoi(d);
+INIT     break;
+INIT   case DM_SU_SECTORS:
+INIT   default:
+INIT     result->csskew = (int)d * result->sector_width;
+INIT     break;
+INIT   }
+INIT }
+
+This specifies the number of physical sectors that are skipped when
+assigning logical block numbers to physical sectors at a cylinder
+crossing point.  Cylinder skew is computed by the manufacturer to
+optimize sequential access. This may be in either sectors or
+revolutions according to the ''Skew units'' parameter.
+
+

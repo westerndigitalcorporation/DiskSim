@@ -1,0 +1,37 @@
+zerocenter = Import["zero.spring.0.0", "Table"];
+monkey = ListPlot3D[Transpose[zerocenter], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 0.6}, DisplayFunction->Identity];
+Export["zero.spring.center.eps", monkey, "eps"];
+
+zerocenter = Import["zero.delta.-1000.-1000", "Table"];
+monkey = ListPlot3D[Transpose[zerocenter], AxesLabel->{"X position", "Y position", "Seek time delta (ms)"}, PlotRange->{0.1, -0.2}, DisplayFunction->Identity];
+Export["zero.delta.corner.eps", monkey, "eps"];
+
+zerocorner = Import["zero.spring.-1000.-1000", "Table"];
+monkey = ListPlot3D[Transpose[zerocorner], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 0.6}, DisplayFunction->Identity];
+Export["zero.spring.corner.eps", monkey, "eps"];
+
+onecenter = Import["one.spring.0.0", "Table"];
+monkey = ListPlot3D[Transpose[onecenter], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 1.0}, DisplayFunction->Identity];
+Export["one.spring.center.eps", monkey, "eps"];
+
+onecorner = Import["one.spring.-1000.-1000", "Table"];
+monkey = ListPlot3D[Transpose[onecorner], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 1.0}, DisplayFunction->Identity];
+Export["one.spring.corner.eps", monkey, "eps"];
+
+zerocenter = Import["zero_hong.spring.0.0", "Table"];
+monkey = ListPlot3D[Transpose[zerocenter], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 0.6}, DisplayFunction->Identity];
+Export["zero_hong.spring.center.eps", monkey, "eps"];
+
+zerocorner = Import["zero_hong.spring.-1000.-1000", "Table"];
+monkey = ListPlot3D[Transpose[zerocorner], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 0.6}, DisplayFunction->Identity];
+Export["zero_hong.spring.corner.eps", monkey, "eps"];
+
+onecenter = Import["one_hong.spring.0.0", "Table"];
+monkey = ListPlot3D[Transpose[onecenter], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 1.0}, DisplayFunction->Identity];
+Export["one_hong.spring.center.eps", monkey, "eps"];
+
+onecorner = Import["one_hong.spring.-1000.-1000", "Table"];
+monkey = ListPlot3D[Transpose[onecorner], AxesLabel->{"X position", "Y position", "Seek time (ms)"}, PlotRange->{0.0, 1.0}, DisplayFunction->Identity];
+Export["one_hong.spring.corner.eps", monkey, "eps"];
+
+Quit

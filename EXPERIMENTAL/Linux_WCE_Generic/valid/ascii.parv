@@ -1,0 +1,343 @@
+disksim_global Global { 
+   Init Seed = 42,
+   Real Seed = 42,
+   # Statistic warm-up period = 0.0 seconds,
+   Stat definition file = statdefs
+}
+
+disksim_stats Stats {
+iodriver stats = disksim_iodriver_stats {
+Print driver size stats = 1,
+Print driver locality stats = 0,
+Print driver blocking stats = 0,
+Print driver interference stats = 0,
+Print driver queue stats = 1,
+Print driver crit stats = 1,
+Print driver idle stats = 1,
+Print driver intarr stats = 1,
+Print driver streak stats = 1,
+Print driver stamp stats = 1,
+Print driver per-device stats = 1 },
+bus stats = disksim_bus_stats {
+Print bus idle stats = 1,
+Print bus arbwait stats = 1 },
+ctlr stats = disksim_ctlr_stats {
+Print controller cache stats = 1,
+Print controller size stats = 1,
+Print controller locality stats = 1,
+Print controller blocking stats = 1,
+Print controller interference stats = 1,
+Print controller queue stats = 1,
+Print controller crit stats = 1,
+Print controller idle stats = 1,
+Print controller intarr stats = 1,
+Print controller streak stats = 1,
+Print controller stamp stats = 1,
+Print controller per-device stats = 1 },
+device stats = disksim_device_stats {
+Print device queue stats = 0,
+Print device crit stats = 0,
+Print device idle stats = 0,
+Print device intarr stats = 0,
+Print device size stats = 0,
+Print device seek stats = 1,
+Print device latency stats = 1,
+Print device xfer stats = 1,
+Print device acctime stats = 1,
+Print device interfere stats = 0,
+Print device buffer stats = 1 },
+process flow stats = disksim_pf_stats {
+Print per-process stats =  1,
+Print per-CPU stats =  1,
+Print all interrupt stats =  1,
+Print sleep stats =  1
+}
+} # end of stats block
+
+disksim_iodriver DRIVER0 {
+ type = 1,
+ Constant access time = 0.0,
+ Scheduler = disksim_ioqueue {
+  Scheduling policy = 3,
+  Cylinder mapping strategy = 1,
+  Write initiation delay = 0.83,
+  Read initiation delay = 0.56,
+  Sequential stream scheme = 0,
+  Maximum concat size = 0,
+  Overlapping request scheme = 0,
+  Sequential stream diff maximum = 0,
+  Scheduling timeout scheme = 0,
+  Timeout time/weight = 6,
+  Timeout scheduling = 4,
+  Scheduling priority scheme = 0,
+  Priority scheduling = 4
+  }, # end of Scheduler
+ Use queueing in subsystem = 1
+} # end of DRV0 spec
+
+disksim_bus BUS0 {
+ type = 2,
+ Arbitration type = 1,
+ Arbitration time = 0.0,
+ Read block transfer time = 0.0,
+ Write block transfer time = 0.0,
+ Print stats =  0
+} # end of BUS0 spec
+
+disksim_bus BUS1 {
+ type = 1,
+ Arbitration type = 1,
+ Arbitration time = 0.0,
+ Read block transfer time = 0.05000,
+ Write block transfer time = 0.05000,
+ Print stats =  1
+} # end of BUS1 spec
+
+disksim_ctlr CTLR0 {
+ type = 1,
+ Scale for delays = 0.0,
+ Bulk sector transfer time = 0.0,
+ Maximum queue length = 0,
+ Print stats =  1
+} # end of CTLR0 spec
+
+# HP_C2249A
+source hp_c2249a.diskspecs
+
+# component instantiation
+instantiate [ statfoo ]          as  Stats
+instantiate [ bus0 .. bus2 ]     as  BUS0
+instantiate [ bus3 .. bus20 ]    as  BUS1
+instantiate [ disk0 .. disk17 ]  as  HP_C2249A
+instantiate [ ctlr0 .. ctlr19 ]  as  CTLR0
+instantiate [ driver0 ]          as  DRIVER0
+
+
+
+
+# must now do this after component instantiation;
+# can't refer to devices that don't exist yet
+disksim_iosim IS {
+     I/O Trace Time Scale = 1.0,
+     I/O Mappings = [ 
+     disksim_iomap { tracedev = 0x0e, simdev = disk0,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x12, simdev = disk1,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x0a, simdev = disk2,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x0b, simdev = disk3,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x14, simdev = disk4,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x00, simdev = disk5,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x10, simdev = disk6,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x1e, simdev = disk7,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x11, simdev = disk8,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x05, simdev = disk9,  locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x07, simdev = disk10, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x65, simdev = disk11, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x06, simdev = disk12, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x03, simdev = disk13, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x04, simdev = disk14, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x67, simdev = disk15, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x01, simdev = disk16, locScale = 512, sizeScale = 1 },
+     disksim_iomap { tracedev = 0x02, simdev = disk17, locScale = 512, sizeScale = 1 }
+     ]  # end of iomap list
+}  # end of iosim spec
+
+instantiate [iosimfoo] as IS
+
+# system topology
+topology disksim_iodriver driver0 [
+     disksim_bus bus0 [ 
+          disksim_ctlr ctlr0 [ 
+               disksim_bus bus1 [ 
+                    disksim_ctlr ctlr2 [ 
+                         disksim_bus bus3 [ 
+                              disksim_disk disk0 []
+                              # end of bus3
+                         ]
+                         # end of ctlr2
+                    ],
+                    disksim_ctlr ctlr3 [ 
+                         disksim_bus bus4 [ 
+                              disksim_disk disk1 []
+                              # end of bus4
+                         ]
+                         # end of ctlr3
+                    ],
+                    disksim_ctlr ctlr4 [ 
+                         disksim_bus bus5 [ 
+                              disksim_disk disk2 []
+                              # end of bus5
+                         ]
+                         # end of ctlr4
+                    ],
+                    disksim_ctlr ctlr5 [ 
+                         disksim_bus bus6 [ 
+                              disksim_disk disk3 []
+                              # end of bus6
+                         ]
+                         # end of ctlr5
+                    ],
+                    disksim_ctlr ctlr6 [ 
+                         disksim_bus bus7 [ 
+                              disksim_disk disk4 []
+                              # end of bus7
+                         ]
+                         # end of ctlr6
+                    ],
+                    disksim_ctlr ctlr7 [ 
+                         disksim_bus bus8 [ 
+                              disksim_disk disk5 []
+                              # end of bus8
+                         ]
+                         # end of ctlr7
+                    ],
+                    disksim_ctlr ctlr8 [ 
+                         disksim_bus bus9 [ 
+                              disksim_disk disk6 []
+                              # end of bus9
+                         ]
+                         # end of ctlr8
+                    ],
+                    disksim_ctlr ctlr9 [ 
+                         disksim_bus bus10 [ 
+                              disksim_disk disk7 []
+                              # end of bus10
+                         ]
+                         # end of ctlr9
+                    ],
+                    disksim_ctlr ctlr10 [ 
+                         disksim_bus bus11 [ 
+                              disksim_disk disk8 []
+                              # end of bus11
+                         ]
+                         # end of ctlr10
+                    ]
+                    # end of bus1
+               ]
+               # end of ctlr0
+          ],
+          disksim_ctlr ctlr1 [ 
+               disksim_bus bus2 [ 
+                    disksim_ctlr ctlr11 [ 
+                         disksim_bus bus12 [ 
+                              disksim_disk disk9 []
+                              # end of bus12
+                         ]
+                         # end of ctlr11
+                    ],
+                    disksim_ctlr ctlr12 [ 
+                         disksim_bus bus13 [ 
+                              disksim_disk disk10 []
+                              # end of bus13
+                         ]
+                         # end of ctlr12
+                    ],
+                    disksim_ctlr ctlr13 [ 
+                         disksim_bus bus14 [ 
+                              disksim_disk disk11 []
+                              # end of bus14
+                         ]
+                         # end of ctlr13
+                    ],
+                    disksim_ctlr ctlr14 [ 
+                         disksim_bus bus15 [ 
+                              disksim_disk disk12 []
+                              # end of bus15
+                         ]
+                         # end of ctlr14
+                    ],
+                    disksim_ctlr ctlr15 [ 
+                         disksim_bus bus16 [ 
+                              disksim_disk disk13 []
+                              # end of bus16
+                         ]
+                         # end of ctlr15
+                    ],
+                    disksim_ctlr ctlr16 [ 
+                         disksim_bus bus17 [ 
+                              disksim_disk disk14 []
+                              # end of bus17
+                         ]
+                         # end of ctlr16
+                    ],
+                    disksim_ctlr ctlr17 [ 
+                         disksim_bus bus18 [ 
+                              disksim_disk disk15 []
+                              # end of bus18
+                         ]
+                         # end of ctlr17
+                    ],
+                    disksim_ctlr ctlr18 [ 
+                         disksim_bus bus19 [ 
+                              disksim_disk disk16 []
+                              # end of bus19
+                         ]
+                         # end of ctlr18
+                    ],
+                    disksim_ctlr ctlr19 [ 
+                         disksim_bus bus20 [ 
+                              disksim_disk disk17 []
+                              # end of bus20
+                         ]
+                         # end of ctlr19
+                    ]
+                    # end of bus2
+               ]
+               # end of ctlr1
+          ]
+          # end of bus0
+     ]
+     # end of system topology
+]
+
+# no syncsets
+
+disksim_logorg org0 {
+   Addressing mode = Parts,
+   Distribution scheme = Asis,
+   Redundancy scheme = Noredun,
+   devices = [ disk0 .. disk17 ],
+   Stripe unit  =  64,
+   Synch writes for safety =  0,
+   Number of copies =  2,
+   Copy choice on read =  6,
+   RMW vs. reconstruct =  0.5,
+   Parity stripe unit =  64,
+   Parity rotation type =  1,
+   Time stamp interval =  0.000000,
+   Time stamp start time =  60000.000000,
+   Time stamp stop time =  10000000000.000000,
+   Time stamp file name =  stamps
+} # end of logorg org0 spec
+
+disksim_pf Proc {
+   Number of processors =  1,
+   Process-Flow Time Scale =  1.0
+} # end of process flow spec
+
+disksim_synthio Synthio {
+   Number of I/O requests to generate =  10000,
+   Maximum time of trace generated  =  1000.0,
+   System call/return with each request =  0,
+   Think time from call to request =  0.0,
+   Think time from request to return =  0.0,
+Generators = [
+disksim_synthgen { # generator 0 
+   Storage capacity per device  =  2382896,
+   devices = [ disk0 .. disk17 ], 
+   Blocking factor =  8,
+   Probability of sequential access =  0.0,
+   Probability of local access =  0.0,
+   Probability of read access =  0.66,
+   Probability of time-critical request =  1.0,
+   Probability of time-limited request =  0.0,
+   Time-limited think times  = [ normal, 30.0, 100.0  ],
+   General inter-arrival times  = [ exponential, 0.0, 0.0  ],
+   Sequential inter-arrival times  = [ normal, 0.0, 0.0  ],
+   Local inter-arrival times  = [ exponential, 0.0, 0.0  ],
+   Local distances  = [ normal, 0.0, 40000.0  ],
+   Sizes  = [ exponential, 0.0, 8.0  ]
+} # end of generator 0 
+] # end of generator list 
+} # end of synthetic workload spec
+
+

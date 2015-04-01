@@ -1,0 +1,140 @@
+dm_disk HP_C3323A_validate_model {
+   Number of data surfaces = 7,
+   Number of cylinders = 2982,
+   Block count = 2056008,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 1,
+      Rangesize for sparing = 1,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 993,
+            Blocks per track = 120,
+            Offset of first block = 0,
+            Empty space at zone front = 1320,
+            Skew for track switch = 17,
+            Skew for cylinder switch = 34,
+            Number of spares = 224,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 994,
+            Last cylinder number = 1134,
+            Blocks per track = 116,
+            Offset of first block = 48,
+            Empty space at zone front = 0,
+            Skew for track switch = 16,
+            Skew for cylinder switch = 33,
+            Number of spares = 35,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1135,
+            Last cylinder number = 1310,
+            Blocks per track = 112,
+            Offset of first block = 23,
+            Empty space at zone front = 0,
+            Skew for track switch = 16,
+            Skew for cylinder switch = 32,
+            Number of spares = 28,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1311,
+            Last cylinder number = 1625,
+            Blocks per track = 104,
+            Offset of first block = 47,
+            Empty space at zone front = 0,
+            Skew for track switch = 15,
+            Skew for cylinder switch = 30,
+            Number of spares = 49,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1626,
+            Last cylinder number = 1966,
+            Blocks per track = 96,
+            Offset of first block = 48,
+            Empty space at zone front = 0,
+            Skew for track switch = 14,
+            Skew for cylinder switch = 27,
+            Number of spares = 49,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1967,
+            Last cylinder number = 2255,
+            Blocks per track = 88,
+            Offset of first block = 72,
+            Empty space at zone front = 0,
+            Skew for track switch = 13,
+            Skew for cylinder switch = 25,
+            Number of spares = 35,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2256,
+            Last cylinder number = 2608,
+            Blocks per track = 80,
+            Offset of first block = 48,
+            Empty space at zone front = 0,
+            Skew for track switch = 12,
+            Skew for cylinder switch = 23,
+            Number of spares = 35,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2609,
+            Last cylinder number = 2981,
+            Blocks per track = 72,
+            Offset of first block = 64,
+            Empty space at zone front = 0,
+            Skew for track switch = 11,
+            Skew for cylinder switch = 21,
+            Number of spares = 35,
+            slips = [],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = extracted,
+      Single cylinder seek time = 0.200000,
+      Full seek curve = hp_c3323a_validate.seek,
+      Full strobe seek time = 2.300000,
+      Add. write settling delay = 0.070000,
+#      HPL seek equation values = [
+#         300,
+#         3.750000,
+#         0.330000,
+#         7.690000,
+#         0.005900,
+#         -1.000000
+#      ],
+#      First ten seek times = [
+#         2.630000,
+#         3.420000,
+#         3.550000,
+#         3.720000,
+#         4.010000,
+#         4.390000,
+#         4.260000,
+#         4.390000,
+#         4.560000,
+#         4.730000
+#      ],
+      Head switch time = 0.650000,
+      Rotation speed (in rpms) = 5396,
+      Percent error in rpms = 0.000000
+   }
+} # end of HP_C3323A_validate_model spec
+

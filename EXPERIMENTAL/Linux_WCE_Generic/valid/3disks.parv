@@ -1,0 +1,268 @@
+# 3disks.parv 
+# John Bucy/20021210
+# 3 different disks on 1 controller
+
+disksim_global Global { 
+ Init Seed = 42,
+ Real Seed = 42,
+ # Statistic warm-up period = 0.0 seconds,
+ Stat definition file = statdefs 
+}
+
+
+disksim_stats Stats {
+
+iodriver stats = disksim_iodriver_stats {
+ Print driver size stats = 1,
+ Print driver locality stats = 0,
+ Print driver blocking stats = 0,
+ Print driver interference stats = 0,
+ Print driver queue stats = 1,
+ Print driver crit stats = 0,
+ Print driver idle stats = 1,
+ Print driver intarr stats = 1,
+ Print driver streak stats = 1,
+ Print driver stamp stats = 1,
+ Print driver per-device stats = 1 },
+
+bus stats = disksim_bus_stats {
+ Print bus idle stats = 1,
+ Print bus arbwait stats = 1 },
+
+ctlr stats = disksim_ctlr_stats {
+ Print controller cache stats = 1,
+ Print controller size stats = 1,
+ Print controller locality stats = 1,
+ Print controller blocking stats = 1,
+ Print controller interference stats = 1,
+ Print controller queue stats = 1,
+ Print controller crit stats = 1,
+ Print controller idle stats = 1,
+ Print controller intarr stats = 1,
+ Print controller streak stats = 1,
+ Print controller stamp stats = 1,
+ Print controller per-device stats = 1 },
+
+device stats = disksim_device_stats {
+ Print device queue stats = 0,
+ Print device crit stats = 0,
+ Print device idle stats = 0,
+ Print device intarr stats = 0,
+ Print device size stats = 0,
+ Print device seek stats = 1,
+ Print device latency stats = 1,
+ Print device xfer stats = 1,
+ Print device acctime stats = 1,
+ Print device interfere stats = 0,
+ Print device buffer stats = 1 },
+
+process flow stats = disksim_pf_stats {
+ Print per-process stats =  1,
+ Print per-CPU stats =  1, 
+ Print all interrupt stats =  1,
+ Print sleep stats =  1
+ }
+
+} # end of stats block
+
+
+#disksim_iosim IS {
+#     I/O Trace Time Scale = 1.0
+#}  # end of iosim spec
+
+disksim_iodriver DRIVER0 {
+type = 1,
+Constant access time = 0.0,
+Scheduler = disksim_ioqueue {
+ Scheduling policy = 3,
+ Cylinder mapping strategy = 1,
+ Write initiation delay = 0.0,
+ Read initiation delay = 0.0,
+ Sequential stream scheme = 0,
+ Maximum concat size = 128,
+ Overlapping request scheme = 0,
+ Sequential stream diff maximum = 0,
+ Scheduling timeout scheme = 0,
+ Timeout time/weight = 6,
+ Timeout scheduling = 4,
+ Scheduling priority scheme = 0,
+ Priority scheduling = 4
+}, # end of Scheduler
+Use queueing in subsystem = 1
+} # end of DRV0 spec
+
+disksim_bus BUS0 {
+type = 1,
+Arbitration type = 1,
+Arbitration time = 0.0,
+Read block transfer time = 0.0,
+Write block transfer time = 0.0,
+Print stats =  0
+} # end of BUS0 spec
+
+disksim_bus BUS1 {
+type = 1,
+Arbitration type = 1,
+Arbitration time = 0.0,
+Read block transfer time = 0.0512,
+Write block transfer time = 0.0512,
+Print stats =  1
+} # end of BUS1 spec
+
+disksim_ctlr CTLR0 {
+type = 1,
+Scale for delays = 0.0,
+Bulk sector transfer time = 0.0,
+Maximum queue length = 0,
+Print stats =  1
+} # end of CTLR0 spec
+
+# HP_C3323A
+source atlas10k.diskspecs
+source ibm18es.diskspecs
+source cheetah9LP.diskspecs
+
+# component instantiation
+instantiate [ statfoo ] as Stats
+instantiate [ bus0 ] as  BUS0
+instantiate [ bus1 ] as  BUS1
+instantiate [ quantum ] as  QUANTUM_TORNADO_validate
+instantiate [ ibm ] as  IBM_DNES-309170W_validate
+instantiate [ seagate ] as  SEAGATE_ST39102LW_validate
+instantiate [ driver0 ] as  DRIVER0
+instantiate [ ctlr0 ] as  CTLR0
+
+
+# system topology
+topology disksim_iodriver driver0 [
+     disksim_bus bus0 [ 
+          disksim_ctlr ctlr0 [ 
+               disksim_bus bus1 [ 
+                    disksim_disk quantum [],
+	            disksim_disk ibm [],
+	            disksim_disk seagate []
+               ]
+          ]
+     ]
+]
+
+# no syncsets
+
+disksim_logorg quantumorg {
+   Addressing mode = Parts,
+   Distribution scheme = Asis,
+   Redundancy scheme = Noredun,
+   devices = [ quantum ],
+   Stripe unit  =  17938986,
+   Synch writes for safety =  0,
+   Number of copies =  2,
+   Copy choice on read =  6,
+   RMW vs. reconstruct =  0.5,
+   Parity stripe unit =  64,
+   Parity rotation type =  1,
+   Time stamp interval =  0.000000,
+   Time stamp start time =  60000.000000,
+   Time stamp stop time =  10000000000.000000,
+   Time stamp file name =  stamps
+} # end of logorg org0 spec
+
+disksim_logorg ibmorg {
+   Addressing mode = Parts,
+   Distribution scheme = Asis,
+   Redundancy scheme = Noredun,
+   devices = [ ibm ],
+   Stripe unit  =   17916240,
+   Synch writes for safety =  0,
+   Number of copies =  2,
+   Copy choice on read =  6,
+   RMW vs. reconstruct =  0.5,
+   Parity stripe unit =  64,
+   Parity rotation type =  1,
+   Time stamp interval =  0.000000,
+   Time stamp start time =  60000.000000,
+   Time stamp stop time =  10000000000.000000,
+   Time stamp file name =  stamps
+} # end of logorg org0 spec
+
+disksim_logorg seagateorg {
+   Addressing mode = Parts,
+   Distribution scheme = Asis,
+   Redundancy scheme = Noredun,
+   devices = [ seagate ],
+   Stripe unit  =  17783240,
+   Synch writes for safety =  0,
+   Number of copies =  2,
+   Copy choice on read =  6,
+   RMW vs. reconstruct =  0.5,
+   Parity stripe unit =  64,
+   Parity rotation type =  1,
+   Time stamp interval =  0.000000,
+   Time stamp start time =  60000.000000,
+   Time stamp stop time =  10000000000.000000,
+   Time stamp file name =  stamps
+} # end of logorg org0 spec
+
+disksim_pf Proc {
+   Number of processors =  1,
+   Process-Flow Time Scale =  1.0
+} # end of process flow spec
+
+disksim_synthio Synthio {
+   Number of I/O requests to generate =  10000,
+   Maximum time of trace generated  =  1000.0,
+   System call/return with each request =  0,
+   Think time from call to request =  0.0,
+   Think time from request to return =  0.0,
+   Generators = [
+   disksim_synthgen {
+     Storage capacity per device = 17938986,
+     devices = [ quantum ], 
+     Blocking factor =  8,
+     Probability of sequential access =  0.0,
+     Probability of local access =  0.0,
+     Probability of read access =  0.66,
+     Probability of time-critical request =  0.0,
+     Probability of time-limited request =  0.0,
+     Time-limited think times  = [ normal, 30.0, 100.0  ],
+     General inter-arrival times  = [ exponential, 0.0, 25.0  ],
+     Sequential inter-arrival times  = [ normal, 0.0, 0.0  ],
+     Local inter-arrival times  = [ exponential, 0.0, 0.0  ],
+     Local distances  = [ normal, 0.0, 40000.0  ],
+     Sizes  = [ exponential, 0.0, 8.0  ] 
+   }, 
+   disksim_synthgen {
+     Storage capacity per device  =  17916240,
+     devices = [ ibm ], 
+     Blocking factor =  8,
+     Probability of sequential access =  0.0,
+     Probability of local access =  0.0,
+     Probability of read access =  0.66,
+     Probability of time-critical request =  0.0,
+     Probability of time-limited request =  0.0,
+     Time-limited think times  = [ normal, 30.0, 100.0  ],
+     General inter-arrival times  = [ exponential, 0.0, 25.0  ],
+     Sequential inter-arrival times  = [ normal, 0.0, 0.0  ],
+     Local inter-arrival times  = [ exponential, 0.0, 0.0  ],
+     Local distances  = [ normal, 0.0, 40000.0  ],
+     Sizes  = [ exponential, 0.0, 8.0  ] 
+   },
+   disksim_synthgen {
+     Storage capacity per device  = 17783240,
+     devices = [ seagate ], 
+     Blocking factor =  8,
+     Probability of sequential access =  0.0,
+     Probability of local access =  0.0,
+     Probability of read access =  0.66,
+     Probability of time-critical request =  0.0,
+     Probability of time-limited request =  0.0,
+     Time-limited think times  = [ normal, 30.0, 100.0  ],
+     General inter-arrival times  = [ exponential, 0.0, 25.0  ],
+     Sequential inter-arrival times  = [ normal, 0.0, 0.0  ],
+     Local inter-arrival times  = [ exponential, 0.0, 0.0  ],
+     Local distances  = [ normal, 0.0, 40000.0  ],
+     Sizes  = [ exponential, 0.0, 8.0  ] 
+   }
+   ] # end of generator list 
+} # end of synthetic workload spec
+
+

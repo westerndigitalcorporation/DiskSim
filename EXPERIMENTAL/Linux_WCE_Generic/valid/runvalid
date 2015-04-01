@@ -1,0 +1,155 @@
+#!/bin/sh
+
+PREFIX=../src
+
+echo ""
+echo "These results represent actual drive validation experiments"
+
+echo ""
+echo "QUANTUM_QM39100TD-SW (rms should be about 0.378)"
+${PREFIX}/disksim atlas_III.parv atlas_III.outv validate atlas_III.trace 0\
+&& ${PREFIX}/rms atlas_III.outv atlas_III.outv -1 -1 1
+
+echo ""
+echo "SEAGATE_ST32171W (rms should be about 0.349)"
+${PREFIX}/disksim barracuda.parv barracuda.outv validate barracuda.trace 0\
+&& ${PREFIX}/rms barracuda.outv barracuda.outv -1 -1 1
+
+echo ""
+echo "SEAGATE_ST34501N (rms should be about 0.318)"
+${PREFIX}/disksim cheetah4LP.parv cheetah4LP.outv validate cheetah4LP.trace 0\
+&& ${PREFIX}/rms cheetah4LP.outv cheetah4LP.outv -1 -1 1
+
+echo ""
+echo "SEAGATE_ST39102LW (rms should be about 0.107)"
+${PREFIX}/disksim cheetah9LP.parv cheetah9LP.outv validate cheetah9LP.trace 0\
+&& ${PREFIX}/rms cheetah9LP.outv cheetah9LP.outv -1 -1 1
+
+echo ""
+echo "IBM_DNES-309170W (rms should be about 0.135)"
+${PREFIX}/disksim ibm18es.parv ibm18es.outv validate ibm18es.trace 0\
+&& ${PREFIX}/rms ibm18es.outv ibm18es.outv -1 -1 1
+
+echo ""
+echo "QUANTUM_TORNADO (rms should be about 0.268)"
+${PREFIX}/disksim atlas10k.parv atlas10k.outv validate atlas10k.trace 0\
+&& ${PREFIX}/rms atlas10k.outv atlas10k.outv -1 -1 1
+
+echo ""
+echo "HP_C2247_validate (rms should be about 0.090)"
+${PREFIX}/disksim hp_c2247a.parv hp_c2247a.outv validate hp_c2247a.trace 0\
+&& ${PREFIX}/rms hp_c2247a.outv hp_c2247a.outv -1 -1 1
+
+echo ""
+echo "HP_C3323_validate (rms should be about 0.306)"
+${PREFIX}/disksim hp_c3323a.parv hp_c3323a.outv validate hp_c3323a.trace 0\
+&& ${PREFIX}/rms hp_c3323a.outv hp_c3323a.outv -1 -1 1
+
+echo ""
+echo "HP_C2490_validate (rms should be about 0.254)"
+${PREFIX}/disksim hp_c2490a.parv hp_c2490a.outv validate hp_c2490a.trace 0\
+&& ${PREFIX}/rms hp_c2490a.outv hp_c2490a.outv -1 -1 1
+
+echo ""
+echo "DEC_RZ26_validate (rms should be about 0.340)"
+${PREFIX}/disksim dec_rz26.parv dec_rz26.outv validate dec_rz26.trace 0\
+&& ${PREFIX}/rms dec_rz26.outv dec_rz26.outv -1 -1 1
+
+
+echo ""
+echo "The remaining tests exercise other DiskSim components"
+
+echo ""
+echo "Open synthetic workload (avg. resp. should be about 10.9ms)"
+ ${PREFIX}/disksim synthopen.parv synthopen.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthopen.outv
+
+echo ""
+echo "Closed synthetic workload (avg. resp. should be about 87.6ms)"
+ ${PREFIX}/disksim synthclosed.parv synthclosed.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthclosed.outv
+
+echo ""
+echo "Mixed synthetic workload (avg. resp. should be about 22.08ms)"
+ ${PREFIX}/disksim synthmixed.parv synthmixed.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthmixed.outv
+
+echo ""
+echo "RAID 5 at device driver (avg. resp. should be about 22.8ms)"
+ ${PREFIX}/disksim synthraid5.parv synthraid5.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthraid5.outv
+
+echo ""
+echo "Set of disk arrays at device driver (avg. resp. should be about 34.3ms)"
+ ${PREFIX}/disksim syntharrays.parv syntharrays.outv ascii 0 1\
+&& grep "Overall I/O System Response time average" syntharrays.outv
+
+echo ""
+echo "Memory cache at controller (avg. resp. should be about 24.6ms)"
+ ${PREFIX}/disksim synthcachemem.parv synthcachemem.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthcachemem.outv
+
+#echo ""
+#echo "Checkpoint/restore version of cache at controller (should be same as above)"
+# ${PREFIX}/disksim checkpoint.synthcachemem\
+#&& grep "IOdriver Response time average" out.synthcachemem
+
+echo ""
+echo "Cache device managed at controller (avg. resp. should be about 28.9ms)"
+ ${PREFIX}/disksim synthcachedev.parv synthcachedev.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthcachedev.outv
+
+echo ""
+echo "Simpledisk instead of original model (avg. resp. should be about 13.5ms)"
+ ${PREFIX}/disksim synthsimpledisk.parv synthsimpledisk.outv ascii 0 1\
+&& grep "IOdriver Response time average" synthsimpledisk.outv
+
+#echo ""
+#echo "Simpledisk together with original disk model"
+#echo "(avg. resps. should be about 13.4ms, 20.3, 13.3 and 20.6)"
+# ${PREFIX}/disksim par.synthmultidevice out.synthmultidevice ascii 0 1\
+#&& grep "IOdriver #0 device #0 Response time average" out.synthmultidevice\
+#&& grep "IOdriver #0 device #1 Response time average" out.synthmultidevice\
+#&& grep "IOdriver #0 device #2 Response time average" out.synthmultidevice\
+#&& grep "IOdriver #0 device #3 Response time average" out.synthmultidevice
+
+echo "3 different disks"
+echo "(avg. resps. should be about 10.937)"
+${PREFIX}/disksim 3disks.parv 3disks.outv ascii 0 1\
+&& grep "IOdriver Response time average" 3disks.outv\
+
+echo "3 disks on separate controllers"
+echo "(avg. resps. should be about 10.937)"
+${PREFIX}/disksim 3disks2.parv 3disks2.outv ascii 0 1\
+&& grep "IOdriver Response time average" 3disks2.outv\
+
+# HPL trace input no longer supported
+#echo ""
+#echo "Note: this validates HP trace input, *not* the corresponding traced disk"
+#echo "HP srt trace input (avg. resp should be about 48.8ms)"
+# ${PREFIX}/disksim hplajw.parv hplajw.outv hpl ajw.1week.srt 0\
+#&& grep "IOdriver Response time average" hplajw.outv
+
+#echo ""
+#echo "Checkpoint/restore version of HP srt trace input (should be same as above)"
+# ${PREFIX}/disksim checkpoint.hplajw\
+#&& grep "IOdriver Response time average" out.hplajw
+
+echo ""
+echo "ASCII input (avg. resp should be about 13.8 msec)"
+ ${PREFIX}/disksim ascii.parv ascii.outv ascii stdin 0 < ascii.trace\
+&& grep "IOdriver Response time average" ascii.outv
+
+echo ""
+echo "syssim: externally-controlled DiskSim (avg. resp should be about 8.9 msec)"
+${PREFIX}/syssim cheetah4LP.parv syssim.outv 2676846\
+&& grep "IOdriver Response time average" syssim.outv
+
+# echo ""
+# echo "syssim2: dual externally-controlled DiskSim instances (avg. resps should same as previous and 0.0ms, respectively)"
+# ${PREFIX}/syssim st41601n.parv syssim2.outv 2676846 1\
+# && grep "IOdriver Response time average" syssim2.outv\
+# && grep "IOdriver Response time average" syssim2.outv2
+
+echo ""
+

@@ -1,0 +1,16 @@
+dm_disk maxtor300g.model {
+Number of data surfaces = 8,
+Number of cylinders = 80512,
+Block count = 585937499,
+Layout Model = source maxtor300g-layout.model,
+Mechanical Model = dm_mech_g1 {
+Access time type = trackSwitchPlusRotation,
+Seek type = extracted,
+Full seek curve = maxtor300g_dual.seek,
+Add. write settling delay = 0.0,
+Head switch time = 0.116000,
+Rotation speed (in rpms) = 10001,
+Percent error in rpms = 0.006669
+   }
+} # end of maxtor300g.model spec
+

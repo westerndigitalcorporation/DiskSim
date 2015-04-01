@@ -1,0 +1,14 @@
+
+\subsection{Introduction}
+Diskmodel is a library implementing mechanical and layout models of
+modern magnetic disk drives.  Diskmodel models two major aspects of disk
+operation.  The layout module models logical-to-physical mapping of
+blocks, defect management and also computes angular offsets of blocks.
+The mechanical model handles seek times, rotational latency and
+various other aspects of disk mechanics.
+
+The implementations of these modules in the current version of
+Diskmodel are derived from DiskSim 2.0 \cite{Ganger99}.  Disksim 3.0
+uses Diskmodel natively. Diskmodel has also been used in a device
+driver implementation of a shortest positioning time first disk
+request scheduler.

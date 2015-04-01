@@ -1,0 +1,849 @@
+dm_disk IBM_DNES-309170W_validate_model {
+   Number of data surfaces = 5,
+   Number of cylinders = 11474,
+   Block count = 17916240,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 7,
+      Rangesize for sparing = 1,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 256,
+            Blocks per track = 390,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 1950,
+            Skew for track switch = 58.000000,
+            Skew for cylinder switch = 101.000000,
+            Number of spares = 0,
+            slips = [
+               199078,
+               346029,
+               384777
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 258,
+            Last cylinder number = 377,
+            Blocks per track = 390,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 58.000000,
+            Skew for cylinder switch = 101.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 378,
+            Last cylinder number = 513,
+            Blocks per track = 374,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 56.000000,
+            Skew for cylinder switch = 97.000000,
+            Number of spares = 0,
+            slips = [
+               187771
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 515,
+            Last cylinder number = 770,
+            Blocks per track = 374,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 56.000000,
+            Skew for cylinder switch = 97.000000,
+            Number of spares = 0,
+            slips = [
+               77785,
+               147167,
+               472742,
+               474976,
+               476837,
+               478697
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 772,
+            Last cylinder number = 1027,
+            Blocks per track = 374,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 56.000000,
+            Skew for cylinder switch = 97.000000,
+            Number of spares = 0,
+            slips = [
+               342827
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1029,
+            Last cylinder number = 1263,
+            Blocks per track = 374,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 56.000000,
+            Skew for cylinder switch = 96.000000,
+            Number of spares = 0,
+            slips = [
+               351931,
+               369022
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1264,
+            Last cylinder number = 1284,
+            Blocks per track = 364,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 54.000000,
+            Skew for cylinder switch = 94.000000,
+            Number of spares = 0,
+            slips = [
+               24279
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1286,
+            Last cylinder number = 1541,
+            Blocks per track = 364,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 54.000000,
+            Skew for cylinder switch = 94.000000,
+            Number of spares = 0,
+            slips = [
+               78771,
+               113027,
+               114838,
+               116649,
+               118459,
+               265129
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1543,
+            Last cylinder number = 1798,
+            Blocks per track = 364,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 54.000000,
+            Skew for cylinder switch = 94.000000,
+            Number of spares = 0,
+            slips = [
+               379094,
+               391728,
+               426906
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1800,
+            Last cylinder number = 2055,
+            Blocks per track = 364,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 54.000000,
+            Skew for cylinder switch = 94.000000,
+            Number of spares = 0,
+            slips = [
+               56898,
+               70255,
+               196598
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2057,
+            Last cylinder number = 2247,
+            Blocks per track = 364,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 54.000000,
+            Skew for cylinder switch = 94.000000,
+            Number of spares = 0,
+            slips = [
+               34960
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2248,
+            Last cylinder number = 2312,
+            Blocks per track = 351,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 52.000000,
+            Skew for cylinder switch = 92.000000,
+            Number of spares = 0,
+            slips = [
+               18228,
+               42782
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2314,
+            Last cylinder number = 2569,
+            Blocks per track = 351,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 52.000000,
+            Skew for cylinder switch = 91.000000,
+            Number of spares = 0,
+            slips = [
+               22840,
+               63847
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2571,
+            Last cylinder number = 2826,
+            Blocks per track = 351,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 52.000000,
+            Skew for cylinder switch = 91.000000,
+            Number of spares = 0,
+            slips = [
+               4035,
+               100826,
+               132204
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2828,
+            Last cylinder number = 3083,
+            Blocks per track = 351,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 52.000000,
+            Skew for cylinder switch = 91.000000,
+            Number of spares = 0,
+            slips = [
+               312896
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3085,
+            Last cylinder number = 3340,
+            Blocks per track = 351,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 52.000000,
+            Skew for cylinder switch = 91.000000,
+            Number of spares = 0,
+            slips = [
+               121620,
+               123366,
+               125112,
+               126858,
+               260927
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3342,
+            Last cylinder number = 3466,
+            Blocks per track = 351,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 52.000000,
+            Skew for cylinder switch = 91.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3467,
+            Last cylinder number = 3597,
+            Blocks per track = 338,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 51.000000,
+            Skew for cylinder switch = 88.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3599,
+            Last cylinder number = 3854,
+            Blocks per track = 338,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 51.000000,
+            Skew for cylinder switch = 88.000000,
+            Number of spares = 0,
+            slips = [
+               4266
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3856,
+            Last cylinder number = 4111,
+            Blocks per track = 338,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 51.000000,
+            Skew for cylinder switch = 87.000000,
+            Number of spares = 0,
+            slips = [
+               209877,
+               404981
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4113,
+            Last cylinder number = 4368,
+            Blocks per track = 338,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 51.000000,
+            Skew for cylinder switch = 87.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4370,
+            Last cylinder number = 4503,
+            Blocks per track = 338,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 51.000000,
+            Skew for cylinder switch = 87.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4504,
+            Last cylinder number = 4625,
+            Blocks per track = 325,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 49.000000,
+            Skew for cylinder switch = 84.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4627,
+            Last cylinder number = 4882,
+            Blocks per track = 325,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 49.000000,
+            Skew for cylinder switch = 84.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4884,
+            Last cylinder number = 5139,
+            Blocks per track = 325,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 49.000000,
+            Skew for cylinder switch = 84.000000,
+            Number of spares = 0,
+            slips = [
+               129101,
+               160983,
+               162600,
+               164217,
+               165833,
+               177150,
+               178767,
+               180383,
+               182000
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5141,
+            Last cylinder number = 5396,
+            Blocks per track = 325,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 49.000000,
+            Skew for cylinder switch = 84.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5398,
+            Last cylinder number = 5526,
+            Blocks per track = 325,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 49.000000,
+            Skew for cylinder switch = 84.000000,
+            Number of spares = 0,
+            slips = [
+               13886,
+               15503,
+               17119,
+               18736,
+               20353,
+               21969,
+               23586,
+               25203,
+               26819,
+               28436,
+               30053,
+               31669,
+               33286,
+               34903,
+               36519,
+               38136,
+               39753,
+               205627
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5527,
+            Last cylinder number = 5653,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5655,
+            Last cylinder number = 5910,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5912,
+            Last cylinder number = 6167,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 6169,
+            Last cylinder number = 6424,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 6426,
+            Last cylinder number = 6681,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [
+               83483,
+               101403,
+               232893
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 6683,
+            Last cylinder number = 6938,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [
+               154397
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 6940,
+            Last cylinder number = 7044,
+            Blocks per track = 312,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 46.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [
+               26857
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 7045,
+            Last cylinder number = 7195,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 7197,
+            Last cylinder number = 7452,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 7454,
+            Last cylinder number = 7709,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [
+               3115
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 7711,
+            Last cylinder number = 7966,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 7968,
+            Last cylinder number = 8223,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 8225,
+            Last cylinder number = 8480,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [
+               143315,
+               347114
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 8482,
+            Last cylinder number = 8737,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [
+               54636
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 8739,
+            Last cylinder number = 8761,
+            Blocks per track = 286,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 43.000000,
+            Skew for cylinder switch = 74.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 8762,
+            Last cylinder number = 8994,
+            Blocks per track = 273,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 41.000000,
+            Skew for cylinder switch = 71.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 8996,
+            Last cylinder number = 9251,
+            Blocks per track = 273,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 41.000000,
+            Skew for cylinder switch = 70.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 9253,
+            Last cylinder number = 9508,
+            Blocks per track = 273,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 41.000000,
+            Skew for cylinder switch = 70.000000,
+            Number of spares = 0,
+            slips = [
+               223351,
+               224709,
+               226067,
+               227425,
+               228783,
+               230141,
+               231772,
+               233130,
+               234488,
+               235846,
+               237204,
+               238562,
+               239920,
+               241278,
+               242636,
+               243994,
+               245352,
+               246710,
+               248068,
+               249426,
+               250784,
+               252142,
+               253500,
+               254858,
+               256216,
+               257574,
+               258932,
+               260290,
+               261648,
+               263006,
+               264364,
+               265722,
+               299474,
+               343674,
+               345032,
+               346390,
+               347748,
+               349106
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 9510,
+            Last cylinder number = 9765,
+            Blocks per track = 273,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 41.000000,
+            Skew for cylinder switch = 70.000000,
+            Number of spares = 0,
+            slips = [
+               182458
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 9767,
+            Last cylinder number = 9815,
+            Blocks per track = 273,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 41.000000,
+            Skew for cylinder switch = 70.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 9816,
+            Last cylinder number = 10022,
+            Blocks per track = 260,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 39.000000,
+            Skew for cylinder switch = 67.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 10024,
+            Last cylinder number = 10279,
+            Blocks per track = 260,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 39.000000,
+            Skew for cylinder switch = 66.000000,
+            Number of spares = 0,
+            slips = [
+               18332
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 10281,
+            Last cylinder number = 10536,
+            Blocks per track = 260,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 39.000000,
+            Skew for cylinder switch = 66.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 10538,
+            Last cylinder number = 10682,
+            Blocks per track = 260,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 39.000000,
+            Skew for cylinder switch = 66.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 10683,
+            Last cylinder number = 10793,
+            Blocks per track = 247,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 37.000000,
+            Skew for cylinder switch = 63.000000,
+            Number of spares = 0,
+            slips = [
+               8843
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 10795,
+            Last cylinder number = 11050,
+            Blocks per track = 247,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 37.000000,
+            Skew for cylinder switch = 63.000000,
+            Number of spares = 0,
+            slips = [
+               49817
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 11052,
+            Last cylinder number = 11307,
+            Blocks per track = 247,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 37.000000,
+            Skew for cylinder switch = 63.000000,
+            Number of spares = 0,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 11309,
+            Last cylinder number = 11473,
+            Blocks per track = 247,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 37.000000,
+            Skew for cylinder switch = 63.000000,
+            Number of spares = 0,
+            slips = [
+               52886
+            ],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = extracted,
+      Single cylinder seek time = 1.086000,
+      Full seek curve = ibm18es.seek,
+      Full strobe seek time = 12.742000,
+      Add. write settling delay = 0.126000,
+#      First ten seek times = [
+#         1.090000,
+#         1.480000,
+#         1.570000,
+#         1.580000,
+#         1.700000,
+#         1.780000,
+#         1.730000,
+#         1.730000,
+#         1.750000,
+#         1.770000
+#      ],
+      Head switch time = 0.062000,
+      Rotation speed (in rpms) = 7200,
+      Percent error in rpms = 0.000000
+   }
+} # end of IBM_DNES-309170W_validate_model spec
+

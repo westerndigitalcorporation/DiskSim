@@ -1,0 +1,83 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+MODULE iosim
+HEADER \#include "../disksim_iosim.h"
+RESTYPE int
+PROTO int disksim_iosim_loadparams(struct lp_block *b);
+
+PARAM I/O Trace Time Scale	D	0
+INIT if (ioscale < 0.0) {
+INIT   if (ioscale > -1.0) {
+INIT     constintarrtime = 1/(-ioscale);
+INIT     ioscale = 1.0;
+INIT   } else {
+INIT     disksim->closedios = (int) -ioscale;
+INIT     ioscale = 1.0;
+INIT   }
+INIT } else if (ioscale == 0.0) {
+INIT   fprintf(stderr, "Invalid value for I/O trace time scale - %f\n", ioscale);
+INIT   exit(0);
+INIT }
+
+This specifies a value by which each arrival time in a trace is
+multiplied.  For example, a value of 2.0 doubles each arrival time,
+lightening the workload by stretching it out over twice the length of
+time.  Conversely, a value of 0.5 makes the workload twice as heavy by
+compressing inter-arrival times.  This value has no effect on
+workloads generated internally (by the synthetic generator).
+
+PARAM I/O Mappings		LIST	0
+TEST iosim_load_mappings(l)
+
+This is a list of \texttt{iomap} blocks (see below) which enable translation
+of disk request sizes and locations in an input trace into disk
+request sizes and locations appropriate for the simulated environment.
+When the simulated environment closely matches the traced environment,
+these mappings may be used simply to reassign disk device numbers.
+However, if the configured environment differs significantly from the
+trace environment, or if the traced workload needs to be scaled (by
+request size or range of locations), these mappings can be used to
+alter the the traced ``logical space'' and/or scale request sizes and
+locations.  One mapping is allowed per traced device.
+
+The mappings from devices identified in the trace to the storage
+subsystem devices being modeled are provided by block values.
+
+
+
+
+
+
+
+
+
+

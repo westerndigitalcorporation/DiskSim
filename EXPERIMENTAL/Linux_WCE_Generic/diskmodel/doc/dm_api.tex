@@ -1,0 +1,431 @@
+
+\subsection{API}
+
+This section describes the data structures and functions that comprise
+the Diskmodel API.
+
+The \texttt{dm\_disk\_if} struct is the ``top-level'' handle for a
+disk in diskmodel.  It contains a few disk-wide parameters -- number
+of heads/surfaces, cylinders and number of logical blocks exported by
+device -- along with pointers to the mechanics and layout interfaces.
+
+
+\subsubsection{Disk-wide Parameters}
+
+The top-level of a disk model is the \texttt{dm\_disk\_if} struct:
+
+\begin{verbatim}
+struct dm_disk_if {
+  int dm_cyls;            // number of cylinders
+  int dm_surfaces;        // number of media surfaces used for data
+  int dm_sectors;         // LBNs or total physical sectors (??)
+
+  struct dm_layout_if   *layout;
+  struct dm_mech_if     *mech;
+};
+\end{verbatim}
+
+All fields of diskmodel API structures are read-only; the behavior of
+diskmodel after any of them is modified is undefined.  \texttt{layout}
+and \texttt{mech} are pointers to the layout and mechanical module
+interfaces, respectively.  Each is a structure containing a number of
+pointers to functions which constitute the actual implementation.  In
+the following presentation, we write the functions as declarations
+rather than as types of function pointers for readability.  Many of the
+methods take one or more result parameters; i.e. pointers whose
+addresses will be filled in with some result.  Unless otherwise
+specified, passing \texttt{NULL} for result parameters is allowed and
+the result will not be filled in.
+
+
+\subsubsection{Layout}
+
+The layout interface uses the following auxiliary type:
+
+\texttt{dm\_ptol\_result\_t} appears in situations where a client code
+provides a pbn which may not exist on disk as-described e.g. due to
+defects.  It contains the following values:
+
+\begin{verbatim}
+  DM_SLIPPED
+  DM_REMAPPED
+  DM_OK
+  DM_NX
+\end{verbatim}
+
+\texttt{DM\_SLIPPED} indicates that the pbn is a slipped defect.
+\texttt{DM\_REMAPPED} indicates that the pbn is a remapped defect.
+\texttt{DM\_OK} indicates that the pbn exists on disk as-is.  \texttt{DM\_NX}
+indicates that there is no sector on the device corresponding to the
+given pbn.  When interpreted as integers, these values are all less
+than zero so they can be unambiguously intermixed with nonnegative
+integers e.g. lbns.
+
+
+
+The layout module exports the following methods:
+
+\begin{verbatim}
+dm_ptol_result_t dm_translate_ltop(struct dm_disk_if *, 
+                                   int lbn, 
+                                   dm_layout_maptype,
+                                   struct dm_pbn *result,
+                                   int *remapsector);
+\end{verbatim}
+
+Translate a logical block number (lbn) to a physical block number
+(pbn).  \texttt{remapsector} is a result parameter which will be set
+to a non-zero value if the lbn was remapped.
+
+The sector number in the result is relative to the $0_l$ zero sector.
+
+
+
+
+\begin{verbatim}
+dm_ptol_result_t dm_translate_ltop_0t(struct dm_disk_if *, 
+                                     int lbn, 
+                                     dm_layout_maptype,
+                                     struct dm_pbn *result,
+                                     int *remapsector);
+\end{verbatim}
+
+
+Same as \texttt{dm\_translate\_ltop} except that the sector in 
+result is relative to the $0_t$ sector.
+
+
+
+\begin{verbatim}
+dm_ptol_result_t dm_translate_ptol(struct dm_disk_if *, 
+                                   struct dm_pbn *p,
+                                   int *remapsector);
+\end{verbatim}
+
+Translate a pbn to an lbn.  \texttt{remapsector} is a result parameter
+which will be set to a non-zero value if the pbn is defective and
+remapped.
+
+The sector number in the operand is relative to the $0_l$ zero sector.
+
+\begin{verbatim}
+dm_ptol_result_t dm_translate_ptol_0t(struct dm_disk_if *, 
+                                      struct dm_pbn *p,
+                                      int *remapsector);
+\end{verbatim}
+
+Same as \texttt{dm\_translate\_ptol} except that the sector in the result
+is relative to the $0_t$ sector.
+
+
+
+\begin{verbatim}
+int dm_get_sectors_lbn(struct dm_disk_if *d,
+                       int lbn);
+\end{verbatim}
+
+Returns the number of sectors on the track containing the given lbn.
+
+
+\begin{verbatim}
+int dm_get_sectors_pbn(struct dm_disk_if *d,
+                       struct dm_pbn *);
+\end{verbatim}
+
+Returns the number of physical sectors on the track containing the
+given pbn.  This may not be the same as the number of lbns mapped on
+this track.  If the cylinder is unmapped, the return value will be the
+number of sectors per track for the nearest (lower) zone.
+
+
+\begin{verbatim}
+void dm_get_track_boundaries(struct dm_disk_if *d,
+                             struct dm_pbn *,
+                             int *first_lbn,
+                             int *last_lbn,
+                             int *remapsector);
+\end{verbatim}
+
+Computes lbn boundaries for the track containing the given pbn.
+\texttt{first\_lbn} is a result parameter which returns the first lbn
+on the track containing the given pbn; similarly, \texttt{last\_lbn}
+returns the last lbn on the given track.  \texttt{remapsector} returns
+a non-zero value if the first or last block on the track are remapped.
+Note that \texttt{last\_lbn} - \texttt{first\_lbn} + 1 may be greater
+than the number of LBNs mapped on the track e.g. due to remapped defects.
+
+
+\begin{verbatim}
+dm_ptol_result_t dm_seek_distance(struct dm_disk_if *,
+                                  int start_lbn,
+                                  int dest_lbn);
+\end{verbatim}
+
+Computes the seek distance in cylinders that would be incurred for
+given request.  Returns a \texttt{dm\_ptol\_result\_t} since one or both of the
+LBNs may be slipped or remapped.
+
+
+\begin{verbatim}
+dm_angle_t dm_pbn_skew(struct dm_disk_if *,
+                       struct dm_pbn *);
+\end{verbatim}
+
+This computes the starting offset of a pbn relative to 0.  The operand
+is a pbn relative to $0_l$; the result is an angle relative to $0$.
+This accounts for all skews, slips, etc.
+
+\begin{verbatim}
+dm_angle_t dm_get_track_zerol(struct dm_disk_if *, 
+                              struct dm_mech_state *);
+\end{verbatim}
+
+The return value is $0_l$ for the track identified by the second
+argument.  This is equivalent to calling \texttt{dm\_pbn\_skew}
+for sector 0 on the same track.
+
+
+\begin{verbatim}
+dm_ptol_result_t dm_convert_atop(struct dm_disk_if *,
+                                 struct dm_mech_state *,
+                                 struct dm_pbn *);
+\end{verbatim}
+
+Finds the pbn of the sector whose leading edge is less than or equal
+to the given angle.  Returns a \texttt{ptol\_result\_t} since the
+provided angle could be in slipped space, etc.  Both the angle in the
+second operand and the sector number in the result pbn are relative to
+$0_l$.
+
+
+
+\begin{verbatim}
+dm_angle_t dm_get_sector_width(struct dm_disk_if *,
+                               struct dm_pbn *track,
+                               int num);
+\end{verbatim}
+
+Returns the angular width of an extent of num sectors on the given track.
+Returns 0 if \texttt{num} is greater than the number of sectors on the
+track.
+
+\begin{verbatim}
+dm_angle_t dm_lbn_offset(struct dm_disk_if *, int lbn1, int lbn2);
+\end{verbatim}
+
+Computes the angular distance/offset between two logical blocks.
+
+
+\begin{verbatim}
+int dm_marshalled_len(struct dm_disk_if *);
+\end{verbatim}
+
+Returns the size of the structure in bytes when marshalled.
+
+
+\begin{verbatim}
+void *dm_marshall(struct dm_disk_if *, char *);
+\end{verbatim}
+
+Marshall this layout struct into the provided buffer.  The return value is
+the first address in the buffer not written.
+
+
+\subsubsection{Mechanics}
+
+The following diagram shows the breakdown of a zero-latency access in
+our model, and the corresponding definitions of seek time, positioning
+time and access time.
+
+\begin{verbatim}
++-------------------------+------------+----------+---------+----------+
+| seek                    | initial    |          | add.    |          |
+| headswitch              | rotational | xfertime | rot.    | xfertime |
+|            extra settle | latency    |          | latency |          |
++-------------------------+------------+----------+---------+----------+
+
+|---------seektime--------|
+|-----------positioning-time-----------|
+|------------------------------access-time-----------------------------|
+\end{verbatim}
+
+\begin{verbatim}
+dm_time_t dm_seek_time(struct dm_disk_if *, 
+                       struct dm_mech_state *start_track,
+                       struct dm_mech_state *end_track,
+                       int read);
+\end{verbatim}
+
+Computes the amount of time to seek from the first track to the second
+track, possibly including a head switch and additional write settling
+time.  This is only track-to-track so the angles in the parameters are
+ignored.  \texttt{read} should be nonzero if the access on the destination
+track is a read and zero if it is a write; extra write-settle time is
+included in the result for writes.
+
+\begin{verbatim}
+int dm_access_block(struct dm_disk_if *,
+                    struct dm_mech_state *initial,
+                    int start,
+                    int len,
+                    int immed);
+\end{verbatim}
+
+From the given inital condition and access, it will return the first
+block on the track to be read.  The access is for \texttt{len} sectors
+starting at physical sector \texttt{start} on the same track as
+\texttt{initial}.  \texttt{immed} indicates if this is an
+``immediate'' or ``zero-latency'' access; if \texttt{immed} is zero,
+the result will always be the same as \texttt{start}.
+
+
+\begin{verbatim}
+dm_time_t dm_latency(struct dm_disk_if *, 
+                     struct dm_mech_state *initial,
+                     int start,                    
+                     int len,                      
+                     int immed,                    
+                     dm_time_t *addtolatency); 
+\end{verbatim}
+
+This computes the rotational latency incurred from accessing up to
+\texttt{len} blocks from the track starting from angle
+\texttt{initial} and sector \texttt{start}.  This will access to the
+end of the track but not wrap around; e.g. for a sequential access that
+starts on the given track and switches to another, after reaching the
+end of the first.  The return value is the initial rotational latency;
+i.e. how long before the media transfer for the first block to be read
+starts.  \texttt{addtolatency} is a result parameter returning
+additional rotational latency as defined in the figure above.  Note
+that for non-zero-latency accesses, addtolatency will always be zero.
+Also note that for zero latency accesses, the latency is the amount of
+time before the media transfer begins for the first sector i.e. the
+same sector that would be returned by \texttt{dm\_access\_block()}.
+
+
+\texttt{dm\_pos\_time} and \texttt{dm\_acctime} optionally return
+broken-down components of the result via the following struct:
+
+\begin{verbatim}
+struct dm_mech_acctimes {
+   dm_time_t seektime;
+   dm_time_t initial_latency;
+   dm_time_t initial_xfer;
+   dm_time_t addl_latency;
+   dm_time_t addl_xfer;
+};
+\end{verbatim}
+
+For a zero-latency access, the last two fields will always be zero.
+\texttt{dm\_pos\_time} only fills in the first two fields;
+\texttt{dm\_acctime} fills in all 5.
+
+\begin{verbatim}
+dm_time_t dm_pos_time(struct dm_disk_if *,
+                      struct dm_mech_state *initial,
+                      struct dm_pbn *start,
+                      int len,
+                      int rw,
+                      int immed);
+\end{verbatim}
+
+Compute the amount of time before the media transfer for \texttt{len}
+sectors starting at \texttt{start} begins starting with the disk
+mechanics in state \texttt{initial}.  0 for \texttt{rw} indicates a
+write, any other value indicates a read.  A non-zero value for
+\texttt{immed} indicates a ``zero-latency'' access.  Positioning time
+is the same as seek time (including head-switch time and any extra
+write-settle time) plus initial rotational latency.
+
+\texttt{len} must be at least 1.
+
+\begin{verbatim}
+dm_time_t dm_acctime(struct dm_disk_if *, 
+                     struct dm_mech_state *initial_state,
+                     struct dm_pbn *start,
+                     int len,
+                     int rw,
+                     int immed,
+                     struct dm_mech_state *result_state);
+\end{verbatim}
+
+Estimate how long it will take to access \texttt{len} sectors starting
+with pbn \texttt{start} with the disk initially in state
+\texttt{initial}. 0 for \texttt{rw} indicates a write; any other value
+indicates a read.  A non-zero value for \texttt{immed} indicates a
+``zero-latency'' access.  \texttt{result\_state} is a result parameter
+which returns the mechanical state of the disk when the access
+completes.
+
+\texttt{len} must be at least 1.
+
+Access time consists of positioning time (above), transfer time and
+any additional rotational latency not included in the positioning
+time, e.g. in the middle of a zero-latency access transfer. 
+
+\texttt{dm\_acctime} ignores defects so it yields a smaller-than-correct 
+result when computing access times on tracks with defective sectors.
+This is deliberate as the handling of defects is a high-level
+controller function which varies widely.
+
+\begin{verbatim}
+dm_time_t dm_rottime(struct dm_disk_if *,
+                     dm_angle_t begin,
+                     dm_angle_t end);
+\end{verbatim}
+
+Compute how long it will take the disk to rotate from the angle in the
+first position to that in the second position.
+  
+
+\begin{verbatim}
+dm_time_t dm_xfertime(struct dm_disk_if *d,
+                      struct dm_mech_state *,
+                      int len);
+\end{verbatim}
+
+Computes the amount of time to transfer len sectors to or from the
+track designated by the second argument.  This is computed in terms of
+\texttt{dm\_get\_sector\_width()} and \texttt{dm\_rottime()} in the
+obvious way.
+
+
+\begin{verbatim}
+dm_time_t dm_headswitch_time(struct dm_disk_if *, 
+                             int h1, 
+                             int h2);
+\end{verbatim}
+
+Returns the amount of time to swith from using the first head to the
+second. 
+
+
+\begin{verbatim}
+dm_angle_t dm_rotate(struct dm_disk_if *, 
+                     dm_time_t *time);
+\end{verbatim}
+
+Returns the angle of the media after \texttt{time} has elapsed
+assuming the media started at angle 0.
+
+
+\begin{verbatim}
+dm_time_t dm_period(struct dm_disk_if *);
+\end{verbatim}
+
+Returns the rotational period of the media.
+
+
+\begin{verbatim}
+int dm_marshalled_len(struct dm_disk_if *);
+\end{verbatim}
+
+Returns the marshalled size of the structure.
+
+
+\begin{verbatim}
+void *dm_marshall(struct dm_disk_if *, char *);
+\end{verbatim}
+
+Marshalls the structure into the given buffer.  The return value is
+the first address in the buffer not written.

@@ -1,0 +1,16 @@
+dm_disk LBA_64BIT.model {
+    Number of data surfaces = 10,
+    Number of cylinders = 310194,
+    Block count = 7725673570,
+    Layout Model = source G4_LBA_64bit_4T.layout,
+    Mechanical Model = dm_mech_g1 {
+        Access time type = trackSwitchPlusRotation,
+        Seek type = extracted,
+        Full seek curve = G4_LBA_64bit_4T.seeks,
+        Add. write settling delay = 0.0,
+        Head switch time = 0.001000,
+        Rotation speed (in rpms) = 7200,
+        Percent error in rpms = 0.0
+   }
+} # end of LBA_64BIT.model spec
+

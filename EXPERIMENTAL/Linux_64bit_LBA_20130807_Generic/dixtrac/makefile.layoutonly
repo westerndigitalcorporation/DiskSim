@@ -1,0 +1,29 @@
+LDFLAGS = -lm
+HP_FAST_OFLAGS = +O4
+NCR_FAST_OFLAGS = -O4 -Hoff=BEHAVED
+DEBUG_OFLAGS = -g -DASSERTS
+PROF_OFLAGS = -g -DASSERTS -p
+GPROF_OFLAGS = -g -DASSERTS -G
+CFLAGS = ${DEBUG_OFLAGS} -I../include -DPARAM_EXTRACT -DLAYOUT_ONLY
+#CC = cc
+CC = gcc -Wall
+LAYOUT_OBJ = disksim_diskmap.o extract_layout.o layout_only.o
+LAYOUT_HDRS = extract_layout.h
+
+all : layout
+
+clean :
+	rm -f *.o layout core
+
+layout : $(LAYOUT_OBJ) $(LAYOUT_HDRS)
+	${CC} ${CFLAGS} -o layout $(LAYOUT_OBJ) $(LDFLAGS)
+
+disksim_diskmap.o : disksim_diskmap.c $(LAYOUT_HDRS)
+	${CC} -c ${CFLAGS} disksim_diskmap.c
+
+extract_layout.o : extract_layout.c $(LAYOUT_HDRS)
+	${CC} -c ${CFLAGS} extract_layout.c
+
+layout_only.o : layout_only.c $(LAYOUT_HDRS)
+	${CC} -c ${CFLAGS} layout_only.c
+

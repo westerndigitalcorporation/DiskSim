@@ -1,0 +1,6 @@
+DiskSimModule.bas is an Excel module that is used to analyze files produced by the XGIG trace analyzer and the DiskSim disk simulator.
+
+It is run in the directory where the test took place.
+
+It accepts an input file with the following contents:
+

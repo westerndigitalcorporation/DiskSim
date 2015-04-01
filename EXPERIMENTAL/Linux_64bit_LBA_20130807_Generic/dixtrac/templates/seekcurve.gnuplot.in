@@ -1,0 +1,9 @@
+set terminal postscript
+set output "@FILE@"
+set xrange[0:@XRANGE@]
+set yrange[0:@YRANGE@]
+set xlabel "Distance [cylinders]"
+set ylabel "Seek Time [ms]"
+set title "@CNAME@\n@DETAILED@Seek Profile (@DATE@)"
+set key off
+plot "seeks" using 1:2 title "seek profile" with lines

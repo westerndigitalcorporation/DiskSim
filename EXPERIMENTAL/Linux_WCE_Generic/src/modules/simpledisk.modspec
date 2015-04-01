@@ -1,0 +1,117 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE simpledisk
+HEADER \#include "../disksim_simpledisk.h"
+RESTYPE struct simpledisk *
+PROTO struct simpledisk *disksim_simpledisk_loadparams(struct lp_block *b);
+PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+
+PARAM Scheduler					BLOCK	1 
+TEST result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats)
+# INIT ioqueue_initialize(result->queue, 0);
+
+This is an ioqueue; see Section \ref{param.queue} for details.
+
+PARAM Max queue length				I	1 
+TEST i >= 0
+INIT result->maxqlen = i;
+
+This specifies the maximum number of requests that the simpledisk can have
+in service or queued for service at any point in time.  During
+initialization, other components request this information and respect
+it during simulation.
+
+PARAM Block count				I	1 
+TEST i >= 1
+INIT result->numblocks = i;
+
+This specifies the capacity of the simpledisk in blocks.
+
+
+PARAM Bus transaction latency			D	0
+TEST d >= 0.0
+INIT result->bus_transaction_latency = d;
+
+This specifies the delay involved at the simpledisk for each message that
+it transfers.
+
+PARAM Bulk sector transfer time			D	1 
+TEST d >= 0.0
+INIT result->blktranstime = d;
+
+This specifies the time necessary to transfer a single 512-byte block to,
+from or through the controller.  Transferring one block over the bus
+takes the maximum of this time, the block transfer time specified for
+the bus itself, and the block transfer time specified for the
+component on the other end of the bus transfer.
+
+
+PARAM Never disconnect				I	1
+TEST RANGE(i,0,1)
+INIT result->neverdisconnect = i;
+
+This specifies whether or not the simpledisk retains ownership of the bus
+during the entire processing and servicing of a request (i.e.,~from
+arrival to completion).  If false~(0), the simpledisk may release the
+bus whenever it is not needed for transferring data or control
+information.
+
+PARAM Print stats				I	1 
+TEST RANGE(i,0,1)
+INIT result->printstats = i;
+
+Specifies whether or not statistics for the simpledisk will be reported.
+
+PARAM Command overhead				D	1 
+TEST d >= 0.0
+INIT result->overhead = d;
+
+This specifies a per-request processing overhead that takes place
+immediately after the arrival of a new request at the disk.
+
+# err ... I'm not sure why there are 2 of these here
+PARAM Constant access time			D	0
+TEST d >= 0.0
+INIT result->acctime = d;
+
+This specifies the fixed per-request access time (i.e.,~actual mechanical
+activity is not simulated).
+
+PARAM Access time				D	1  
+TEST d >= 0.0
+INIT result->acctime = d;
+
+Synonym for \texttt{Constant access time}.
+
+
+

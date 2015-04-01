@@ -1,0 +1,11 @@
+#!/bin/sh
+
+PREFIX= ../../src
+
+echo "maxtor300g, expected IOdriver Response time average: 	1.997 "
+echo ""
+${PREFIX}/disksim maxtor300g.parv maxtor300g_latency_skew.outv ascii Trace_CheckLatencySkew.txt 0
+grep "IOdriver Response time average" maxtor300g_latency_skew.outv
+
+
+

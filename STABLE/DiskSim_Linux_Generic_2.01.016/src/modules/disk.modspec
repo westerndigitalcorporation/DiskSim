@@ -1,0 +1,756 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE disk
+PROTO struct disk* disksim_disk_loadparams(struct lp_block *b, int *num);
+PROTO struct dm_disk_if* dm_disk_loadparams(struct lp_block *b, int *num);
+PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+HEADER \#include "../disksim_disk.h"
+RESTYPE struct disk *
+
+PARAM Model				BLOCK	1
+TEST result->model = (struct dm_disk_if *) dm_disk_loadparams(blk, 0)
+
+Parameters for the disk's libdiskmodel model.  See the diskmodel
+documentation for details.
+
+
+PARAM Scheduler				BLOCK	1 
+TEST (result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats))
+# INIT ioqueue_initialize(result->queue, 0);
+An ioqueue; see Section \ref{param.queue}
+
+PARAM Max queue length			I	1 
+TEST i >= 0
+INIT result->maxqlen = i;
+
+This specifies the maximum number of requests that the disk can have in
+service or queued for service at any point in time.  During
+initialization, other components request this information and respect
+it during simulation.
+
+PARAM Bulk sector transfer time		D	1 
+TEST  d >= 0.0
+INIT result->blktranstime = d;
+
+This specifies the time for the disk to transfer a single 512-byte block
+over the bus.  Recall that this value is compared with the
+corresponding bus and controller block transfer values to determine
+the actual transfer time (i.e.,~the maximum of the three values).
+
+PARAM Segment size (in blks)		I	1 
+TEST RANGE(i, 1, result->model->dm_sectors)
+INIT result->segsize = i;
+
+This specifies the size of each buffer segment, assuming a static segment
+size.  Some modern disks will dynamically resize their buffer segments
+(and thereby alter the number of segments) to respond to perceived
+patterns of workload behavior, but DiskSim does not currently support
+this functionality.
+
+PARAM Number of buffer segments		I	1 
+TEST i >= 0
+INIT result->numsegs = i;
+
+This specifies the number of segments in the on-board buffer/cache.  A
+buffer segment is similar to a cache line, in that each segment
+contains data that is disjoint from all other segments.  However,
+segments tend to be organized as circular queues of logically
+sequential disk sectors, with new sectors pushed into an appropriate
+queue either from the bus (during a write) or from the disk media
+(during a read).  As data are read from the buffer/cache and either
+transferred over the bus (during a read) or written to the disk media
+(during a write), they are eligible to be pushed out of the segment
+(if necessary or according to the dictates of the buffer/cache
+management algorithm).
+
+
+PARAM Print stats			I	1 
+TEST RANGE(i,0,1)
+INIT result->printstats = i;
+This specifies whether or not statistics for the disk will be reported.
+
+
+PARAM Per-request overhead time		D	1 
+TEST d >= 0.0
+INIT result->overhead = d;
+This specifies a per-request processing overhead that takes place
+immediately after the arrival of a new request at the disk.  It is
+additive with various other processing overheads described below, but
+in general either the other overheads are set to zero or this
+parameter is set to zero.
+
+
+PARAM Time scale for overheads		D	1 
+TEST d >= 0.0
+INIT result->timescale = d;
+This specifies a multiplicative scaling factor for all processing overhead
+times.  For example, 0.0 eliminates all such delays, 1.0 uses them at
+face value, and 1.5 increases them all by 50\%.
+
+PARAM Hold bus entire read xfer		I	1 
+TEST RANGE(i,0,1)
+INIT result->hold_bus_for_whole_read_xfer = i;
+
+This specifies whether or not the disk retains ownership of the bus
+throughout the entire transfer of ``read'' data from the disk.  If
+false~(0), the disk may release the bus if and when the current
+transfer has exhausted all of the available data in the on-board
+buffer/cache and must wait for additional data sectors to be read off
+the disk into the buffer/cache.
+
+
+PARAM Hold bus entire write xfer	I	1 
+TEST RANGE(i,0,1)
+INIT result->hold_bus_for_whole_write_xfer = i;
+
+This specifies whether or not the disk retains ownership of the bus
+throughout the entire transfer of ``write'' data to the disk.  If
+false~(0), the disk may release the bus if and when the current
+transfer has filled up the available space in the on-board
+buffer/cache and must wait for data from the buffer/cache to be
+written to the disk.
+
+
+PARAM Allow almost read hits	I		1 
+TEST RANGE(i,0,1)
+INIT result->almostreadhits = i;
+
+This specifies whether or not a new read request whose first block is
+currently being prefetched should be treated as a partial cache hit.
+Doing so generally means that the request is handled right away.
+
+
+PARAM Allow sneaky full read hits	I	1 
+TEST RANGE(i,0,1)
+INIT result->sneakyfullreadhits = i;
+
+This specifies whether or not a new read request whose data are entirely
+contained in a single segment of the disk cache is allowed to
+immediately transfer that data over the bus while another request is
+moving the disk actuator and/or transferring data between the disk
+cache and the disk media.  In essence, the new read request ``sneaks''
+its data out from the disk cache without interrupting the current
+(active) disk request.
+
+
+PARAM Allow sneaky partial read hits	I	1 
+TEST RANGE(i,0,1)
+INIT result->sneakypartialreadhits = i;
+
+This specifies whether or not a new read request whose data are partially
+contained in a single segment of the disk cache is allowed to
+immediately transfer that data over the bus while another request is
+moving the disk actuator and/or transferring data between the disk
+cache and the disk media.  In essence, the new read request ``sneaks''
+the cached portion of its data out from the disk cache without
+interrupting the current (active) disk request.
+
+
+PARAM Allow sneaky intermediate read hits	I	1 
+TEST RANGE(i,0,1)
+INIT result->sneakyintermediatereadhits = i;
+
+This specifies whether or not the on-board queue of requests is searched
+during idle bus periods in order to find read requests that may be
+partially or completely serviced from the current contents of the disk
+cache.  That is, if the current (active) request does not need bus
+access at the current time, and the bus is available for use, a queued
+read request whose data are in the cache may obtain access to the bus
+and begin data transfer.  ``Full'' intermediate read hits are given
+precedence over ``partial'' intermediate read hits.
+
+
+PARAM Allow read hits on write data	I	1 
+TEST RANGE(i,0,1)
+INIT result->readhitsonwritedata = i;
+
+This specifies whether or not data placed in the disk cache by write
+requests are considered usable by read requests.  If false~(0), such
+data are removed from the cache as soon as they have been copied to
+the media.
+
+PARAM Allow write prebuffering		I	1 
+TEST RANGE(i,0,1)
+INIT result->writeprebuffering = i;
+
+This specifies whether or not the on-board queue of requests is searched
+during idle bus periods for write requests that could have part or all
+of their data transferred to the on-board cache (without disturbing an
+ongoing request).  That is, if the current (active) request does not
+need bus access at the current time, and the bus is available for use,
+a queued write request may obtain access to the bus and begin data
+transfer into an appropriate cache segment.  Writes that are
+contiguous to the end of the current (active) request are given
+highest priority in order to facilitate continuous transfer to the
+media, followed by writes that have already ``prebuffered'' some
+portion of their data.
+
+
+PARAM Preseeking level			I	1 
+TEST RANGE(i,0,2)
+INIT result->preseeking = i;
+
+This specifies how soon the actuator is allowed to start seeking towards
+the media location of the next request's data.  
+
+0~indicates no preseeking, meaning that the actuator does not begin
+relocation until the current request's completion has been confirmed
+by the controller (via a completion ``handshake'' over the bus).
+
+1~indicates that the actuator can begin relocation as soon as the
+completion message has been prepared for transmission by the disk.
+
+2~indicates that the actuator can begin relocation as soon as the
+access of the last sector of the current request (and any required
+prefetching) has been completed.  This allows greater parallelism
+between bus activity and mechanical activity.
+
+
+PARAM Never disconnect			I	1 
+TEST RANGE(i,0,1)
+INIT result->neverdisconnect = i;
+
+This specifies whether or not the disk retains ownership of the bus during
+the entire processing and servicing of a request (i.e.,~from arrival
+to completion).  If false~(0), the disk may release the bus whenever
+it is not needed for transferring data or control information.
+
+PARAM Avg sectors per cylinder		I	1 
+TEST RANGE(i,1,result->model->dm_sectors)
+INIT result->sectpercyl = i;
+
+This specifies (an approximation of) the mean number of sectors per
+cylinder.  This value is exported to external schedulers some of which
+utilize approximations of the actual layout of data on the disk(s)
+when reordering disk requests.  This value is not used by the disk
+itself.
+
+PARAM Maximum number of write segments	I	1 
+DEPEND Number of buffer segments
+TEST RANGE(i,1,result->numsegs)
+INIT result->numwritesegs = i;
+
+This specifies the number of cache segments available for holding
+``write'' data at any point in time.  Because write-back caching is
+typically quite limited in current disk cache management schemes, some
+caches only allow a subset of the segments to be used to hold data for
+write requests (in order to minimize any interference with sequential
+read streams).
+
+PARAM Use separate write segment	I	1 
+TEST RANGE(i,0,1)
+
+This specifies whether or not a single segment is statically designated
+for use by all write requests.  This further minimizes the impact of
+write requests on the caching/prefetching of sequential read streams.
+
+PARAM Low (write) water mark		D	1 
+TEST RANGE(d,0.0,1.0)
+INIT result->writelowwatermark = d;
+
+This specifies the fraction of segment size or request size (see below)
+corresponding to the {\it low water mark}.  When data for a write
+request are being transferred over the bus into the buffer/cache, and
+the buffer/cache segment fills up with ``dirty'' data, the disk may
+disconnect from the bus while the buffered data are written to the
+disk media.  When the amount of dirty data in the cache falls below
+the low water mark, the disk attempts to reconnect to the bus to
+continue the interrupted data transfer.
+
+PARAM High (read) water mark		D	1 
+TEST RANGE(d,0.0,1.0)
+INIT result->readhighwatermark = d;
+
+This specifies the fraction of 
+segment size or request size (see below) corresponding to the 
+{\it high water mark}.  When data for a read request are being transferred
+over the bus from the buffer/cache, and the buffer/cache segment runs out of
+data to transfer, the disk may disconnect from the bus until additional data
+are read from the disk media.  When the amount of available data in the cache 
+reaches the high water mark, the disk attempts to reconnect to the bus to 
+continue the interrupted data transfer.
+
+
+PARAM Set watermark by reqsize		I	1 
+TEST RANGE(i,0,1)
+INIT result->reqwater = i;
+
+This specifies whether the 
+watermarks are computed as fractions of the individual request size
+or as fractions of the buffer/cache segment size.
+
+
+PARAM Calc sector by sector		I	1 
+TEST RANGE(i,0,1)
+INIT result->sectbysect = i;
+
+This specifies whether or not media transfers should be computed sector by
+sector rather than in groups of sectors.  This optimization has no
+effect on simulation accuracy, but potentially results in shorter
+simulation times (at a cost of increased code complexity).  It has not
+been re-enabled since the most recent modifications to DiskSim, so the
+simulator currently functions as if the value were always true~(1).
+
+PARAM Enable caching in buffer		I	1 
+TEST RANGE(i,0,2)
+INIT result->enablecache = i;
+
+This specifies whether or not
+on-board buffer segments are used for data caching as well as for
+speed-matching between the bus and the disk media.  Most (if not all) modern 
+disk drives utilize their buffers as caches.
+
+PARAM Buffer continuous read		I	1 
+TEST RANGE(i,0,4)
+INIT result->contread = i;
+
+This specifies the type of prefetching performed by the disk.  0~disables
+prefetching.  1~enables prefetching up to the end of the track
+containing the last sector of the read request. 2~enables prefetching
+up to the end of the cylinder containing the last sector of the read
+request. 3~enables prefetching up to the point that the current cache
+segment is full.  4~enables prefetching up to the end of the track
+following the track containing the last sector of the read request,
+provided that the current request was preceded in the not-too-distant
+past by another read request that accessed the immediately previous
+track.  In essence, the last scheme enables a type of prefetching that
+tries to stay one logical track ``ahead'' of any sequential read
+streams that are detected.
+
+PARAM Minimum read-ahead (blks)		I	1 
+TEST RANGE(i,0,result->segsize)
+INIT result->minreadahead = i;
+
+This specifies the minimum number of disk sectors that must be prefetched
+after a read request before servicing another (read or write) request.
+A positive value may be beneficial for workloads containing multiple
+interleaved sequential read streams, but 0~is typically the
+appropriate value.
+
+PARAM Maximum read-ahead (blks)		I	1 
+TEST RANGE(i,0,result->segsize)
+INIT result->maxreadahead = i;
+
+This specifies the maximum number of disk sectors that may be prefetched
+after a read request (regardless of all other prefetch parameters).
+
+
+PARAM Read-ahead over requested		I	1 
+TEST RANGE(i,-1,1)
+INIT result->keeprequestdata = i;
+
+This specifies whether or not newly prefetched data can replace (in a
+buffer segment) data returned to the host as part of the most recent
+read request.  
+% If false~(0), prefetch is %terminated when the buffer segment is
+% full.
+
+PARAM Read-ahead on idle hit		I	1 
+TEST RANGE(i,0,1)
+INIT result->readaheadifidle = i;
+
+This specifies whether or not prefetching should be initiated by the
+disk when a read request is completely satisfied by cached data
+(i.e.,~a ``full read hit'').
+
+
+PARAM Read any free blocks		I	1 
+TEST RANGE(i,0,1)
+INIT result->readanyfreeblocks = i;
+
+This specifies whether or not disk sectors logically prior to the
+requested sectors should be read into the cache if they pass under the
+read/write head prior to reaching the requested data (e.g.,~during
+rotational latency).
+
+
+PARAM Fast write level			I	1
+TEST RANGE(i,0,2) 
+INIT result->fastwrites = i;
+
+This specifies the type of write-back caching implemented.  
+
+0~indicates that write-back caching is disabled (i.e.,~all dirty data
+must be written to the disk media prior to sending a completion
+message).
+
+1~indicates that write-back caching is enabled for contiguous
+sequential write request streams.  That is, as long as each request
+arriving at the disk is a write request that ``appends'' to the
+current segment of dirty data, a completion message will be returned
+for each new request as soon as all of its data have been transferred
+over the bus to the disk buffer/cache.
+
+2~indicates that write-back caching is enabled for contiguous
+sequential write request streams even if they are intermixed with read
+or non-appending write requests, although before any such request is
+serviced by the disk, all of the dirty write data must be flushed to
+the media.  A scheduling algorithm that gives precedence to sequential
+writes would maximize the effectiveness of this option.
+
+
+PARAM Combine seq writes		I	1 
+TEST RANGE(i,0,1)
+INIT result->writecomb = i;
+
+This specifies whether or not sequential data from separate write requests
+can share a common cache segment.  If true~(1), data are typically
+appended at the end of a previous request's dirty data.  However, if
+all of the data in a cache segment are dirty, and no mechanical
+activity has begun on behalf of the request(s) using that segment,
+``prepending'' of additional dirty data are allowed provided that the
+resulting cache segment contains a single contiguous set of dirty
+sectors.
+
+
+PARAM Stop prefetch in sector		I	1 
+TEST RANGE(i,0,1)
+INIT result->stopinsector = i;
+
+This specifies whether or not a prefetch may be aborted in the ``middle''
+of reading a sector off the media.  If false~(0), prefetch activity is
+only aborted at sector boundaries.
+
+
+PARAM Disconnect write if seek		I	1 
+TEST RANGE(i,0,1) 
+INIT result->disconnectinseek = i;
+
+This specifies whether or not the disk should disconnect from the bus if
+the actuator is still in motion (seeking) when the last of a write
+request's data has been transferred to the disk buffer/cache.
+
+PARAM Write hit stop prefetch		I	1 
+TEST RANGE(i,0,1)
+INIT result->write_hit_stop_readahead = i;
+
+This specifies whether or not
+the disk should discontinue the read-ahead of a previous request when a
+write hit in the cache occurs.  Doing so allows the new write request's
+data to begin travelling to the disk more quickly, at the expense of
+some prefetching activity.
+
+PARAM Read directly to buffer		I	1 
+TEST RANGE(i,0,1)
+INIT result->read_direct_to_buffer = i;
+
+This specifies whether or not
+space for a sector must be available in the buffer/cache prior to the
+start of the sector read.  If false~(0), a separate sector buffer is assumed
+to be available for use by the media-reading electronics, implying that the
+data for a sector is transferred to the main buffer/cache only after it has
+been completely read (and any error-correction algorithms completed).
+
+
+PARAM Immed transfer partial hit	I	1 
+TEST RANGE(i,0,1)
+INIT result->immedtrans_any_readhit = i;
+
+This specifies whether or not a read request whose initial (but not all)
+data are present in the disk buffer/cache has that data immediately
+transferred over the bus.  If false~(0), the data are immediately
+transferred only if the amount of requested data that are present in
+the buffer/cache exceed the {\it high water mark} (see above).
+
+PARAM Read hit over. after read		D	1 
+TEST d >= 0.0
+INIT result->overhead_command_readhit_afterread = d;
+
+This specifies the processing time for a read request that hits in the
+on-board cache when the immediately previous request was also a read.
+This delay is applied before any data are transferred from the disk
+buffer/cache.
+
+PARAM Read hit over. after write	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_readhit_afterwrite = d;
+
+This specifies the processing time for a read request that hits in the
+on-board cache when the immediately previous request was a write.
+This delay is applied before any data are transferred from the disk
+buffer/cache.
+
+PARAM Read miss over. after read	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_readmiss_afterread = d;
+
+This specifies the processing time for a read request that misses in the
+on-board cache when the immediately previous request was also a read.
+This delay is applied before any mechanical positioning delays or data
+transfer from the media.
+
+
+PARAM Read miss over. after write	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_readmiss_afterwrite = d;
+
+This specifies the processing time for a read request that misses in the
+on-board cache when the immediately previous request was a write.
+This delay is applied before any mechanical positioning delays or data
+transfer from the media.
+
+
+PARAM Write hit over. after read	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_writehit_afterread = d;
+
+This specifies the processing time for a write request that ``hits'' in
+the on-board cache (i.e., completion will be reported before data
+reaches media) when the immediately previous request was a read.  This
+delay is applied before any mechanical positioning delays and before
+any data are transferred to the disk buffer/cache.
+
+PARAM Write hit over. after write	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_writehit_afterwrite = d;
+
+This specifies the processing time for a write request that ``hits'' in
+the on-board cache (i.e., completion will be reported before data
+reaches media) when the immediately previous request was also a write.
+This delay is applied before any mechanical positioning delays and
+before any data are transferred to the disk buffer/cache.
+
+PARAM Write miss over. after read	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_writemiss_afterread = d;
+
+This specifies that ``misses'' in the on-board cache (i.e., completion will
+be reported only after data reaches media) when the immediately
+previous request was a read.  This delay is applied before any
+mechanical positioning delays and before any data are transferred to
+the disk buffer/cache.
+
+
+PARAM Write miss over. after write	D	1 
+TEST d >= 0.0
+INIT result->overhead_command_writemiss_afterwrite = d;
+
+This specifies the processing time for a write request that ``misses'' in
+the on-board cache (i.e., completion will be reported only after data
+reaches media) when the immediately previous request was also a write.
+This delay is applied before any mechanical positioning delays and
+before any data are transferred to the disk buffer/cache.
+
+PARAM Read completion overhead		D	1 
+TEST d >= 0.0
+INIT result->overhead_complete_read = d;
+
+This specifies the processing time for completing a read request.
+This overhead is applied just before the completion message is sent
+over the (previously acquired) bus and occurs in parallel with any
+background disk activity (e.g.,~prefetching or preseeking).
+
+PARAM Write completion overhead		D	1 
+TEST d >= 0.0
+INIT result->overhead_complete_write = d;
+
+This specifies the processing time for completing a write request.
+This overhead is applied just before the completion message is sent
+over the (previously acquired) bus and occurs in parallel with any
+background disk activity (e.g.,~preseeking).
+
+PARAM Data preparation overhead		D	1 
+TEST d >= 0.0
+INIT result->overhead_data_prep = d;
+
+This specifies the additional processing time necessary when preparing to
+transfer data over the bus (for either reads or writes).  This command
+processing overhead is applied after obtaining access to the bus
+(prior to transferring any data) and occurs in parallel with any
+ongoing media access.
+
+PARAM First reselect overhead		D	1 
+TEST d >= 0.0
+INIT result->overhead_reselect_first = d; 
+
+This specifies the processing time for reconnecting to (or
+``reselecting'') the controller for the first time during the current
+request.  This command processing overhead is applied after the disk
+determines that reselection is appropriate (prior to attempting to
+acquire the bus) and occurs in parallel with any ongoing media access.
+
+Reselection implies that the disk has explicitly disconnected from the
+bus at some previous point while servicing the current request and is
+now attempting to reestablish communication with the controller.
+Disconnection and subsequent reselection result in some additional
+command processing and protocol overhead, but they may also improve
+the overall utilization of bus resources shared by multiple disks (or
+other peripherals).
+
+PARAM Other reselect overhead		D	1 
+TEST d >= 0.0
+INIT result->overhead_reselect_other = d;
+
+This specifies the processing time for reconnecting to the controller
+after the first time during the current request (i.e.,~the second
+reselection, the third reselection, etc.).  This command processing
+overhead is applied after the disk determines that reselection is
+appropriate (prior to attempting to acquire the bus) and occurs in
+parallel with any ongoing media access.
+
+
+PARAM Read disconnect afterread		D	1 
+TEST d >= 0.0
+INIT result->overhead_disconnect_read_afterread = d;
+
+This specifies the processing time for a read request that disconnects
+from the bus when the previous request was also a read.  This command
+processing overhead is applied after the disk determines that
+disconnection is appropriate (prior to requesting disconnection from
+the bus) and occurs in parallel with any ongoing media access.
+
+PARAM Read disconnect afterwrite	D	1 
+TEST d >= 0.0
+INIT result->overhead_disconnect_read_afterwrite = d;
+
+This specifies the processing time for a read request that disconnects
+from the bus when the previous request was a write request.  This
+command processing overhead is applied after the disk determines that
+disconnection is appropriate (prior to requesting disconnection from
+the bus) and occurs in parallel with any ongoing media access.
+
+PARAM Write disconnect overhead		D	1 
+TEST d >= 0.0
+INIT result->overhead_disconnect_write = d;
+
+This specifies the processing time for a write request that disconnects
+from the bus (which generally occurs after the data are transferred
+from the host to the on-board buffer/cache).  This command processing
+overhead is applied after the disk determines that disconnection is
+appropriate (prior to requesting disconnection from the bus) and
+occurs in parallel with any ongoing media access.
+
+PARAM Extra write disconnect		I	1 
+TEST RANGE(i,0,1)
+INIT result->extra_write_disconnect = i;
+
+This specifies whether or not the disk disconnects from the bus after
+processing the write command but before any data have been transferred
+over the bus into the disk buffer/cache.  Although there are no
+performance or reliability advantages to this behavior, it has been
+observed in at least one production SCSI disk and has therefore been
+included in DiskSim.  If true~(1), the next five parameters configure
+additional overhead values specifically related to this behavior.
+
+
+PARAM Extradisc command overhead	D	1 
+TEST d >= 0.0
+INIT result->extradisc_command = d;
+
+This specifies the processing time for a write request that disconnects
+from the bus before transferring any data to the disk buffer/cache.
+This overhead is applied before requesting disconnection from the bus
+and before any mechanical positioning delays.  This parameter (when
+enabled) functions in place of the above ``Write over.'' parameters.
+
+PARAM Extradisc disconnect overhead	D	1 
+TEST d >= 0.0
+INIT result->extradisc_disconnect1 = d;
+
+This specifies the additional processing time for a write request that
+disconnects from the bus before transferring any data to the disk
+buffer/cache.  This overhead is also applied before requesting
+disconnection from the bus, but it occurs in parallel with any
+mechanical positioning delays.  This parameter (when enabled)
+functions in place of the above ``Write disconnect'' parameter for
+initial write disconnections.
+
+
+PARAM Extradisc inter-disconnect delay	D	1 
+TEST d >= 0.0
+INIT result->extradisc_inter_disconnect = d;
+
+This specifies the time between the initial disconnect from the bus and
+the subsequent reconnection attempt for a write request that
+disconnects from the bus before transferring any data to the disk
+buffer/cache.  It occurs in parallel with any mechanical positioning
+delays.
+
+PARAM Extradisc 2nd disconnect overhead	D	1 
+TEST d >= 0.0
+INIT result->extradisc_disconnect2 = d; 
+
+This specifies the processing time for a write request that disconnects
+from the bus after data has been transferred but previously had
+disconnected without transferring any data to the disk buffer/cache.
+This command processing overhead is applied after the disk determines
+that disconnection is appropriate (prior to requesting disconnection
+from the bus) and occurs in parallel with any ongoing media access.
+This parameter (when enabled) functions in place of the above ``Write
+disconnect'' parameter for non-initial write disconnections.
+
+# not used by mech model
+PARAM Extradisc seek delta		D	1 
+TEST d >= 0.0
+INIT result->extradisc_seekdelta = d;
+
+This specifies the additional delay between the completion of the initial
+command processing overhead and the initiation of any mechanical
+positioning for a write request that disconnects from the bus before
+transferring any data to the disk buffer/cache.  This delay occurs in
+parallel with ongoing bus activity and related processing overheads.
+
+# not used by mech model
+PARAM Minimum seek delay		D	1 
+TEST d >= 0.0
+INIT result->minimum_seek_delay = d;
+
+This specifies the minimum media access delay for a nonsequential write
+request.  That is, a nonsequential write request (after any command
+processing overheads) must wait at least this amount of time before
+accessing the disk media.
+
+
+PARAM Immediate buffer read		I	1 
+TEST RANGE(i,0,2)
+INIT result->immedread = i;
+
+This specifies whether or not disk sectors should be transferred into the
+on-board buffer in the order that they pass under the read/write head
+rather than in strictly ascending logical block order.  This is known
+as {\it zero-latency reads} or {\it read-on-arrival}.  It is intended
+to improve response times by reducing rotational latency (by not
+rotating all the way around to the first requested sector before
+beginning to fill the buffer/cache).
+
+PARAM Immediate buffer write		I	1 
+TEST RANGE(i,0,2)
+INIT result->immedwrite = i;
+
+This specifies whether or not disk sectors should be transferred from the
+on-board buffer in the order that they pass under the read/write head
+rather than in strictly ascending logical block order.  These are known
+as {\it zero-latency writes} or {\it write-on-arrival}.  It is
+intended to improve response times by reducing rotational latency (by
+not rotating all the way around to the first ``dirty'' sector before
+beginning to flush the buffer/cache).

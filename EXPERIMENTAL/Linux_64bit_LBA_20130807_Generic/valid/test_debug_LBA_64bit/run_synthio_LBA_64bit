@@ -1,0 +1,22 @@
+#!/bin/sh
+
+#PREFIX=../../../src
+PREFIX=.
+IOCOUNT=1000000
+
+rm *.outv
+rm *.log
+rm *.results
+rm *.txt
+#echo "" > log_synthio.txt
+#echo "" > log_diskio.txt
+#echo "" > log_diskqueue.txt
+#echo "" > log_event.txt
+
+./disksim64 G4_LBA_64bit_4T.parv G4_LBA_64bit_4T_synthio.outv ascii 0 1  "Synthio" "Number of I/O requests to generate" ${IOCOUNT}
+#cp log_diskio.txt log_diskio_64_synthio.txt
+#cp log_iodriver_queue.csv log_iodriver_queue_64_synthio.csv
+#cp log_synthio.txt log_synthio_64_synthio.txt
+#cp log_exectrace.txt log_exectrace_64_synthio.txt
+#cp log_diskqueue.txt log_diskqueue_64_synthio.txt
+#cp log_event.txt log_event_64_synthio.txt

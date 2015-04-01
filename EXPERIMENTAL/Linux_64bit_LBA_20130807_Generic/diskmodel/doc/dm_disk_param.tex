@@ -1,0 +1,62 @@
+\noindent 
+\begin{tabular}{|p{\lpmodwidth}|p{\lpnamewidth}|p{0.5in}|p{0.5in}|}
+\cline{1-4}
+\texttt{dm\_disk} & \texttt{Block count} & int & required \\ 
+\cline{1-4}
+\multicolumn{4}{|p{6in}|}{
+This specifies the number of data blocks. This capacity is exported by the
+disk (e.g.,~to a disk array controller). It is not used directly
+during simulation, but is compared to a similar value computed from
+other disk parameters. A warning is reported if the values differ.
+}\\ 
+\cline{1-4}
+\multicolumn{4}{p{5in}}{}\\
+\end{tabular}\\ 
+\noindent 
+\begin{tabular}{|p{\lpmodwidth}|p{\lpnamewidth}|p{0.5in}|p{0.5in}|}
+\cline{1-4}
+\texttt{dm\_disk} & \texttt{Number of data surfaces} & int & required \\ 
+\cline{1-4}
+\multicolumn{4}{|p{6in}|}{
+This specifies the number of magnetic media surfaces (not platters!) on
+which data are recorded. Dedicated servo surfaces should not be
+counted for this parameter.
+}\\ 
+\cline{1-4}
+\multicolumn{4}{p{5in}}{}\\
+\end{tabular}\\ 
+\noindent 
+\begin{tabular}{|p{\lpmodwidth}|p{\lpnamewidth}|p{0.5in}|p{0.5in}|}
+\cline{1-4}
+\texttt{dm\_disk} & \texttt{Number of cylinders} & int & required \\ 
+\cline{1-4}
+\multicolumn{4}{|p{6in}|}{
+This specifies the number of physical cylinders. All cylinders that impact
+the logical to physical mappings should be included.
+}\\ 
+\cline{1-4}
+\multicolumn{4}{p{5in}}{}\\
+\end{tabular}\\ 
+\noindent 
+\begin{tabular}{|p{\lpmodwidth}|p{\lpnamewidth}|p{0.5in}|p{0.5in}|}
+\cline{1-4}
+\texttt{dm\_disk} & \texttt{Mechanical Model} & block & optional \\ 
+\cline{1-4}
+\multicolumn{4}{|p{6in}|}{
+This block defines the disk's mechanical model. Currently,
+the only available implementation is \texttt{dm\_mech\_g1}.
+}\\ 
+\cline{1-4}
+\multicolumn{4}{p{5in}}{}\\
+\end{tabular}\\ 
+\noindent 
+\begin{tabular}{|p{\lpmodwidth}|p{\lpnamewidth}|p{0.5in}|p{0.5in}|}
+\cline{1-4}
+\texttt{dm\_disk} & \texttt{Layout Model} & block & required \\ 
+\cline{1-4}
+\multicolumn{4}{|p{6in}|}{
+This block defines the disk's layout model.
+}\\ 
+\cline{1-4}
+\multicolumn{4}{p{5in}}{}\\
+\end{tabular}\\ 

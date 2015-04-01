@@ -1,0 +1,140 @@
+dm_disk HP_C2249A_model {
+   Number of data surfaces = 17,
+   Number of cylinders = 2051,
+   Block count = 2687632,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 1,
+      Rangesize for sparing = 1,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 558,
+            Blocks per track = 96,
+            Offset of first block = 0,
+            Empty space at zone front = 1632,
+            Skew for track switch = 14,
+            Skew for cylinder switch = 32,
+            Number of spares = 425,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 559,
+            Last cylinder number = 760,
+            Blocks per track = 92,
+            Offset of first block = 14,
+            Empty space at zone front = 0,
+            Skew for track switch = 13,
+            Skew for cylinder switch = 30,
+            Number of spares = 170,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 761,
+            Last cylinder number = 901,
+            Blocks per track = 88,
+            Offset of first block = 73,
+            Empty space at zone front = 0,
+            Skew for track switch = 13,
+            Skew for cylinder switch = 29,
+            Number of spares = 85,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 902,
+            Last cylinder number = 1051,
+            Blocks per track = 84,
+            Offset of first block = 80,
+            Empty space at zone front = 0,
+            Skew for track switch = 12,
+            Skew for cylinder switch = 28,
+            Number of spares = 102,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1052,
+            Last cylinder number = 1193,
+            Blocks per track = 80,
+            Offset of first block = 52,
+            Empty space at zone front = 0,
+            Skew for track switch = 12,
+            Skew for cylinder switch = 27,
+            Number of spares = 68,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1194,
+            Last cylinder number = 1519,
+            Blocks per track = 72,
+            Offset of first block = 0,
+            Empty space at zone front = 0,
+            Skew for track switch = 11,
+            Skew for cylinder switch = 24,
+            Number of spares = 136,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1520,
+            Last cylinder number = 1793,
+            Blocks per track = 64,
+            Offset of first block = 32,
+            Empty space at zone front = 0,
+            Skew for track switch = 10,
+            Skew for cylinder switch = 22,
+            Number of spares = 102,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1794,
+            Last cylinder number = 2050,
+            Blocks per track = 56,
+            Offset of first block = 30,
+            Empty space at zone front = 0,
+            Skew for track switch = 9,
+            Skew for cylinder switch = 19,
+            Number of spares = 85,
+            slips = [],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = hplplus10,
+      Single cylinder seek time = 0.200000,
+      Average seek time = 1.100000,
+      Full strobe seek time = 2.300000,
+      Add. write settling delay = 0.650000,
+      HPL seek equation values = [
+         300,
+         3.810000,
+         0.330000,
+         7.750000,
+         0.005900,
+         -1.000000
+      ],
+      First ten seek times = [
+         2.890000,
+         3.680000,
+         3.810000,
+         3.980000,
+         4.270000,
+         4.650000,
+         4.520000,
+         4.650000,
+         4.820000,
+         4.990000
+      ],
+      Head switch time = 0.890000,
+      Rotation speed (in rpms) = 5400,
+      Percent error in rpms = 0.000000
+   }
+} # end of HP_C2249A_model spec
+

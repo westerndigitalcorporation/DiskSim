@@ -1,0 +1,56 @@
+dm_disk DEC_RZ26_validate_model {
+   Number of data surfaces = 14,
+   Number of cylinders = 2599,
+   Block count = 2050860,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 3,
+      Rangesize for sparing = 1,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 2598,
+            Blocks per track = 58,
+            Offset of first block = 0,
+            Empty space at zone front = 23142,
+            Skew for track switch = 7,
+            Skew for cylinder switch = 25,
+            Number of spares = 1,
+            slips = [],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = extracted,
+      Single cylinder seek time = 0.200000,
+      Full seek curve = dec_rz26_validate.seek,
+      Full strobe seek time = 2.300000,
+      Add. write settling delay = -0.483000, 
+      HPL seek equation values = [
+         300,
+         3.750000,
+         0.330000,
+         7.690000,
+         0.005900,
+         -1.000000
+      ],
+#      First ten seek times = [
+#         2.630000,
+#         3.420000,
+#         3.550000,
+#         3.720000,
+#         4.010000,
+#         4.390000,
+#         4.260000,
+#         4.390000,
+#         4.560000,
+#         4.730000
+#      ],
+      Head switch time = 0.865000,
+      Rotation speed (in rpms) = 5360,
+      Percent error in rpms = 0.000000
+   }
+} # end of DEC_RZ26_validate_model spec
+

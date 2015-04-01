@@ -1,0 +1,329 @@
+DiskSim Outline
+
+Note: Go read the users manual and the appendices before reading this
+document. The material in those docs will not be repeated here. This
+document is intended for people who want to understand the code
+internals. If you don't understand what functionality the code is
+implementing, then you won't understand the code or this description
+of how it is implemented.
+
+Information stored inside of the disk modules
+
+When a request enters the disk module, it is a ioreq_event containing
+basic information about the request. Once inside the module it is
+converted to the structure below in order to keep track of activity in
+the simulated disk.
+
+      seg -----> diskreqlist (linked list)
+       |             |
+       v             v
+     access      ioreqlist
+       |         (original, unmodified request)
+       v
+     bcount
+
+access = (copy of) active request on this segment, it's arguments may
+be changed.
+
+access->bcount = does not mean block count, see the comments in
+	disksim_diskctlr.c:disk_buffer_sector_done().
+
+diskreqlist requests are stored in ascending block order.
+
+Event based System
+
+There are various types of events: timer, io, etc.. All events are
+stored in a global queue in time order. Time jumps to the next event
+time when the current one completes.
+
+The disk module is woken up by events from io_event_arrive() and the
+bus module. disk_event_arrive() fields all events and takes
+appropriate action. Events are passed down to io_event_arrive from the
+global event handler. addtointq() and removefromintq() are used to
+access the global queue.
+
+Memory management
+
+Functions dealing with extraq are for memory management.
+
+Nothing (well, as little as possible) is dynamically allocated. Memory
+is reserved when disksim starts. A pool of event structures is
+maintained by disksim. To create a new event, call getfromextraq(), to
+free up an event call addtoextraq(). If you want a disk event,
+typecast the return event struct pointer from getfromextraq to a
+disk_event structure pointer.
+
+Event Flow in Disk module
+
+Below are common paths of function calls taken when the disk module is
+accessed. Each arrow represents a different path. Stacked functions
+within a given path are executed in order. Not all paths are listed,
+only the more common ones which benefit from explanation. An event is
+not a function call, but it is crucial enough to how the simulator
+works that the event submissions are listed here. The submitted event
+is the access member of the structure described above, assuming that a
+segment has been set.
+
+disk_event_arrive
+    `-> disk_request_arrive
+             `-> disk_send_event_up_path
+                 disk_active_read/write
+                   `-> (various cases exist, depending on whether
+                            another request is active and the disk
+                            parameters, see the code for detailed
+                            comments) disk_check_hda
+                               `-> disk_initiate_seek
+    `->   disk_buffer_seekdone
+             `->   (DISK_BUFFER_SECTOR_DONE event)
+    `->   disk_buffer_sector_done
+             `->   disk_buffer_request_complete
+                   (DISK_BUFFER_SECTOR_DONE event)
+             `->   disk_buffer_request_complete
+                   disk_initiate_seek
+             `->   disk_buffer_request_complete
+                   (DISK_DATA_TRANSFER_COMPLETE event)
+
+Brief Explanation of Functions:
+
+disk_event_arrive:
+
+All disk events enter the disk module through this function. The
+proper function for the given event is called.
+
+disk_request_arrive:
+
+Sets up structure described above. Since this is not always possible,
+parts may set up and given information about where the other parts are
+so that it can be completed later. Most commonly a segment cannot be
+set. In this case, the ioreq_event which will become access has it's
+tmpptrs set to point to the disk and the diskreq.
+
+Adds request to disk queue.
+
+Finds appropriate cache segment for request (or determines that none
+are currently available.)  Adds processing delay if the request can be
+serviced right away.
+
+disk_activate_read/write:
+
+Figures out whether request can be serviced immediately, otherwise
+they will be activated when their turn comes up in the disk queue.
+Tries to put a more permanent claim on a cache segment, if possible.
+
+disk_check_hda:
+
+Big, ugly function that I never really touched.  Can also be called
+from an ongoing request, seems to duplicate some functionality from
+the functions above it, possibly for this reason.  If a request
+completes it may call this function, a new request is pulled off of
+the queue.
+
+disk_initiate_seek:
+
+Enters a DISK_BUFFER_SEEKDONE event for when the seek + rotational
+latency will finish.
+
+disk_buffer_sector_done:
+
+As mentioned above, the bcount member of the access request contains
+strange values. This function is somewhat difficult to understand
+because of this. Aside from that, this function is just generally
+complicated, I don't completely understand it.
+
+Checks to see if request is complete.
+
+If not complete, and this is the end of a track, seek to next track.
+If not the end of a track, enter sector_done event for next block in
+track.
+
+disk_buffer_request_complete:
+
+Returns true if either the request is done or if the watermark
+conditions are right.  
+
+If watermark conditions are right then it disconnects from the bus and
+possibly may issue a request_complete event. In this case the request
+is not actually complete and will continue after reconnecting to the
+bus.
+
+Modifications to disksim
+
+Added layout variable to disk structure
+Valid layouts are 0 (LAYOUT_NORMAL)
+
+LAYOUT_NORMAL preserves the old behavior of the simulator.
+
+Switch statements were added to almost every function in
+disksim_diskmap.c to accomodate different layouts. It should be easy
+to add new layouts now.
+
+There are several places in the code that make assumptions about the
+logical to physical mappings and vice versa. They should all be
+commented. They assume that the lowest numbered logical block on a
+track corresponds to the lowest numbered physical block. Ditto for the
+highest.  If you want to do a mapping that violates this, there are 3
+or 4 places in disksim_diskctlr.c that should be changed. Skew is
+currently determined by a seperate pbn_skew function that lives in
+disksim_diskmap.c.
+
+Extension of "synthio"
+
+The mechanism for feeding in traces was found to be lacking. I have
+extended the "synthio" module so it is no longer restricted to
+synthetic I/O. Let me explain. The trace input mechanism requires
+placing a timestamp on every event passed in. This can lead to
+problems if the modeled system runs slower then the one on which the
+traces were taken. Organization of the code makes it difficult to
+stamp events as time-critical or time-limited, etc.. Synthio has
+facilities for doing this. It also has a concept of multiple processes
+running at a high level, so theoretically disk events can be tagged in
+trace files as belonging to a particular process #. With the current
+state of the code it would be a bad idea to try to use this extension
+with more than one synthio generator. If a tracefile is given on the
+command line (other than "0") and the synthio flag is specified then
+all events will come from the named file.
+
+Removal of trackacc stuff
+
+disksim1.0 was released with code that was previously used to speed up
+the simulator but was not active or working at the time of release. It
+did so by reducing the number of events by handling entire tracks at a
+time, instead of doing things a sector at a time. I have removed this
+code and everything related to it as I feel the added complexity is
+not worth the gain.
+
+ATA bus, postgres and IPEAK traces
+
+Added support for the ascii format of the winbench traces (ATA bus) I
+was given, as well as the postgres traces from the PDL and Intel IPEAK
+traces. An explanation of how to add new trace formats is in the
+manual. It is very easy to do. The IPEAK structure was copied out of a
+header file in the IPEAK package and will probably only work on 32
+bit, little endian machines.
+
+The time fields in these traces is set for the synthio method of trace
+input, rather than the original method. Time is therefore a think-time
+since last request instead of an absolute timestamp. It is probably
+possible to clean this up so the traces can work either way.
+
+Port to windows
+
+Some bunch of disksim.* Files are now in the src dir. To compile using
+microsoft vc++, open the workspace file and build all. A few changes
+were made to disksim_global.h, look for #ifdef's with win32 in
+them. Windows is also missing the rand48 family of function
+calls. disksim_rand48.[ch] contains versions of these calls that have
+been ripped from the gnu libc. DO NOT REDISTRIBUTE THIS PACKAGE with
+those files. syssim will not be built under windows as it is still
+missing the lrand48 call, which I didn't bother to rip with the
+others.
+
+Parsing updates
+
+The disk and logorg parsing and override functions have been partially
+ripped apart. Almost all of the safety checking and calculations have
+been moved into postpass functions. Postpass functions are called
+after all parsing of parameter files and command line has been
+completed for all modules. Overriding parameters is now much cleaner
+and safety checks are performed on these overrides. The same should be
+done for all other parsing functions. Many more things can now be
+overridden as well (in theory, I have not added all the parameters
+with which it is possible to do this.) Several of the disk geometry
+numbers that are spit into the output file are now incorrect, though,
+because they are printed before the calculation takes place.
+
+Extra tidbits
+
+In the valid dir there are a few new files. Graphall and grapher will
+use the information in par.graph and the plots dir to generate a few
+graphs, assuming you have perl and gnuplot installed. Graphall is what
+you want to run. It will do some runs using disksim and then call
+grapher to plot the results. Postscript files will appear in the plots
+dir. New directories will be created under valid to store data from
+the runs, as well as a bunch of files in plots with names beginning
+with "foo-". These and the perlplot file and all the files beginning
+with "out" can be safely deleted.  Some exit() calls were changed to
+assert(0) calls. Forces the program to dump core. Convenient for
+debugging purposes.  Disk models for an Eclipse and a Trident drive
+have been added to the diskspecs file. Cache management for a real
+Eclipse drive cannot be accurately modeled by disksim, since the
+Eclipse uses dynamically sized cache segments. I have used what seemed
+to be a reasonable approximation. If updating, keep in mind that the
+Eclipse has an internal queue of 24 commands (lazy writes and one
+read, it's an ATA drive.) I cannot comment much on the Trident model
+since I did not create the model and it didn't work in the one or two
+tests I tried to run using it.
+
+Disk modules
+
+The modules listed below are the ones which implement the disk model.
+Most of the complexity seems to be in disksim_diskctlr; that seems to
+be where nearly all of the disk event handling resides.  The other
+modules provide routines which are called from diskctlr, or perhaps
+other modules.
+
+disksim_disk
+
+Routines to initialize the disk section and print statistics. IE,
+parsing parameters from a specfile or command line, outputting
+accumulated statistics to the output file.
+
+disksim_diskcache
+
+Have to look more closely at this one.
+
+disksim_diskctlr
+
+The main entry point is disk_event_arrive, called by disksim_bus and
+disksim_iosim. This submodule does all the thinking, other modules
+provide very simple interfaces that make this modules job easier. Zero
+latency reads, sector remapping, prefetching, scheduling, etc. are all
+handled in here.
+
+disksim_diskmap
+
+Handles mappings from LBNs (Logical Block Numbers) to PBNs (Physical
+Block Numbers) and vice versa. Takes into account a few sparing and
+layout schemes.  disksim_diskmech
+
+Doesn't take into account ZLR/ZLW.  It does very little, in
+fact. Since the events are on a sector-by-sector basis, all this
+module does is provide lengths of time for seeks and
+transfers. Occasionally it will set up a few variables for a calling
+function as well.
+
+
+* * * * * * * * * * * * * * Other modules
+
+Disksim_bus
+
+Passes events between compontents, notably disk and controller.
+
+Known Bugs/Brokenness/etc.
+
+Some of these items are mentioned elsewhere, but I want to have all of
+these listed together as well.
+
+LAYOUT_SERPENTINE (layout 3) is currently non-functional. Serpentine
+layout has only hooks without any code whatsoever.
+
+Trace formats that I have implemented do not set the time field
+properly for normal trace input. See the comments under the traces
+heading for more details.
+
+I could not get the trident disk model to work. It seems that after a
+few requests, one would simply not report completion, causing the
+synthio generator to idle for more than 50 seconds, thus ending the
+simulation.
+
+Several pieces of information about disk geometry in the output may
+appear to be wrong. This is a result of the the updated parsing. See
+comments under that heading for more details.
+
+Future
+
+Add ability to turn on debug statements (preferrably at run-time, but
+at least at build-time) on a component-by-component basis.  (Currently
+one must uncomment individual fprintf statements.)  Maybe parameters
+in the parv file (like the PRINTED I/O SUBSYSTEM STATISTICS section)
+would be a good method.

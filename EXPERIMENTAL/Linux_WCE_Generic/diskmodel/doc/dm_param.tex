@@ -1,0 +1,138 @@
+
+\subsection{Model Configuration}
+Diskmodel uses libparam to input the following blocks of parameter data:
+
+\begin{verbatim}
+dm_disk
+dm_layout_g1
+dm_layout_g1_zone
+dm_mech_g1
+dm_layout_g2
+dm_layout_g2_zone
+dm_layout_g4
+\end{verbatim}
+
+\subsubsection{dm\_disk}
+
+The outer \texttt{dm\_disk} block contains the top-level parameters
+which are used to fill in the \texttt{dm\_disk\_if} structure.  The
+only valid value for ``Layout Model'' is a \texttt{dm\_layout\_g1}
+block and for ``Mechanical Model,'' a \texttt{dm\_mech\_g1} block.\\
+
+\input{dm_disk_param.tex}
+
+\subsubsection{G1 Layout}
+% \subsubsection{dm\_layout\_g1}
+
+The \texttt{dm\_layout\_g1} block provides parameters for a first
+generation (g1) layout model.\\
+
+\input{dm_layout_g1_param.tex}
+
+The \texttt{Zones} parameter is a list of zone blocks each of which
+contains the following fields:\\
+
+\input{dm_layout_g1_zone_param.tex}
+
+\subsubsection{G1 Mechanics}
+%\subsubsection{dm\_mech\_g1}
+
+The \texttt{dm\_mech\_g1} block provides parameters for a first
+generation (g1) mechanical model.\\
+
+\input{dm_mech_g1_param.tex}
+
+% -----------------------------------------------
+% G2 Layout stuff
+
+\subsubsection{G2 Layout}
+% \subsubsection{dm\_layout\_g2}
+
+The \texttt{dm\_layout\_g2} block provides parameters for a second
+generation (g2) layout model.\\
+
+\input{dm_layout_g2_param.tex}
+
+The \texttt{Zones} parameter is a list of zone blocks each of which
+contains the following fields:\\
+
+\input{dm_layout_g2_zone_param.tex}
+
+% -----------------------------------------------
+% G4 Layout stuff
+
+\subsubsection{G4 Layout}
+% \subsubsection{dm\_layout\_g4}
+
+The \texttt{dm\_layout\_g4} block provides parameters for a fourth
+generation (g4) layout model.\\
+
+\input{dm_layout_g4_param.tex}
+
+\subsection{Seek Equation Definitions}
+
+
+\subsubsection{Lee's Seek Equation}
+\label{seek.lee}
+
+\begin{math}
+seekTime(x) = \left\{ \begin{array} {r@{\quad:\quad}l}
+              0 & if x = 0 \\
+              a\sqrt{x-1} + b(x-1) + c & if x > 0
+              \end{array} \right., \mbox{where} \\
+\\
+\indent
+x \quad\mbox{is the seek distance in cylinders,} \\
+\indent
+a = (-10 minSeek + 15 avgSeek - 5 maxSeek) / (3 \sqrt{numCyl}), \\
+\indent
+b = (7 minSeek - 15 avgSeek + 8 maxSeek) / (3 numCyl), \mbox{and}\\
+\indent
+c = minSeek.
+\end{math}\\
+
+
+\subsubsection{The HPL Seek Equation}
+\label{seek.hpl}
+
+\begin{tabular}{cc}
+Seek distance     & Seek time \\ \hline
+1 cylinder        & $V_6$ \\
+$<$$V_1$ cylinders  & $V_2$ + $V_3$ * $\sqrt{dist}$ \\
+$>=$$V_1$ cylinders & $V_4$ + $V_5$ * dist \\
+\end{tabular}
+, where {\it dist} is the seek distance in cylinders.
+\newline
+If $V_6 == -1$, single-cylinder seeks are computed using the second equation.
+$V_1$ is specified in cylinders, and $V_2$ through $V_6$ are specified in 
+milliseconds.
+
+$V_1$ must be a non-negative integer, $V_2 \ldots V_5$ must be
+non-negative floats and $V_6$ must be either a non-negative float or
+$-1$.\\
+
+
+\noindent\textbf{Format of an extracted seek curve}
+\label{seek.extract}
+
+An extracted seek file contains a number of (seek-time,seek-distance)
+data points.
+The format of such a file is very simple: the first line is
+\[\texttt{Seek distances measured: <n>}\]
+where \texttt{<n>} is the number of seek distances provided in the
+curve.  This line is followed by \texttt{<n>} lines of the form
+\texttt{<distance>, <time>} where \texttt{<distance>} is the seek
+distance measured in cylinders, and \texttt{<time>} is the amount of
+time the seek took in milliseconds. e.g.
+
+\begin{verbatim}
+Seek distances measured: 4
+1,  1.2
+2,  1.5
+5,  5
+10, 9.2
+\end{verbatim}
+
+
+
+

@@ -1,0 +1,248 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE cachemem
+HEADER \#include "disksim_cachemem.h"
+RESTYPE struct cache_mem *
+PROTO struct cache_if *disksim_cachemem_loadparams(struct lp_block *b);
+
+# 512B blocks
+PARAM Cache size		I	1
+TEST i >= 0
+INIT if(result->map) { fprintf(stderr, "*** ignoring repeat cache size definition.\n"); } 
+INIT else { int c2; result->size = i; result->mapmask = 0; result->map = (cache_mapentry *)DISKSIM_malloc((result->mapmask+1)*sizeof(cache_mapentry)); result->map[0].freelist = NULL; for (c2=0; c2<CACHE_MAXSEGMENTS; c2++) { result->map[0].maxactive[c2] = result->size; result->map[0].lru[c2] = NULL; } }
+
+This specifies the total size of the cache in blocks.
+
+
+PARAM SLRU segments		LIST	0 
+INIT cachemem_setup_segs(result, l);
+
+This is a list of segment sizes in blocks for the segmented-LRU algorithm
+\cite{Karedla94} if it is specified as the cache replacement algorithm
+(see below).
+
+PARAM Line size			I	1 
+TEST i >= 0
+INIT result->linesize = i;
+
+This specifies the cache line size (i.e.,~the unit of cache space
+allocation/replacement).
+
+
+PARAM Bit granularity		I	1 
+TEST i > 0
+INIT result->atomsperbit = i;
+
+This specifies the number of blocks covered by each ``present'' bit and
+each ``dirty'' bit.  The value must divide the cache line size evenly.
+Higher values (i.e.,~coarser granularities) can result in increased
+numbers of installation reads (i.e.,~fill requests required to
+complete partial-line writes \cite{Otoole94}).
+
+PARAM Lock granularity		I	1 
+TEST i > 0
+INIT result->lockgran = i;
+
+This specifies the number of blocks covered by each lock.  The value must
+divide the cache line size evenly.  Higher values (i.e.,~coarser
+granularities) can lead to increased lock contention.
+
+PARAM Shared read locks		I	1 
+TEST RANGE(i,0,1)
+INIT result->sharedreadlocks = i;
+
+This specifies whether or not read locks are sharable.  If false~(0), read
+locks are exclusive.
+
+
+PARAM Max request size		I	1 
+TEST i >= 0
+INIT result->maxreqsize = i;
+
+This specifies the maximum request size to be served by the cache.  This
+value does not actually affect the simulated cache's behavior.
+Rather, higher-level system components (e.g.,~the device driver in
+DiskSim) acquire this information at initialization time and break up
+larger requests to accommodate it.  0~indicates that there is no
+maximum request size.
+
+PARAM Replacement policy	I	1 
+TEST RANGE(i,CACHE_REPLACE_MIN,CACHE_REPLACE_MAX)
+INIT result->replacepolicy = i; 
+
+This specifies the line replacement policy.  
+
+1~indicates First-In-First-Out (FIFO).
+
+2~indicates segmented-LRU \cite{Karedla94}.
+
+3~indicates random replacement.
+
+4~indicates Last-In-First-Out (LIFO).
+
+PARAM Allocation policy		I	1 
+TEST RANGE(i,CACHE_ALLOCATE_MIN,CACHE_ALLOCATE_MAX)
+INIT result->allocatepolicy = i;
+
+This specifies the line allocation policy.  
+
+0~indicates that the cache replacement policy is strictly followed; if
+the selected line is dirty, the allocation waits for the required
+write-back request to complete.
+
+1~indicates that ``clean'' lines are considered for replacement prior
+to ``dirty'' lines (and background write-back requests are issued for
+each dirty line considered).
+
+PARAM Write scheme		I	1 
+TEST RANGE(i,CACHE_WRITE_MIN,CACHE_WRITE_MAX)
+INIT result->writescheme = i;
+
+This specifies the policy for handling write requests.  
+
+1~indicates that new data are always synchronously written to the
+backing store before indicating completion.
+
+2~indicates a write-through scheme where requests are immediately
+initiated for writing out the new data to the backing store. The
+original write requests are considered complete as soon as the new
+data is cached.
+
+3~indicates a write-back scheme where completions are reported
+immediately and dirty blocks are held in the cache for some time
+before being written out to the backing store.
+
+PARAM Flush policy		I	1 
+TEST RANGE(i,CACHE_FLUSH_MIN,CACHE_FLUSH_MAX)
+INIT result->flush_policy = i;
+
+This specifies the policy for flushing dirty blocks to the backing store
+(assuming a write-back scheme for handling write requests).
+
+0~indicates that dirty blocks are written back ``on demand''
+(i.e.,~only when the allocation/replacement policy needs to reclaim
+them).
+
+1~indicates write-back requests are periodically initiated for all
+dirty cache blocks.
+
+
+PARAM Flush period	D	1 
+TEST d >= 0 
+INIT result->flush_period = d;
+
+This specifies the time between periodic write-backs of all dirty cache
+blocks (assuming a periodic flush policy).
+
+PARAM Flush idle delay		D	1 
+TEST (d >= 0) || (d == -1.0)
+INIT result->flush_idledelay = d;
+
+This specifies the amount of contiguous idle time that must be observed
+before background write-backs of dirty cache blocks are initiated.
+Any front-end request processing visible to the cache resets the idle
+timer.  $-1.0$ indicates that idle background flushing is disabled.
+
+
+PARAM Flush max line cluster	I	1 
+TEST i >= 0
+INIT result->flush_maxlinecluster = i;
+
+This specifies the maximum number of cache lines that can be combined into
+a single write-back request (assuming ``gather'' write support).
+
+PARAM Read prefetch type		I	1 
+TEST RANGE(i,CACHE_PREFETCH_MIN,CACHE_PREFETCH_MAX)
+INIT result->read_prefetch_type = i;
+
+This specifies the prefetch policy for handling read requests.
+Prefetching is currently limited to extending requested fill accesses
+to include other portions of requested lines.  
+
+0~indicates that prefetching is disabled.
+
+1~indicates that unrequested data at the start of a requested line are
+prefetched.
+
+2~indicates that unrequested data at the end of a requested line are
+prefetched.  
+
+3~indicates that any unrequested data in a requested line are
+prefetched (i.e.,~full line fills only).
+
+
+PARAM Write prefetch type		I	1 
+TEST RANGE(i,CACHE_PREFETCH_MIN,CACHE_PREFETCH_MAX)
+INIT result->writefill_prefetch_type = i;
+
+This specifies the prefetch policy for handling installation reads (caused
+by write requests).  Prefetching is currently limited to extending the
+requested fill accesses to include other portions of the requested
+lines.  
+
+0~indicates that prefetching is disabled.  
+
+1~indicates that unrequested data at the start of a requested line are
+prefetched.
+
+
+2~indicates that unrequested data at the end of a requested line are
+prefetched.  
+
+3~indicates that any unrequested data in a requested line are
+prefetched (i.e.,~full line fills only).
+
+PARAM Line-by-line fetches	I	1 
+TEST RANGE(i,0,1)
+INIT result->read_line_by_line = i; result->write_line_by_line = i;
+
+This specifies whether or not every requested cache line results in a
+separate fill request.  If false~(0), multi-line fill requests can be
+generated when appropriate.
+
+PARAM Max gather			I	1 
+TEST i >= 0
+INIT result->maxscatgath = i;
+
+This specifies the maximum number of non-contiguous cache lines (in terms
+of their memory addresses) 
+%physically contiguous (but logically non-contiguous) cache lines 
+that can be combined into a single disk request, assuming that they
+correspond to contiguous disk addresses.  (DiskSim currently treats
+every pair of cache lines as non-contiguous in memory.)  
+%Therefore,
+%this value specifies the maximum number of cache lines that can be filled
+%or cleaned by a single backing store access.)
+0~indicates that any number of lines can be combined into a single
+request (i.e.,~there is no maximum).
+

@@ -1,0 +1,4179 @@
+diff -uNr disksim_orig/disksim-4.0/.paths disksim-src_64bit/.paths
+--- disksim_orig/disksim-4.0/.paths	2007-03-07 17:29:22.000000000 -0800
++++ disksim-src_64bit/.paths	2010-06-09 14:04:41.000000000 -0700
+@@ -1,40 +1,40 @@
+ # libdisksim 
+-export LIBDISKSIM_PREFIX=
++export LIBDISKSIM_PREFIX=../
+ export LIBDISKSIM_INCL=$(LIBDISKSIM_PREFIX)/include
+ export LIBDISKSIM_CFLAGS=-I$(LIBDISKSIM_INCL)
+ export LIBDISKSIM_LDPATH=$(LIBDISKSIM_PREFIX)/lib
+ export LIBDISKSIM_LDFLAGS=-L$(LIBDISKSIM_LDPATH) -ldisksim
+ 
+ # disksim internals (for memsmodel, etc)
+-export DISKSIM_PREFIX=src/
++export DISKSIM_PREFIX=../src/
+ export DISKSIM_INCL=$(DISKSIM_PREFIX)/
+ export DISKSIM_CFLAGS=-I$(DISKSIM_INCL)
+ export DISKSIM_LDPATH=$(DISKSIM_PREFIX)/
+ export DISKSIM_LDFLAGS=-L$(DISKSIM_LDPATH) -ldisksim
+ 
+ # path to diskmodel
+-export DISKMODEL_PREFIX=diskmodel
++export DISKMODEL_PREFIX=../diskmodel
+ export DISKMODEL_INCL=$(DISKMODEL_PREFIX)/include
+ export DISKMODEL_CFLAGS=-I$(DISKMODEL_INCL)
+ export DISKMODEL_LDPATH=$(DISKMODEL_PREFIX)/lib
+ export DISKMODEL_LDFLAGS=-L$(DISKMODEL_LDPATH) -ldiskmodel
+ 
+ # path to libparam
+-export LIBPARAM_PREFIX=libparam
++export LIBPARAM_PREFIX=../libparam
+ export LIBPARAM_INCL=$(LIBPARAM_PREFIX)/include
+ export LIBPARAM_CFLAGS=-I$(LIBPARAM_INCL)
+ export LIBPARAM_LDPATH=$(LIBPARAM_PREFIX)/lib
+ export LIBPARAM_LDFLAGS=-L$(LIBPARAM_LDPATH) -lparam
+ 
+ # libtrace
+-export LIBDDBG_PREFIX=libddbg
++export LIBDDBG_PREFIX=../libddbg
+ export LIBDDBG_INCL=$(LIBDDBG_PREFIX)/include
+ export LIBDDBG_CFLAGS=-I$(LIBDDBG_INCL)
+ export LIBDDBG_LDPATH=$(LIBDDBG_PREFIX)/lib
+ export LIBDDBG_LDFLAGS=-L$(LIBDDBG_LDPATH) -lddbg
+ 
+ # path to memsmodel
+-export MEMSMODEL_PREFIX=memsmodel
++export MEMSMODEL_PREFIX=../memsmodel
+ export MEMSMODEL_INCL=$(MEMSMODEL_PREFIX)/include
+ export MEMSMODEL_CFLAGS=-I$(MEMSMODEL_INCL)
+ export MEMSMODEL_LDPATH=$(MEMSMODEL_PREFIX)/lib
+diff -uNr disksim_orig/disksim-4.0/.paths.in disksim-src_64bit/.paths.in
+--- disksim_orig/disksim-4.0/.paths.in	2003-01-09 11:47:45.000000000 -0800
++++ disksim-src_64bit/.paths.in	2010-06-09 14:04:41.000000000 -0700
+@@ -1,21 +1,3 @@
+ 
+-# path to diskmodel
+-export DISKMODEL_PREFIX=
+-export DISKMODEL_INCL=$(DISKMODEL_PREFIX)/include
+-export DISKMODEL_CFLAGS=-I$(DISKMODEL_INCL)
+-export DISKMODEL_LDPATH=$(DISKMODEL_PREFIX)/lib
+-export DISKMODEL_LDFLAGS=-L$(DISKMODEL_LDPATH) -ldiskmodel
+-
+-# path to libparam
+-export LIBPARAM_PREFIX=
+-export LIBPARAM_INCL=$(LIBPARAM_PREFIX)/include
+-export LIBPARAM_CFLAGS=-I$(LIBPARAM_INCL)
+-export LIBPARAM_LDPATH=$(LIBPARAM_PREFIX)/lib
+-export LIBPARAM_LDFLAGS=-L$(LIBPARAM_LDPATH) -lparam
+-
+-# libtrace
+ export LIBDDBG_PREFIX=
+ export LIBDDBG_INCL=$(LIBDDBG_PREFIX)/include
+-export LIBDDBG_CFLAGS=-I$(LIBDDBG_INCL)
+-export LIBDDBG_LDPATH=$(LIBDDBG_PREFIX)/lib
+-export LIBDDBG_LDFLAGS=-L$(LIBDDBG_LDPATH) -lddbg
+diff -uNr disksim_orig/disksim-4.0/diskmodel/Makefile disksim-src_64bit/diskmodel/Makefile
+--- disksim_orig/disksim-4.0/diskmodel/Makefile	2008-05-11 15:09:28.000000000 -0700
++++ disksim-src_64bit/diskmodel/Makefile	2010-06-09 14:04:41.000000000 -0700
+@@ -80,13 +80,13 @@
+ libdiskmodel.a:	$(DM_OBJ) $(DM_USERSPACE_OBJ) 
+ 	$(MAKE) -C modules
+ 	@echo "Linking libdiskmodel.a $(DM_USERSPACE_OBJ)"
+-	ar cru $@ $(DM_OBJ) $(DM_USERSPACE_OBJ)
++	ar crus $@ $(DM_OBJ) $(DM_USERSPACE_OBJ)
+ 	mkdir -p lib
+ 	$(CP) libdiskmodel.a lib
+ 
+ # for kernel
+ #libdiskmodel.a: modules $(DM_OBJ)
+-#	ar cru $@ $(DM_OBJ)
++#	ar crus $@ $(DM_OBJ)
+ 
+ clean:
+ 	rm -f *.o
+diff -uNr disksim_orig/disksim-4.0/diskmodel/layout_g1.c disksim-src_64bit/diskmodel/layout_g1.c
+--- disksim_orig/disksim-4.0/diskmodel/layout_g1.c	2008-05-11 15:09:28.000000000 -0700
++++ disksim-src_64bit/diskmodel/layout_g1.c	2010-06-09 14:04:41.000000000 -0700
+@@ -181,7 +181,7 @@
+   struct dm_layout_g1_band *b;
+ 
+   while(!(b = find_band_pbn(l, &p2)) && p2.cyl >= 0) { p2.cyl--; }
+-  ddbg_assert(b);
++  ddbg_assert_ptr(b);
+ 
+ 
+   return b->blkspertrack;
+@@ -489,7 +489,7 @@
+   p = &pbn;
+ 
+ 
+-  ddbg_assert(b);
++  ddbg_assert_ptr(b);
+   ddbg_assert(p->cyl >= 0);
+   ddbg_assert(p->cyl >= b->startcyl);
+   ddbg_assert(p->cyl < d->dm_cyls);
+@@ -528,7 +528,7 @@
+   struct dm_pbn pbn = *p;
+   p = &pbn;
+ 
+-  ddbg_assert(b);
++  ddbg_assert_ptr(b);
+   ddbg_assert(p->cyl >= 0);
+   ddbg_assert(p->cyl >= b->startcyl);
+   ddbg_assert(p->cyl < d->dm_cyls);
+@@ -699,7 +699,7 @@
+   p = &pbn;
+ 
+ 
+-  ddbg_assert(b);
++  ddbg_assert_ptr(b);
+   ddbg_assert(p->cyl >= 0);
+   ddbg_assert(p->cyl >= b->startcyl);
+   ddbg_assert(p->cyl < d->dm_cyls);
+@@ -776,7 +776,7 @@
+   p = &pbn;
+ 
+ 
+-  ddbg_assert(b);
++  ddbg_assert_ptr(b);
+   ddbg_assert(p->cyl >= 0);
+   ddbg_assert(p->cyl >= b->startcyl);
+   ddbg_assert(p->cyl < d->dm_cyls);
+@@ -848,7 +848,7 @@
+   struct dm_pbn pbn = *p;
+   p = &pbn;
+ 
+-  ddbg_assert(b);
++  ddbg_assert_ptr(b);
+   ddbg_assert(p->cyl >= 0);
+   ddbg_assert(p->cyl >= b->startcyl);
+   ddbg_assert(p->cyl < d->dm_cyls);
+diff -uNr disksim_orig/disksim-4.0/diskmodel/layout_g2.c disksim-src_64bit/diskmodel/layout_g2.c
+--- disksim_orig/disksim-4.0/diskmodel/layout_g2.c	2007-01-08 20:58:48.000000000 -0800
++++ disksim-src_64bit/diskmodel/layout_g2.c	2010-06-09 14:04:41.000000000 -0700
+@@ -248,13 +248,13 @@
+ 
+   // return st for the nearest (lower) zone if this cyl is unmapped
+   while(!(z = find_zone_pbn(d, &p2)) && p2.cyl >= 0) { p2.cyl--; }
+-  ddbg_assert(z);
++  ddbg_assert_ptr(z);
+ 
+   return z->st;
+ }
+ 
+ 
+-static void
++static dm_ptol_result_t
+ track_boundaries(struct dm_disk_if *d,
+ 		 struct dm_pbn *p,
+ 		 int *l1,
+@@ -283,6 +283,8 @@
+       *l2 = d->layout->dm_translate_ptol(d, &p2, remapsector);
+     } while((*l2 == DM_NX) && p2.sector);
+   }
++
++  return DM_OK;
+ }
+ 
+ static dm_angle_t
+diff -uNr disksim_orig/disksim-4.0/diskmodel/layout_g4.c disksim-src_64bit/diskmodel/layout_g4.c
+--- disksim_orig/disksim-4.0/diskmodel/layout_g4.c	2008-05-11 09:52:53.000000000 -0700
++++ disksim-src_64bit/diskmodel/layout_g4.c	2010-06-09 14:04:41.000000000 -0700
+@@ -321,6 +321,7 @@
+ 
+  out_err:
+   free(acc);
++  acc = NULL;
+   return 0;
+ }
+ 
+@@ -419,6 +420,7 @@
+       }
+     }
+     free(p);
++    p = NULL;
+   }
+ 
+   return DM_OK;
+@@ -491,6 +493,7 @@
+     }
+ 
+     free(path);
++    path = NULL;
+   }
+ 
+   return result;
+@@ -513,6 +516,7 @@
+     ddbg_assert(n->type == TRACK);
+     rv = n->n.t->spt;
+     free(p);
++    p = NULL;
+   }
+   else {
+     rv = -1;
+@@ -638,6 +642,7 @@
+       ddbg_assert(n->type == TRACK);
+       result = n->n.t->sw;
+       free(p);
++      p = NULL;
+     }
+   }
+ 
+@@ -689,6 +694,7 @@
+   }
+ 
+   free(p);
++  p = NULL;
+   return result;
+ }
+ 
+diff -uNr disksim_orig/disksim-4.0/diskmodel/layout_g4_tools/g4_skews.c disksim-src_64bit/diskmodel/layout_g4_tools/g4_skews.c
+--- disksim_orig/disksim-4.0/diskmodel/layout_g4_tools/g4_skews.c	2007-05-21 16:01:49.000000000 -0700
++++ disksim-src_64bit/diskmodel/layout_g4_tools/g4_skews.c	2010-06-09 14:04:41.000000000 -0700
+@@ -157,6 +157,8 @@
+ 
+     free(r1);
+     free(r2);
++    r1 = NULL;
++    r2 = NULL;
+ 
+     //    printf("%d -> %d : %f\n", l1, l2, ds->compl[1] - ds->compl[0]);
+ 
+@@ -354,6 +356,8 @@
+ 
+   free(err);
+   free(x);
++  err = NULL;
++  x = NULL;
+ 
+   return b;
+ }
+@@ -537,6 +541,11 @@
+   free(li);
+   free(tracetimes);
+   free(times);
++
++  li = NULL;
++  tracetimes = NULL;
++  times = NULL;
++
+   return;
+ }
+ 
+@@ -688,9 +697,11 @@
+   }
+ 
+   free(ds);
++  ds = NULL;
+ 
+   fclose(t->fp);
+   free(t);
++  t = NULL;
+ 
+   return 0;
+ }
+diff -uNr disksim_orig/disksim-4.0/libddbg/Makefile disksim-src_64bit/libddbg/Makefile
+--- disksim_orig/disksim-4.0/libddbg/Makefile	2008-05-11 15:09:29.000000000 -0700
++++ disksim-src_64bit/libddbg/Makefile	2010-06-09 14:04:42.000000000 -0700
+@@ -50,7 +50,7 @@
+ 	rm -f *~
+ 
+ libddbg.a: $(LT_OBJ)
+-	ar cru $@ $^
++	ar crus $@ $^
+ 
+ 
+ #test: test.c libddbg.a libddbg.h
+diff -uNr disksim_orig/disksim-4.0/libddbg/libddbg.h disksim-src_64bit/libddbg/libddbg.h
+--- disksim_orig/disksim-4.0/libddbg/libddbg.h	2008-05-11 15:09:29.000000000 -0700
++++ disksim-src_64bit/libddbg/libddbg.h	2010-06-09 14:04:42.000000000 -0700
+@@ -141,6 +141,16 @@
+ #define ddbg_assert2(x,y)
+ #endif
+ 
++/* like assert() modulo above */
++#ifndef _DDBG_DISABLE_ASSERTIONS
++#define ddbg_assert_ptr(cond) do { void* _ltassert_cond = (void*)(cond); \
++if(!_ltassert_cond) { \
++ddbg_assert_msg(__FILE__, __LINE__, #cond, __func__, ""); \
++ddbg_assert_fail(__FILE__, __LINE__, #cond, __func__, ""); \
++} } while(0)
++#else
++#define ddbg_assert_ptr(cond) 
++#endif
+ 
+ /* invoke by e.g. 
+  *   ddbg_assert3(cond, ("foo %d", 3));
+diff -uNr disksim_orig/disksim-4.0/libparam/Makefile disksim-src_64bit/libparam/Makefile
+--- disksim_orig/disksim-4.0/libparam/Makefile	2008-05-11 15:09:29.000000000 -0700
++++ disksim-src_64bit/libparam/Makefile	2010-06-09 14:04:42.000000000 -0700
+@@ -53,7 +53,7 @@
+ LIBPARAM_OBJ = $(LIBPARAM_SRC:.c=.o)
+ 
+ libparam.a: $(LIBPARAM_OBJ)
+-	ar cru $@ $^ 
++	ar crus $@ $^ 
+ 
+ 
+ dump_tlts: dump_tlts.o libparam.a
+diff -uNr disksim_orig/disksim-4.0/libparam/libparam.h disksim-src_64bit/libparam/libparam.h
+--- disksim_orig/disksim-4.0/libparam/libparam.h	2008-05-11 15:09:29.000000000 -0700
++++ disksim-src_64bit/libparam/libparam.h	2010-06-09 14:26:53.000000000 -0700
+@@ -167,8 +167,7 @@
+ };
+ 
+ 
+-
+-typedef int*(*lp_modloader_t)(struct lp_block *, int);
++typedef void*(*lp_modloader_t)(struct lp_block *, int*);
+ 
+ typedef void(*lp_paramloader_int)(void *, int);
+ typedef void(*lp_paramloader_double)(void *, double);
+@@ -278,9 +277,8 @@
+ extern int lp_searchpath_len;
+ extern int lp_lineno;
+ 
+-
+ int *
+-lp_override_inst(struct lp_block *b, 
++lp_override_inst(const struct lp_block *b, 
+ 	      char *cname, 
+ 	      lp_modloader_t loader,
+ 	      char **overrides,
+diff -uNr disksim_orig/disksim-4.0/libparam/libparam.y disksim-src_64bit/libparam/libparam.y
+--- disksim_orig/disksim-4.0/libparam/libparam.y	2008-05-16 14:04:35.000000000 -0700
++++ disksim-src_64bit/libparam/libparam.y	2010-06-09 14:52:36.000000000 -0700
+@@ -54,7 +54,7 @@
+ 
+ %union {
+   double d;
+-  int i;
++  long i;
+   char *s;
+ 
+   struct lp_block *b;
+@@ -115,7 +115,7 @@
+ ;
+ 
+ INST: INSTANTIATE LIST AS STRING {
+-  $$ = malloc(sizeof(struct lp_inst));
++  $$ = calloc(1, sizeof(struct lp_inst));
+   $$->source_file = lp_filename;
+   $$->l = $2;
+   $$->name = $4;
+@@ -124,7 +124,7 @@
+ TOPOSPEC: STRING STRING LIST {
+ /*    printf("topospec\n"); */
+ 
+-  $$.l = malloc(sizeof(struct lp_topospec));
++  $$.l = calloc(1, sizeof(struct lp_topospec));
+   $$.l->source_file = lp_filename;
+   $$.len = 1;
+   $$.l[0].type = $1;
+@@ -156,8 +156,7 @@
+ 
+ /*    printf("start of blockdef: %s\n", $2); */
+ 
+-  $$ = malloc(sizeof(struct lp_block));
+-  bzero($$, sizeof(struct lp_block));
++  $$ = calloc(1, sizeof(struct lp_block));
+   $$->source_file = lp_filename;
+ 
+   $$->type = lp_mod_name(lp_lookup_base_type($1,0));
+@@ -188,8 +187,7 @@
+ 
+ 
+ BLOCKVAL: STRING LBRACE EXPS RBRACE {
+-  $$ = malloc(sizeof(struct lp_block));
+-  bzero($$, sizeof(struct lp_block));
++  $$ = calloc(1, sizeof(struct lp_block));
+   $$->source_file = lp_filename;
+   $$->name = 0;
+   $$->params = $3.p;
+@@ -211,8 +209,7 @@
+ EXPS: { $$.p = 0; $$.plen = 0; }
+ | EXP { 
+ /*      printf("first exp\n");  */
+-  $$.p = malloc(8 * sizeof(int *)); 
+-  bzero($$.p, 8*sizeof(int *)); 
++  $$.p = calloc(1, 8 * sizeof(int *)); 
+   $$.plen = 8; 
+   $$.p[0] = $1;
+ }
+@@ -222,14 +219,13 @@
+ 
+ /*    printf("another exp\n");  */
+ 
+-  $$.p = malloc($1->values_len * sizeof(int *));
++  $$.p = calloc(1, $1->values_len * sizeof(int *));
+   $$.plen = $1->values_len;
+-  bzero($$.p, $1->values_len * (sizeof(int *)));
+ 
+   for(c = 0; c < $1->values_len; c++) {
+     if(!$1->values[c]) continue;
+     ddbg_assert($1->values[c]->t == S);
+-    tmp = malloc(sizeof(struct lp_param));
++    tmp = calloc(1, sizeof(struct lp_param));
+     tmp->name = $1->values[c]->v.s;
+     tmp->v = $3;
+     if(lp_add_param(&($$.p), &($$.plen), tmp)) YYABORT;
+@@ -407,14 +403,14 @@
+   $$->t = BLOCK;
+ }
+ | BLOCKDEF { 
+-  $$ = malloc(sizeof(struct lp_value));
++  $$ = calloc(1, sizeof(struct lp_value));
+   $$->source_file = lp_filename;
+   $$->v.b = $1;
+   $$->t = BLOCK;
+ }
+ | TOPOSPEC {
+ /*    printf("topospec value\n"); */
+-  $$ = malloc(sizeof(struct lp_value));
++  $$ = calloc(1, sizeof(struct lp_value));
+   $$->source_file = lp_filename;
+   $$->v.t.l = $1.l;
+   $$->v.t.len = $1.len;
+diff -uNr disksim_orig/disksim-4.0/libparam/myutil.c disksim-src_64bit/libparam/myutil.c
+--- disksim_orig/disksim-4.0/libparam/myutil.c	2008-05-11 15:09:29.000000000 -0700
++++ disksim-src_64bit/libparam/myutil.c	2010-06-09 14:04:42.000000000 -0700
+@@ -225,6 +225,7 @@
+   free(p->name);
+   destroy_value(p->v);
+   free(p);
++  p = NULL;
+ }
+ 
+ 
+@@ -236,6 +237,7 @@
+ 
+   free(l->values);
+   free(l);
++  l = NULL;
+ }
+ 
+ 
+@@ -265,6 +267,7 @@
+   }
+ 
+   free(v);
++  v = NULL;
+ }
+ 
+ 
+@@ -279,6 +282,7 @@
+   free(b->name);
+   free(b->params);
+   free(b);
++  b = NULL;
+ }
+ 
+ static void destroy_topospec(struct lp_topospec *t)
+@@ -286,6 +290,7 @@
+   free(t->type);
+   free(t->name);
+   destroy_list(t->l);
++  t = NULL;
+ }
+ 
+ 
+@@ -723,7 +728,7 @@
+   }
+   newlen = 2 * c * sizeof(struct lp_value *);
+   l->values = realloc(l->values, newlen);
+-  bzero(l->values + c, newlen / 2);
++  bzero(&(l->values[c]), newlen / 2);
+   l->values_len *= 2;
+ 
+  done:
+@@ -906,7 +911,7 @@
+ 
+     lp_typetbl = realloc(lp_typetbl, newlen * sizeof(int *));
+ 
+-    bzero(lp_typetbl + c, c * sizeof(int *));
++    bzero(&(lp_typetbl[c]), c * sizeof(int *));
+     lp_typetbl_len = newlen;
+   }
+   else return -1;
+@@ -942,7 +947,7 @@
+     /* didn't find a free slot -- double the array */
+     int newlen = 2 * (*plen) + 1;
+     (*b) = realloc((*b), newlen * sizeof(int *));
+-    bzero((int *)(*b) + *plen, ((*plen) + 1) * sizeof(int*));
++    bzero((int *)((*b)[*plen]), ((*plen) + 1) * sizeof(int*));
+     (*b)[(*plen)] = p;
+     *plen = newlen;
+   }
+@@ -982,8 +987,7 @@
+ 
+   for(c = 0; c < lp_max_mod; c++) {
+ 
+-    lp_typetbl[c] = malloc(sizeof(struct lp_subtype));
+-    bzero(lp_typetbl[c], sizeof(struct lp_subtype));
++    lp_typetbl[c] = calloc(1, sizeof(struct lp_subtype));
+     lp_typetbl[c]->sub = strdup(lp_modules[c]->name);
+   }
+ 
+@@ -1009,6 +1013,7 @@
+   }
+ 
+   free(lp_typetbl);
++  lp_typetbl = NULL;
+ }
+ 
+ 
+@@ -1355,6 +1360,7 @@
+   }
+ 
+   free(paramvec);
++  paramvec = NULL;
+ 
+   return 0; // ???
+ }
+diff -uNr disksim_orig/disksim-4.0/libparam/util.c disksim-src_64bit/libparam/util.c
+--- disksim_orig/disksim-4.0/libparam/util.c	2008-05-11 15:09:29.000000000 -0700
++++ disksim-src_64bit/libparam/util.c	2010-06-09 14:52:00.000000000 -0700
+@@ -152,7 +152,6 @@
+   result->source_file = source;
+   result->name = name;
+   result->v = v;
+-  
+ 
+   return result;
+ }
+@@ -225,6 +224,7 @@
+   free(p->name);
+   destroy_value(p->v);
+   free(p);
++  p = NULL;
+ }
+ 
+ 
+@@ -236,6 +236,7 @@
+ 
+   free(l->values);
+   free(l);
++  l = NULL;
+ }
+ 
+ 
+@@ -265,6 +266,7 @@
+   }
+ 
+   free(v);
++  v = NULL;
+ }
+ 
+ 
+@@ -279,6 +281,7 @@
+   free(b->name);
+   free(b->params);
+   free(b);
++  b = NULL;
+ }
+ 
+ static void destroy_topospec(struct lp_topospec *t)
+@@ -286,18 +289,19 @@
+   free(t->type);
+   free(t->name);
+   destroy_list(t->l);
++  t = NULL;
+ }
+ 
+ 
+-static struct lp_block *copy_block(struct lp_block *);
+-static struct lp_list *copy_list(struct lp_list *);
+-static struct lp_value *copy_value(struct lp_value *);
+-static struct lp_param *copy_param(struct lp_param *);
++static struct lp_block *copy_block(const struct lp_block *);
++static struct lp_list *copy_list(const struct lp_list *);
++static struct lp_value *copy_value(const struct lp_value *);
++static struct lp_param *copy_param(const struct lp_param *);
+ 
+-static struct lp_block *copy_block(struct lp_block *b)
++static struct lp_block *copy_block(const struct lp_block *b)
+ {
+   int c;
+-  struct lp_block *result = calloc(1, sizeof(*result));
++  struct lp_block *result = calloc(1, sizeof(struct lp_block));
+   memcpy(result, b, sizeof(struct lp_block));
+   result->params = calloc(b->params_len, sizeof(result->params[0]));
+ 
+@@ -315,7 +319,7 @@
+ }
+ 
+ 
+-static struct lp_list *copy_list(struct lp_list *l) {
++static struct lp_list *copy_list(const struct lp_list *l) {
+   int c;
+   struct lp_list *result = calloc(1, sizeof(*result));
+   memcpy(result, l, sizeof(struct lp_list));
+@@ -330,7 +334,7 @@
+ }
+ 
+ 
+-static struct lp_value *copy_value(struct lp_value *v) {
++static struct lp_value *copy_value(const struct lp_value *v) {
+   struct lp_value *result = calloc(1, sizeof(struct lp_value));
+   memcpy(result, v, sizeof(struct lp_value));
+   switch(v->t) {
+@@ -353,7 +357,7 @@
+   return result;
+ }
+ 
+-static struct lp_param *copy_param(struct lp_param *p) {
++static struct lp_param *copy_param(const struct lp_param *p) {
+   struct lp_param *result = calloc(1, sizeof(struct lp_param));
+   result->name = strdup(p->name);
+   result->v = copy_value(p->v);
+@@ -560,7 +564,6 @@
+   int c;
+   
+   /*      unparse_block(spec, outputfile); */
+-
+   for(c = 0; c < i->l->values_len; c++) {
+     if(!i->l->values[c]) continue;
+     
+@@ -602,7 +605,6 @@
+   // swap the name back
+   spec->name = nametmp;
+ 
+-
+   if(!obj) {
+     return 0;
+   }
+@@ -723,7 +725,7 @@
+   }
+   newlen = 2 * c * sizeof(struct lp_value *);
+   l->values = realloc(l->values, newlen);
+-  bzero(l->values + c, newlen / 2);
++  bzero(&(l->values[c]), newlen / 2);
+   l->values_len *= 2;
+ 
+  done:
+@@ -906,7 +908,7 @@
+ 
+     lp_typetbl = realloc(lp_typetbl, newlen * sizeof(int *));
+ 
+-    bzero(lp_typetbl + c, c * sizeof(int *));
++    bzero(&(lp_typetbl[c]), c * sizeof(int *));
+     lp_typetbl_len = newlen;
+   }
+   else return -1;
+@@ -942,7 +944,7 @@
+     /* didn't find a free slot -- double the array */
+     int newlen = 2 * (*plen) + 1;
+     (*b) = realloc((*b), newlen * sizeof(int *));
+-    bzero((int *)(*b) + *plen, ((*plen) + 1) * sizeof(int*));
++    bzero(&((*b)[*plen]), ((*plen) + 1) * sizeof(int*));
+     (*b)[(*plen)] = p;
+     *plen = newlen;
+   }
+@@ -982,8 +984,8 @@
+ 
+   for(c = 0; c < lp_max_mod; c++) {
+ 
+-    lp_typetbl[c] = malloc(sizeof(struct lp_subtype));
+-    bzero(lp_typetbl[c], sizeof(struct lp_subtype));
++    lp_typetbl[c] = calloc(1, sizeof(struct lp_subtype));
++    //    bzero(lp_typetbl[c], sizeof(struct lp_subtype));
+     lp_typetbl[c]->sub = strdup(lp_modules[c]->name);
+   }
+ 
+@@ -1009,6 +1011,7 @@
+   }
+ 
+   free(lp_typetbl);
++  lp_typetbl = NULL;
+ }
+ 
+ 
+@@ -1125,14 +1128,14 @@
+  * cname name of instantiated component
+  * loader is the module loader function for tname
+  */
+-int *lp_override_inst(struct lp_block *spec, 
++int *lp_override_inst(const struct lp_block *spec, 
+ 		  char *cname, 
+ 		  lp_modloader_t loader,
+ 		  char **overrides,
+ 		  int overrides_len)
+ {
+   int c, d;
+-  struct lp_block *spec_copy;
++  struct lp_block *spec_copy = NULL;
+   char *p1, *p2; 
+   int *result;
+   
+@@ -1355,6 +1358,7 @@
+   }
+ 
+   free(paramvec);
++  paramvec = NULL;
+ 
+   return 0; // ???
+ }
+diff -uNr disksim_orig/disksim-4.0/memsmodel/Makefile disksim-src_64bit/memsmodel/Makefile
+--- disksim_orig/disksim-4.0/memsmodel/Makefile	2008-05-11 14:30:54.000000000 -0700
++++ disksim-src_64bit/memsmodel/Makefile	2010-06-09 14:04:42.000000000 -0700
+@@ -29,12 +29,12 @@
+ 
+ include .paths
+ 
+-LDFLAGS = -lm -L.
++LDFLAGS = -lm -L. 
+ 
+ DEBUG_OFLAGS = -g -DASSERTS # -DDEBUG=1
+ PROF_OFLAGS = -g -DASSERTS -p
+ GPROF_OFLAGS = -g -DASSERTS -pg
+-CFLAGS = $(DEBUG_OFLAGS) $(DISKSIM_CFLAGS) -I../ -I$(DISKSIM_PREFIX)/src
++CFLAGS = $(DEBUG_OFLAGS) $(DISKSIM_CFLAGS) -I../ -I$(DISKSIM_PREFIX)/src 
+ 
+ CC = gcc -Wall -Wno-unused -MD
+ CP = cp -p
+diff -uNr disksim_orig/disksim-4.0/memsmodel/mems_disksim.c disksim-src_64bit/memsmodel/mems_disksim.c
+--- disksim_orig/disksim-4.0/memsmodel/mems_disksim.c	2008-05-11 14:30:54.000000000 -0700
++++ disksim-src_64bit/memsmodel/mems_disksim.c	2010-06-09 14:04:42.000000000 -0700
+@@ -1232,17 +1232,15 @@
+ 
+   bzero(&tmpsled, sizeof(tmpsled));
+ 
+-  result = malloc(sizeof(mems_t));
++  result = calloc(1, sizeof(mems_t));
+   if(!result) return 0;
+-  bzero(result, sizeof(mems_t));
+ 
+   ((struct device_header *)result)->device_type = DEVICETYPE_MEMS;
+ 
+   /* Initialize disksim's memsinfo structures */
+   if (disksim->memsinfo == NULL) {
+-    disksim->memsinfo = malloc(sizeof(struct mems_info));
++    disksim->memsinfo = calloc(1, sizeof(struct mems_info));
+     ASSERT(disksim->memsinfo != NULL);
+-    bzero((char *)disksim->memsinfo, sizeof(struct mems_info));
+ 
+ /*      disksim->memsinfo->devices = malloc(MAXDEVICES * sizeof(mems_t)); */
+ /*      ASSERT(disksim->memsinfo->devices != NULL); */
+@@ -1264,7 +1262,7 @@
+       realloc(disksim->memsinfo->devices, 
+ 	      newlen * sizeof(mems_t *));
+ 
+-    bzero(disksim->memsinfo->devices + c, zerolen * sizeof(mems_t *));
++    bzero(&(disksim->memsinfo->devices[c]), zerolen * sizeof(mems_t *));
+     disksim->memsinfo->devices_len = newlen;
+   }
+   
+@@ -1298,8 +1296,7 @@
+ }
+ 
+ mems_t *mems_copy(mems_t *src) {
+-  mems_t *result = malloc(sizeof(mems_t));
+-  bzero(result, sizeof(mems_t));
++  mems_t *result = calloc(1, sizeof(mems_t));
+   memcpy(result, src, sizeof(mems_t));
+   result->queue = ioqueue_copy(src->queue);
+   memcpy(&result->sled, src->sled, src->num_sleds * sizeof(mems_sled_t));
+diff -uNr disksim_orig/disksim-4.0/memsmodel/mems_event.c disksim-src_64bit/memsmodel/mems_event.c
+--- disksim_orig/disksim-4.0/memsmodel/mems_event.c	2008-05-11 14:30:54.000000000 -0700
++++ disksim-src_64bit/memsmodel/mems_event.c	2010-06-09 14:04:42.000000000 -0700
+@@ -1493,6 +1493,7 @@
+ 		  mems_request_complete(extent_ptr->request, latency);
+ 		  addtoextraq((event *)extent_ptr->request);
+ 		  free(extent_ptr);
++		  extent_ptr = NULL;
+ 		  mems_extent_frees++;
+ 		  // addtoextraq(extent_ptr);
+ 		}
+@@ -1562,6 +1563,7 @@
+       if (curr->mems_reqinfo)
+ 	{
+ 	  free(curr->mems_reqinfo);
++	  curr->mems_reqinfo = NULL;
+ 	  mems_reqinfo_frees++;
+ 	  //addtoextraq((event *)curr->mems_reqinfo);
+ 	}
+@@ -1753,6 +1755,7 @@
+ 	  mems_request_complete(bus_extent->request, 0.0);
+ 	  addtoextraq((event *)bus_extent->request);  // schlos
+ 	  free(bus_extent);
++	  bus_extent = NULL;
+ 	  mems_extent_frees++;
+ 	  // addtoextraq(bus_extent);
+ 	}
+@@ -1812,6 +1815,7 @@
+ 	  if (isread && (reqinfo->extents == NULL))
+ 	    {
+ 	      free(reqinfo);
++	      reqinfo = NULL;
+ 	      mems_reqinfo_frees++;
+ 	      // addtoextraq((event *)reqinfo);  // schlos - I fixed a leak here, i think
+ 	    }
+diff -uNr disksim_orig/disksim-4.0/memsmodel/mems_seektest.pl disksim-src_64bit/memsmodel/mems_seektest.pl
+--- disksim_orig/disksim-4.0/memsmodel/mems_seektest.pl	2005-01-04 14:22:22.000000000 -0800
++++ disksim-src_64bit/memsmodel/mems_seektest.pl	2010-06-09 14:04:42.000000000 -0700
+@@ -53,7 +53,7 @@
+ $GNUPLOT = "gnuplot";
+ $XV = "/usr/X11R6/bin/xv";
+ $GNUPLOT_FILE = "gnuplottemp";
+-$SEEK_TEST2 = "/home/schlos/Work/disksim-memsmodel/memsmodel/mems_seektest";
++$SEEK_TEST2 = "./mems_seektest";
+ # $SEEK_TEST2 = "./mems_seektest";
+ $TEST_FILENAME = "testme";
+ 
+diff -uNr disksim_orig/disksim-4.0/memsmodel/modules/mems.modspec disksim-src_64bit/memsmodel/modules/mems.modspec
+--- disksim_orig/disksim-4.0/memsmodel/modules/mems.modspec	2008-05-11 14:30:54.000000000 -0700
++++ disksim-src_64bit/memsmodel/modules/mems.modspec	2010-06-09 14:04:42.000000000 -0700
+@@ -34,9 +34,10 @@
+ HEADER \#include "../mems_global.h"
+ RESTYPE struct mems *
+ PROTO struct mems *memsmodel_mems_loadparams(struct lp_block *b, int *num);
++PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+ 
+ PARAM Scheduler					BLOCK	1 
+-TEST result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats)
++TEST result->queue = disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats)
+ # INIT ioqueue_initialize(result->queue, 0);
+ 
+ An ioqueue; see Section \ref{param.queue}
+diff -uNr disksim_orig/disksim-4.0/src/Makefile disksim-src_64bit/src/Makefile
+--- disksim_orig/disksim-4.0/src/Makefile	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/Makefile	2010-06-09 14:06:57.000000000 -0700
+@@ -32,7 +32,7 @@
+ 
+ include .paths
+ 
+-LDFLAGS = -lm -L. -ldisksim $(DISKMODEL_LDFLAGS) $(MEMSMODEL_LDFLAGS) \
++LDFLAGS = -lm -L. -ldisksim $(DISKMODEL_LDFLAGS) $(MEMSMODEL_LDFLAGS)\
+                             $(LIBPARAM_LDFLAGS) $(LIBDDBG_LDFLAGS) 
+ 
+ HP_FAST_OFLAGS = +O4
+@@ -119,7 +119,7 @@
+ 	$(CC) $< -o $@
+ 
+ libdisksim.a: $(MODULEDEPS) $(DISKSIM_OBJ) disksim_interface.o
+-	ar cru $@ $(DISKSIM_OBJ) disksim_interface.o modules/*.o
++	ar crus $@ $(DISKSIM_OBJ) disksim_interface.o modules/*.o
+ 	ranlib $@
+ 	mkdir -p ../lib
+ 	cp libdisksim.a ../lib
+@@ -130,6 +130,16 @@
+ syssim: syssim_driver.o libdisksim.a
+ 	$(CC) $(CFLAGS) -o $@ syssim_driver.o disksim_interface.o $(LDFLAGS)
+ 
++skippy: skippy_sim.o libdisksim.a
++	$(CC) $(CFLAGS) -o $@ skippy_sim.o syssim_opts.o disksim_interface.o $(LDFLAGS)
++
++seek: seek_sim.o libdisksim.a
++	$(CC) $(CFLAGS) -o $@ seek_sim.o syssim_opts.o disksim_interface.o $(LDFLAGS)
++
++seek2: seek_sim2.o libdisksim.a
++	$(CC) $(CFLAGS) -o $@ seek_sim2.o syssim_opts.o disksim_interface.o $(LDFLAGS)
++
++
+ ########################################################################
+ 
+ # rule to automatically generate dependencies from source files
+Binary files disksim_orig/disksim-4.0/src/ajw.1week.srt and disksim-src_64bit/src/ajw.1week.srt differ
+diff -uNr disksim_orig/disksim-4.0/src/disksim_bus.c disksim-src_64bit/src/disksim_bus.c
+--- disksim_orig/disksim-4.0/src/disksim_bus.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_bus.c	2010-06-09 14:06:57.000000000 -0700
+@@ -569,8 +569,7 @@
+ int disksim_bus_stats_loadparams(struct lp_block *b) {
+    
+   if(!disksim->businfo) {
+-    disksim->businfo = malloc(sizeof(businfo_t));
+-    bzero(disksim->businfo, sizeof(businfo_t));
++    disksim->businfo = calloc(1, sizeof(businfo_t));
+   }
+ 
+ 
+@@ -681,8 +680,7 @@
+   int c;
+ 
+   if(!disksim->businfo) {
+-    disksim->businfo = malloc(sizeof(businfo_t));
+-    bzero(disksim->businfo, sizeof(businfo_t));
++    disksim->businfo = calloc(1, sizeof(businfo_t));
+   }
+ 
+   //   disksim->businfo->bus_printidlestats = disksim_bus_printidlestats;
+@@ -697,11 +695,11 @@
+      int newlen = c ? 2*c : 2;
+      
+      disksim->businfo->buses = realloc(disksim->businfo->buses,
+-				       newlen * sizeof(int*));
++				       newlen * sizeof(void*));
+      if(newlen > 2)
+-       bzero(disksim->businfo->buses + c, (newlen/2)*sizeof(int *));
++       bzero(&(disksim->businfo->buses[c]), (newlen/2)*sizeof(void*));
+      else 
+-       bzero(disksim->businfo->buses, 2 * sizeof(int *));
++       bzero(disksim->businfo->buses, newlen * sizeof(void*));
+ 
+      disksim->businfo->buses_len = newlen;
+ 
+@@ -751,8 +749,8 @@
+   /* if this bus is the child of a controller */
+   if(parentctlno) { b->numslots++; }
+ 
+-  b->slots = malloc(b->numslots * sizeof(slot));
+-  bzero(b->slots, b->numslots * sizeof(slot));
++  b->slots = calloc(b->numslots, sizeof(slot));
++  //  bzero(b->slots, b->numslots * sizeof(slot));
+ 
+   if(parentctlno) {
+     b->slots[0].devtype = CONTROLLER;
+diff -uNr disksim_orig/disksim-4.0/src/disksim_controller.c disksim-src_64bit/src/disksim_controller.c
+--- disksim_orig/disksim-4.0/src/disksim_controller.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_controller.c	2010-06-09 14:06:57.000000000 -0700
+@@ -430,9 +430,8 @@
+   ctlrinfo_t *ctlrinfo;
+ 
+   if(disksim->ctlrinfo == NULL) {
+-    disksim->ctlrinfo = malloc(sizeof(ctlrinfo_t));
++    disksim->ctlrinfo = calloc(1, sizeof(ctlrinfo_t));
+     if(!disksim->ctlrinfo) return 0;
+-    bzero((char *)disksim->ctlrinfo, sizeof(ctlrinfo_t));
+   }
+   ctlrinfo = disksim->ctlrinfo;
+ 
+@@ -446,7 +445,7 @@
+ 
+ 
+ controller *controller_copy(controller *orig) {
+-  controller *result = malloc(sizeof(controller));
++  controller *result = calloc(1, sizeof(controller));
+   if(!result) return 0;
+   memcpy(result, orig, sizeof(controller));
+   result->cache = orig->cache->cache_copy(orig->cache);
+@@ -488,12 +487,19 @@
+   {
+     int newlen = c ? 2*c : 2;
+     int zerooff = (newlen == 2) ? 0 : c;
+-    int zerolen = ((newlen == 2) ? 2 : (newlen / 2)) * sizeof(int *);
++    int zerolen = ((newlen == 2) ? 2 : (newlen / 2));
+     
+-    disksim->ctlrinfo->controllers = realloc(disksim->ctlrinfo->controllers,
+-					     newlen * sizeof(int *));
+-    
+-    bzero(disksim->ctlrinfo->controllers + zerooff, zerolen);
++    if ( zerooff == 0 )
++    {
++      disksim->ctlrinfo->controllers = calloc(newlen, sizeof(void*));
++    }
++    else
++    {
++      disksim->ctlrinfo->controllers = realloc(disksim->ctlrinfo->controllers,
++					       newlen * sizeof(int *));
++      bzero(&(disksim->ctlrinfo->controllers[zerooff]), zerolen*sizeof(int*));
++    }
++
+     disksim->ctlrinfo->ctlrs_len = newlen;
+   }
+ 
+@@ -502,9 +508,8 @@
+   disksim->ctlrinfo->numcontrollers++;
+ 
+   /* allocate a new controller struct */
+-  result = malloc(sizeof(controller));
++  result = calloc(1, sizeof(controller));
+   if(!result) return 0;
+-  bzero(result, sizeof(controller));
+ 
+   disksim->ctlrinfo->controllers[c] = result;
+   bzero(result, sizeof(controller));
+@@ -800,8 +805,7 @@
+   if(!ctlr->outbuses) {
+     ctlr->numoutbuses = 0;
+     slots = t->l->values_len;
+-    ctlr->outbuses = malloc(slots * sizeof(int));
+-    bzero(ctlr->outbuses, slots * sizeof(int));
++    ctlr->outbuses = calloc(1, slots * sizeof(int));
+   }
+ 
+   for(c = 0; c < t->l->values_len; c++) {
+diff -uNr disksim_orig/disksim-4.0/src/disksim_device.c disksim-src_64bit/src/disksim_device.c
+--- disksim_orig/disksim-4.0/src/disksim_device.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_device.c	2010-06-09 14:06:57.000000000 -0700
+@@ -119,10 +119,9 @@
+ 
+ void device_initialize_deviceinfo (void)
+ {
+-   if (disksim->deviceinfo == NULL) {
+-      disksim->deviceinfo = malloc (sizeof(device_info_t));
+-      bzero ((char *)disksim->deviceinfo, sizeof(device_info_t));
+-   }
++  if (disksim->deviceinfo == NULL) {
++    disksim->deviceinfo = calloc (1, sizeof(device_info_t));
++  }
+ }
+ 
+ void device_add(struct device_header *d, int ldevno) {
+@@ -141,17 +140,17 @@
+   zerocnt = (newlen == 2) ? 2 : (newlen/2);
+   disksim->deviceinfo->devicenames = 
+     realloc(disksim->deviceinfo->devicenames, newlen * sizeof(char *));
+-  bzero(disksim->deviceinfo->devicenames + c, zerocnt * sizeof(char *));
++  bzero(&(disksim->deviceinfo->devicenames[c]), zerocnt * sizeof(char *));
+ 
+   devicenos = realloc(devicenos, newlen*sizeof(int));
+-  bzero(devicenos + c, zerocnt * sizeof(int));
++  bzero(&(devicenos[c]), zerocnt * sizeof(int));
+ 
+   devicetypes = realloc(devicetypes, newlen*sizeof(int));
+-  bzero(devicetypes + c, zerocnt * sizeof(int));
++  bzero(&(devicetypes[c]), zerocnt * sizeof(int));
+ 
+   disksim->deviceinfo->devices = realloc(disksim->deviceinfo->devices, 
+-					 newlen*sizeof(int));
+-  bzero(disksim->deviceinfo->devices + c, zerocnt * sizeof(int));
++					 newlen*sizeof(void*));
++  bzero(&(disksim->deviceinfo->devices[c]), zerocnt * sizeof(void*));
+ 
+   disksim->deviceinfo->devs_len = newlen;
+ 
+diff -uNr disksim_orig/disksim-4.0/src/disksim_disk.c disksim-src_64bit/src/disksim_disk.c
+--- disksim_orig/disksim-4.0/src/disksim_disk.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_disk.c	2010-06-09 14:06:57.000000000 -0700
+@@ -146,7 +146,7 @@
+   /* note that numdisks must be equal to diskinfo->disks_len */
+   disksim->diskinfo->disks = realloc(disksim->diskinfo->disks, 
+ 			   2 * NUMDISKS * sizeof(disk *));
+-  bzero(disksim->diskinfo->disks + NUMDISKS, NUMDISKS);
++  bzero(&(disksim->diskinfo->disks[NUMDISKS]), NUMDISKS*sizeof(disk*));
+   disksim->diskinfo->disks[c] = d;
+   NUMDISKS++;
+   disksim->diskinfo->disks_len *= 2;
+@@ -412,9 +412,9 @@
+     fprintf(stderr, "Must have more segments than dedicated write segments\n");
+     ddbg_assert(0);;
+   }
+-  if (((int)currdisk->dedicatedwriteseg != 0) &&
+-      ((int)currdisk->dedicatedwriteseg != 1)) {
+-    fprintf(stderr, "Invalid value for dedicatedwriteseg in disk_postpass_perdisk: %d\n", (int)currdisk->dedicatedwriteseg);
++  if ((currdisk->dedicatedwriteseg != NULL) &&
++      (currdisk->dedicatedwriteseg != (void*)1)) {
++    fprintf(stderr, "Invalid value for dedicatedwriteseg in disk_postpass_perdisk: %ld\n", (long)currdisk->dedicatedwriteseg);
+     ddbg_assert(0);;
+   }
+ 
+@@ -500,12 +500,10 @@
+ 
+ static void disk_initialize_diskinfo ()
+ {
+-  disksim->diskinfo = malloc (sizeof(disk_info_t));
+-  bzero ((char *)disksim->diskinfo, sizeof(disk_info_t));
++  disksim->diskinfo = calloc (1, sizeof(disk_info_t));
+ 
+-  disksim->diskinfo->disks = (struct disk**) malloc(MAXDEVICES * sizeof(disk));
++  disksim->diskinfo->disks = (struct disk**) calloc(1, MAXDEVICES * sizeof(disk));
+   disksim->diskinfo->disks_len = MAXDEVICES;
+-  bzero ((char *)disksim->diskinfo->disks, (MAXDEVICES * sizeof(disk)));
+ 
+   /* important initialization of stuff that gets remapped into diskinfo */
+   disk_printhacktime = 0.0;
+@@ -870,9 +868,9 @@
+   disk_postpass();
+   disk_syncset_init();
+ 
+-  result = malloc(sizeof(disk));
++  result = calloc(1, sizeof(disk));
+   if(!result) return 0;
+-  memset(result, 0, sizeof(struct disk));
++  //  memset(result, 0, sizeof(struct disk));
+ 
+   result->hdr = disk_hdr_initializer;
+   result->hdr.device_name = strdup(b->name);
+diff -uNr disksim_orig/disksim-4.0/src/disksim_diskctlr.c disksim-src_64bit/src/disksim_diskctlr.c
+--- disksim_orig/disksim-4.0/src/disksim_diskctlr.c	2008-05-16 14:04:35.000000000 -0700
++++ disksim-src_64bit/src/disksim_diskctlr.c	2010-06-09 14:06:57.000000000 -0700
+@@ -469,12 +469,12 @@
+ 	       "HDA_OWNED set for fixed-access-time disk");
+ 
+ 
+-    ddbg_assert2(ioqueue_get_specific_request(currdisk->queue,tmpioreq),
++    ddbg_assert2(ioqueue_get_specific_request(currdisk->queue,tmpioreq) != NULL,
+ 	       "ioreq_event not found");
+ 
+     disk_interferestats(currdisk, tmpioreq);
+     /* GROK: this would seem to leak (or worse) for concatenating schedulers */
+-    ddbg_assert2(ioqueue_physical_access_done(currdisk->queue,tmpioreq),
++    ddbg_assert2(ioqueue_physical_access_done(currdisk->queue,tmpioreq) != NULL,
+ 	       "ioreq_event not found");
+ 
+     currdisk->currentbus = 
+@@ -494,18 +494,18 @@
+   } 
+   else if(tmpioreq->flags & READ) {
+     while (tmpioreq) {
+-      int evtfound = 0;
++      void* evtfound = 0;
+       if(!(currdiskreq->flags & HDA_OWNED)) {
+ 
+-	ddbg_assert2(ioqueue_get_specific_request(currdisk->queue,tmpioreq),
++	ddbg_assert2(ioqueue_get_specific_request(currdisk->queue,tmpioreq) != NULL,
+ 		   "ioreq_event not found");
+ 	
+ 	disk_interferestats(currdisk, tmpioreq);
+       }
+ 
+-      evtfound = (int)ioqueue_physical_access_done(currdisk->queue,tmpioreq);
++      evtfound = ioqueue_physical_access_done(currdisk->queue,tmpioreq);
+ 
+-      ddbg_assert2(evtfound != 0, "ioreq_event not found");
++      ddbg_assert2(evtfound != NULL, "ioreq_event not found");
+ 
+       tmpioreq = tmpioreq->next;
+     }
+@@ -3221,7 +3221,7 @@
+     if(!reading) {
+       tmpioreq = currdiskreq->ioreqlist;
+       while (tmpioreq) {
+-	ddbg_assert2(ioqueue_physical_access_done(currdisk->queue,tmpioreq),
++	ddbg_assert2(ioqueue_physical_access_done(currdisk->queue,tmpioreq) != NULL,
+ 		   "disk_buffer_request_complete:  ioreq_event "
+ 		   "not found by ioqueue_physical_access_done call");
+ 
+@@ -3250,7 +3250,7 @@
+   diskreq *currdiskreq = currdisk->effectivehda;
+   segment *seg;
+ 
+-  ddbg_assert2(currdiskreq, "No effectivehda");
++  ddbg_assert2(currdiskreq != NULL, "No effectivehda");
+ 
+   seg = currdiskreq->seg;
+   if(seg->outstate == BUFFER_PREEMPT) {
+diff -uNr disksim_orig/disksim-4.0/src/disksim_global.h disksim-src_64bit/src/disksim_global.h
+--- disksim_orig/disksim-4.0/src/disksim_global.h	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_global.h	2010-06-09 14:06:57.000000000 -0700
+@@ -251,7 +251,7 @@
+    int    temp;
+ } foo;
+ 
+-#define DISKSIM_EVENT_SIZE	128
++#define DISKSIM_EVENT_SIZE	256
+ #define DISKSIM_EVENT_SPACESIZE	(DISKSIM_EVENT_SIZE - sizeof(struct foo))
+ 
+ typedef struct ev {
+diff -uNr disksim_orig/disksim-4.0/src/disksim_interface.c disksim-src_64bit/src/disksim_interface.c
+--- disksim_orig/disksim-4.0/src/disksim_interface.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_interface.c	2010-06-09 14:06:57.000000000 -0700
+@@ -480,6 +480,7 @@
+   disksim_cleanup();
+   free(iface->disksim);
+   free(iface);
++  iface = NULL;
+ }
+ 
+ double disksim_time_to_msec(double x) { return x; }
+diff -uNr disksim_orig/disksim-4.0/src/disksim_interface.h disksim-src_64bit/src/disksim_interface.h
+--- disksim_orig/disksim-4.0/src/disksim_interface.h	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_interface.h	2010-06-09 14:06:57.000000000 -0700
+@@ -50,6 +50,7 @@
+   int batchno;
+   int batch_complete;
+   void *reqctx;         /* context passed with the request */
++  short completed;
+ };
+ 
+ struct disksim_interface;
+diff -uNr disksim_orig/disksim-4.0/src/disksim_iodriver.c disksim-src_64bit/src/disksim_iodriver.c
+--- disksim_orig/disksim-4.0/src/disksim_iodriver.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_iodriver.c	2010-06-09 14:06:57.000000000 -0700
+@@ -1069,7 +1069,7 @@
+   disksim->iodriver_info->iodrivers_len = newlen;
+   iodrivers = realloc(iodrivers, newlen * sizeof(iodriver *));
+   zerocnt = c ? c : 2;
+-  bzero((struct iodriver*)iodrivers + c, zerocnt * sizeof(iodriver *));
++  bzero(&(iodrivers[c]), zerocnt * sizeof(iodriver *));
+ 
+   iodrivers[c] = d;
+   numiodrivers++;
+@@ -1079,13 +1079,11 @@
+   iodriver *result;
+ 
+   if (disksim->iodriver_info == NULL) {
+-    disksim->iodriver_info = malloc (sizeof(iodriver_info_t));
+-    bzero ((char *)disksim->iodriver_info, sizeof(iodriver_info_t));
++    disksim->iodriver_info = calloc (1, sizeof(iodriver_info_t));
+   }
+   overallqueue = ioqueue_createdefaultqueue ();
+    
+-  result = malloc(sizeof(iodriver));
+-  bzero(result, sizeof(iodriver));
++  result = calloc(1, sizeof(iodriver));
+ 
+   add_driver(result);
+ 
+@@ -1155,8 +1153,7 @@
+ 
+ 
+ static iodriver *driver_copy(iodriver *orig) {
+-  iodriver *result = malloc(sizeof(iodriver));
+-  bzero(result, sizeof(iodriver));
++  iodriver *result = calloc(1, sizeof(iodriver));
+   memcpy(result, orig, sizeof(iodriver));
+   result->queue = ioqueue_copy(orig->queue);
+   return result;
+@@ -1186,7 +1183,7 @@
+ 
+   sysorgs = realloc(sysorgs, newlen * sizeof(struct logorg *));
+ 
+-  bzero(sysorgs + zeroOff, 
++  bzero(&(sysorgs[zeroOff]), 
+ 	(zeroOff ? numsysorgs : 2) * sizeof(struct logorg *));
+ 
+   disksim->iodriver_info->sysorgs_len = newlen;
+@@ -1252,6 +1249,7 @@
+    }
+ 
+    free(queueset);
++   queueset = NULL;
+ }
+ 
+ 
+diff -uNr disksim_orig/disksim-4.0/src/disksim_ioqueue.c disksim-src_64bit/src/disksim_ioqueue.c
+--- disksim_orig/disksim-4.0/src/disksim_ioqueue.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_ioqueue.c	2010-06-09 14:06:57.000000000 -0700
+@@ -3752,8 +3752,7 @@
+ 
+ ioqueue * ioqueue_createdefaultqueue ()
+ {
+-   ioqueue * queue = (ioqueue *) malloc(sizeof(ioqueue));
+-   bzero(queue, sizeof(ioqueue));
++   ioqueue * queue = (ioqueue *) calloc(1, sizeof(ioqueue));
+ 
+    queue->printqueuestats  = 1;
+    queue->printcritstats   = 1;
+@@ -3804,8 +3803,7 @@
+ {
+   struct ioq *result;
+ 
+-  result = malloc(sizeof(ioqueue));
+-  bzero(result, sizeof(ioqueue));
++  result = calloc(1, sizeof(ioqueue));
+ 
+   result->printqueuestats = printqueuestats;
+   result->printcritstats = printcritstats;
+@@ -3904,6 +3902,7 @@
+    fprintf (outputfile, "%sNumber of batches:  %d\n", prefix, stat_get_count_set(statset, setsize));
+    stat_print_set(statset, setsize, prefix);
+    free(statset);
++   statset = NULL;
+ }
+ 
+ 
+@@ -3933,6 +3932,7 @@
+    }
+    stat_print_set(statset, setsize, prefix);
+    free(statset);
++   statset = NULL;
+ }
+ 
+ 
+@@ -3962,6 +3962,7 @@
+    }
+    stat_print_set(statset, setsize, prefix);
+    free(statset);
++   statset = NULL;
+ }
+ 
+ 
+@@ -3982,6 +3983,7 @@
+    fprintf (outputfile, "%sNumber of idle periods:  %d\n", prefix, stat_get_count_set(statset, setsize));
+    stat_print_set(statset, setsize, prefix);
+    free(statset);
++   statset = NULL;
+ }
+ 
+ 
+@@ -4029,6 +4031,7 @@
+    sprintf(prefix2, "%sNon-Critical Write ", prefix);
+    stat_print_set(statset, setsize, prefix2);
+    free(statset);
++   statset = NULL;
+ }
+ 
+ 
+@@ -4093,6 +4096,7 @@
+    }
+    stat_print_set(statset, setsize, prefix);
+    free(statset);
++   statset = NULL;
+ }
+ 
+ 
+@@ -4263,5 +4267,7 @@
+ 
+    free(subset);
+    free(statset);
++   subset = NULL;
++   statset = NULL;
+ }
+ 
+diff -uNr disksim_orig/disksim-4.0/src/disksim_loadparams.c disksim-src_64bit/src/disksim_loadparams.c
+--- disksim_orig/disksim-4.0/src/disksim_loadparams.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_loadparams.c	2010-06-09 14:06:57.000000000 -0700
+@@ -57,8 +57,8 @@
+ int disksim_loadparams(char *inputfile, int synthgen) {
+   int rv;
+   int c;
+-  struct lp_tlt **tlts;
+-  int tlts_len;
++  struct lp_tlt **tlts = NULL;
++  int tlts_len = 0;
+ 
+   // register modules with libparam
+   for(c = 0; c <= DISKSIM_MAX_MODULE; c++) {
+diff -uNr disksim_orig/disksim-4.0/src/disksim_logorg.c disksim-src_64bit/src/disksim_logorg.c
+--- disksim_orig/disksim-4.0/src/disksim_logorg.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_logorg.c	2010-06-09 14:06:57.000000000 -0700
+@@ -1590,8 +1590,7 @@
+   int devno, devtype;
+   int slot = 0;
+ 
+-  result->devs = malloc(l->values_len * sizeof(logorgdev));
+-  bzero(result->devs, l->values_len * sizeof(logorgdev));
++  result->devs = calloc(1, l->values_len * sizeof(logorgdev));
+ 
+   for(c = 0; c < l->values_len; c++) {
+     if(!l->values[c]) continue;
+@@ -1647,8 +1646,7 @@
+   //  double rmwpoint = 0.0;
+ 
+ 
+-  result = malloc(sizeof(struct logorg));
+-  bzero(result, sizeof(struct logorg));
++  result = calloc(1, sizeof(struct logorg));
+ 
+   //#include "modules/disksim_logorg_param.c"
+   lp_loadparams(result, b, &disksim_logorg_mod);
+diff -uNr disksim_orig/disksim-4.0/src/disksim_simpledisk.c disksim-src_64bit/src/disksim_simpledisk.c
+--- disksim_orig/disksim-4.0/src/disksim_simpledisk.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_simpledisk.c	2010-06-09 14:06:57.000000000 -0700
+@@ -741,11 +741,9 @@
+ 
+ static void simpledisk_initialize_diskinfo ()
+ {
+-   disksim->simplediskinfo = malloc (sizeof(simplediskinfo_t));
+-   bzero ((char *)disksim->simplediskinfo, sizeof(simplediskinfo_t));
+-   disksim->simplediskinfo->simpledisks = malloc(MAXDEVICES * (sizeof(simpledisk_t)));
++   disksim->simplediskinfo = calloc (1, sizeof(simplediskinfo_t));
++   disksim->simplediskinfo->simpledisks = calloc(1, MAXDEVICES * (sizeof(simpledisk_t)));
+    disksim->simplediskinfo->simpledisks_len = MAXDEVICES;
+-   bzero ((char *)disksim->simplediskinfo->simpledisks, (MAXDEVICES * (sizeof(simpledisk_t))));
+ }
+ 
+ 
+@@ -810,8 +808,8 @@
+     realloc(disksim->simplediskinfo->simpledisks, 
+ 	    2 * c * sizeof(struct simpledisk *));
+ 
+-  bzero(disksim->simplediskinfo->simpledisks + numsimpledisks, 
+-	numsimpledisks);
++  bzero(&(disksim->simplediskinfo->simpledisks[numsimpledisks]), 
++	numsimpledisks*sizeof(void*));
+ 
+   disksim->simplediskinfo->simpledisks[c] = d;
+   numsimpledisks++;
+@@ -828,9 +826,8 @@
+ 
+   if(!disksim->simplediskinfo) simpledisk_initialize_diskinfo();
+ 
+-  result = malloc(sizeof(struct simpledisk));
++  result = calloc(1, sizeof(struct simpledisk));
+   if(!result) return 0;
+-  bzero(result, sizeof(struct simpledisk));
+   
+   num = simpledisk_add(result);
+ 
+@@ -849,8 +846,7 @@
+ 
+ 
+ struct simpledisk *simpledisk_copy(struct simpledisk *orig) {
+-  struct simpledisk *result = malloc(sizeof(struct simpledisk));
+-  bzero(result, sizeof(struct simpledisk));
++  struct simpledisk *result = calloc(1, sizeof(struct simpledisk));
+   memcpy(result, orig, sizeof(struct simpledisk));
+   result->queue = ioqueue_copy(orig->queue);
+ 
+diff -uNr disksim_orig/disksim-4.0/src/disksim_synthio.c disksim-src_64bit/src/disksim_synthio.c
+--- disksim_orig/disksim-4.0/src/disksim_synthio.c	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/disksim_synthio.c	2010-06-09 14:06:57.000000000 -0700
+@@ -720,8 +720,7 @@
+     return -1;
+   }
+ 
+-  synthio_gens = malloc(l->values_len * sizeof(synthio_generator));
+-  bzero(synthio_gens, l->values_len * sizeof(synthio_generator));
++  synthio_gens = calloc(1, l->values_len * sizeof(synthio_generator));
+   disksim->synthio_info->synthio_gens_len = l->values_len;
+ 
+   for(c = 0; c < l->values_len; c++) {
+@@ -871,8 +870,7 @@
+ 
+ static int loadgen(struct lp_block *b, synthio_generator **result) {
+ 
+-  (*result) = malloc(sizeof(synthio_generator));
+-  bzero((*result), sizeof(synthio_generator));
++  (*result) = calloc(1, sizeof(synthio_generator));
+ 
+   //#include "modules/disksim_synthgen_param.c"
+   lp_loadparams(result, b, &disksim_synthgen_mod);
+@@ -893,8 +891,7 @@
+   char *name;
+   int slot = 0;
+ 
+-  result->devno = malloc(l->values_len * sizeof(int));
+-  bzero(result->devno, l->values_len * sizeof(int));
++  result->devno = calloc(1, l->values_len * sizeof(int));
+   
+   for(c = 0; c < l->values_len; c++) {
+     if(!l->values[c]) continue;
+diff -uNr disksim_orig/disksim-4.0/src/modules/ctlr.modspec disksim-src_64bit/src/modules/ctlr.modspec
+--- disksim_orig/disksim-4.0/src/modules/ctlr.modspec	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/modules/ctlr.modspec	2010-06-09 14:06:57.000000000 -0700
+@@ -34,6 +34,8 @@
+ HEADER \#include "../disksim_ctlr.h"
+ RESTYPE struct controller *
+ PROTO struct controller *disksim_ctlr_loadparams(struct lp_block *b);
++PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
++PROTO struct cache_if *disksim_cache_loadparams(struct lp_block *b);
+ 
+ PARAM type				I	1 
+ TEST RANGE(i,1,3)
+@@ -102,7 +104,7 @@
+ 
+ 
+ PARAM Scheduler				BLOCK	0 
+-TEST result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, disksim->ctlrinfo->ctl_printqueuestats, disksim->ctlrinfo->ctl_printcritstats, disksim->ctlrinfo->ctl_printidlestats, disksim->ctlrinfo->ctl_printintarrstats,disksim->ctlrinfo->ctl_printsizestats)
++TEST result->queue = disksim_ioqueue_loadparams(blk, disksim->ctlrinfo->ctl_printqueuestats, disksim->ctlrinfo->ctl_printcritstats, disksim->ctlrinfo->ctl_printidlestats, disksim->ctlrinfo->ctl_printintarrstats,disksim->ctlrinfo->ctl_printsizestats)
+ # INIT ioqueue_initialize(result->queue, 0);
+ 
+ This is an ioqueue; see section \ref{param.queue}
+diff -uNr disksim_orig/disksim-4.0/src/modules/disk.modspec disksim-src_64bit/src/modules/disk.modspec
+--- disksim_orig/disksim-4.0/src/modules/disk.modspec	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/modules/disk.modspec	2010-06-09 14:06:57.000000000 -0700
+@@ -31,19 +31,21 @@
+ 
+ 
+ MODULE disk
+-PROTO struct disk *disksim_disk_loadparams(struct lp_block *b, int *num);
++PROTO struct disk* disksim_disk_loadparams(struct lp_block *b, int *num);
++PROTO struct dm_disk_if* dm_disk_loadparams(struct lp_block *b, int *num);
++PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+ HEADER \#include "../disksim_disk.h"
+ RESTYPE struct disk *
+ 
+ PARAM Model				BLOCK	1
+-TEST result->model = (struct dm_disk_if *) dm_disk_loadparams(blk, 0)
++TEST result->model =  dm_disk_loadparams(blk, 0)
+ 
+ Parameters for the disk's libdiskmodel model.  See the diskmodel
+ documentation for details.
+ 
+ 
+ PARAM Scheduler				BLOCK	1 
+-TEST (result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats))
++TEST (result->queue = disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats))
+ # INIT ioqueue_initialize(result->queue, 0);
+ An ioqueue; see Section \ref{param.queue}
+ 
+diff -uNr disksim_orig/disksim-4.0/src/modules/iodriver.modspec disksim-src_64bit/src/modules/iodriver.modspec
+--- disksim_orig/disksim-4.0/src/modules/iodriver.modspec	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/modules/iodriver.modspec	2010-06-09 14:06:57.000000000 -0700
+@@ -34,6 +34,7 @@
+ HEADER \#include "../disksim_iodriver.h"
+ RESTYPE struct iodriver *
+ PROTO struct iodriver *disksim_iodriver_loadparams(struct lp_block *b);
++PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+ 
+ PARAM type				I	1
+ TEST i >= 0 
+@@ -73,7 +74,7 @@
+ 
+ 
+ PARAM Scheduler				BLOCK	1
+-TEST result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, drv_printqueuestats, drv_printcritstats, drv_printidlestats, drv_printintarrstats, drv_printsizestats)
++TEST result->queue = disksim_ioqueue_loadparams(blk, drv_printqueuestats, drv_printcritstats, drv_printidlestats, drv_printintarrstats, drv_printsizestats)
+ # INIT ioqueue_initialize(result->queue, 0);
+ 
+ This is an ioqueue; see section \ref{param.queue}.
+diff -uNr disksim_orig/disksim-4.0/src/modules/simpledisk.modspec disksim-src_64bit/src/modules/simpledisk.modspec
+--- disksim_orig/disksim-4.0/src/modules/simpledisk.modspec	2008-05-11 14:30:53.000000000 -0700
++++ disksim-src_64bit/src/modules/simpledisk.modspec	2010-06-09 14:06:57.000000000 -0700
+@@ -34,9 +34,10 @@
+ HEADER \#include "../disksim_simpledisk.h"
+ RESTYPE struct simpledisk *
+ PROTO struct simpledisk *disksim_simpledisk_loadparams(struct lp_block *b);
++PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+ 
+ PARAM Scheduler					BLOCK	1 
+-TEST result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats)
++TEST result->queue = disksim_ioqueue_loadparams(blk, device_printqueuestats, device_printcritstats, device_printidlestats, device_printintarrstats, device_printsizestats)
+ # INIT ioqueue_initialize(result->queue, 0);
+ 
+ This is an ioqueue; see Section \ref{param.queue} for details.
+Binary files disksim_orig/disksim-4.0/src/seagate_cur.gif and disksim-src_64bit/src/seagate_cur.gif differ
+diff -uNr disksim_orig/disksim-4.0/src/seek_sim.c disksim-src_64bit/src/seek_sim.c
+--- disksim_orig/disksim-4.0/src/seek_sim.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/seek_sim.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,214 @@
++/*
++ * A Driver for disksim that generates block requests to match
++ * the seek parameters in the [device].seek file. 
++ */
++
++#include <stdio.h>
++#include <assert.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <math.h>
++//#include "syssim_interface.h"
++#include "disksim_interface.h"
++#include "disksim_rand48.h"
++#include "skippy_opts.h"
++
++typedef	struct	{
++  int n;
++  double sum;
++  double sqr;
++} Stat;
++
++static double now = 0;		/* current time */
++static double next_event = -1;	/* next event */
++static int completed = 0;	/* last request was completed */
++static Stat st;
++
++void
++panic(const char *s)
++{
++  perror(s);
++  exit(1);
++}
++
++
++void
++add_statistics(Stat *s, double x)
++{
++  s->n++;
++  s->sum += x;
++  s->sqr += x*x;
++}
++
++
++void
++print_statistics(Stat *s, const char *title)
++{
++  double avg, std;
++
++  avg = s->sum/s->n;
++  std = sqrt((s->sqr - 2*avg*s->sum + s->n*avg*avg) / s->n);
++  printf("%s: n=%d average=%f std. deviation=%f\n", title, s->n, avg, std);
++}
++
++
++void
++syssim_schedule_callback(disksim_interface_callback_t fn, 
++			 double t, 
++			 void *ctx)
++{
++  next_event = t;
++}
++
++
++/*
++ * de-scehdule a callback.
++ */
++void
++syssim_deschedule_callback(double t, void *ctx)
++{
++  next_event = -1;
++}
++
++void
++syssim_report_completion(double t, struct disksim_request *r, void *ctx)
++{
++  completed = 1;
++  now = t;
++  add_statistics(&st, t - r->start);
++}
++
++int seek_sim(
++		struct disksim_interface *disksim,
++		const int measurements,
++		const size_t sector_size,
++		const int write_flag)
++{
++    double t; 
++    double sum;
++    unsigned long pos=0;
++    int nbytes; 
++    int i; 
++    struct disksim_request r;
++    int base;
++
++    fprintf(stdout, "# Seek distances measured: %d\n", measurements);
++
++    sum = 0;
++    //    for ( base = 0; base < sector_size*measurements; base += sector_size )
++    //    for ( base = 0; base < sector_size*1000; base += 4096 )
++    {
++      pos = 0;
++	for (i=0; i<measurements; i++) 
++	{
++	  r.start = now;
++	  //	  r.flags = DISKSIM_READ;
++	  r.flags = DISKSIM_WRITE;
++	  r.devno = 0;
++	  r.bytecount = sector_size;
++	  //	  r.blkno = base;	  r.blkno = base;
++	  r.blkno = 0;
++	  
++	  /* reset the disk position */
++	  if (write_flag) {
++	    r.flags = DISKSIM_WRITE;
++	  }
++	  
++	  disksim_interface_request_arrive(disksim, now, &r);
++
++	  /* Process events until this I/O is completed */
++	  while(next_event >= 0) {
++	    now = next_event;
++	    next_event = -1;
++	    disksim_interface_internal_event(disksim, now, 0);
++	  }
++	  //	  pos += sector_size;
++	  pos = 0;
++
++	  /* save the current time */
++	  
++	  /* lseek(fd, i*sector_size, SEEK_CUR) */
++	  r.start = now;
++	  //	  r.flags = DISKSIM_READ;
++	  r.flags = DISKSIM_WRITE;
++	  r.devno = 0;
++	  r.bytecount = sector_size;
++	  //	  r.blkno = base;	  r.blkno = base;
++	  r.blkno = pos+i*sector_size;
++	  
++	  /* reset the disk position */
++	  if (write_flag) {
++	    r.flags = DISKSIM_WRITE;
++	  }
++	  
++	  /* read(fd, buffer, sector_size) */
++	  t = now;
++	  disksim_interface_request_arrive(disksim, now, &r);
++
++	  /* Process events until this I/O is completed */
++	  while(next_event >= 0) {
++	    now = next_event;
++	    next_event = -1;
++	    disksim_interface_internal_event(disksim, now, 0);
++	  }
++	  
++	  fprintf(stdout, "%d %lf\n", i, now-t);
++	}
++
++      }
++
++    return 0; 
++}
++
++
++
++int
++main(int argc, char *argv[])
++{
++	int nsectors;
++	//	struct stat; 
++	//	struct disksim *disksim, *disksim2;
++	struct stat buf;
++	int len = 8192000;
++	int test_encapsulation;
++	struct disksim_interface* disksim;
++
++	struct gengetopt_args_info args_info; 
++
++	if (argc != 4 || (nsectors = atoi(argv[3])) <= 0) {
++	  fprintf(stderr, "usage: %s <param file> <output file> <#nsectors>\n",
++		  argv[0]);
++	  exit(1);
++	}
++
++	if (stat(argv[1], &buf) < 0)
++      	  panic(argv[1]);
++
++  //	nsectors = args_info.sectors_arg; 
++	test_encapsulation = 0;//args_info.test_encapsulation_flag; 
++
++	disksim = disksim_interface_initialize(argv[1], 
++					       argv[2],
++					       syssim_report_completion,
++					       syssim_schedule_callback,
++					       syssim_deschedule_callback,
++					       0,
++					       0,
++					       0);
++
++	/* This simulates the skippy algorithm */
++	seek_sim(disksim, 
++		 nsectors,
++		 512,
++		 0); 
++
++
++
++	//	if (test_encapsulation) {
++	//		disksim_interface_shutdown(disksim2, now);
++	//	}
++
++	exit(0);
++}
+diff -uNr disksim_orig/disksim-4.0/src/seek_sim2.c disksim-src_64bit/src/seek_sim2.c
+--- disksim_orig/disksim-4.0/src/seek_sim2.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/seek_sim2.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,211 @@
++/*
++ * A Driver for disksim that generates block requests to match
++ * the seek parameters in the [device].seek file. 
++ */
++
++#include <stdio.h>
++#include <assert.h>
++#include <stdlib.h>
++#include <string.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <math.h>
++//#include "syssim_interface.h"
++#include "disksim_interface.h"
++#include "disksim_rand48.h"
++#include "skippy_opts.h"
++
++typedef	struct	{
++  int n;
++  double sum;
++  double sqr;
++} Stat;
++
++static double now = 0;		/* current time */
++static double next_event = -1;	/* next event */
++static int completed = 0;	/* last request was completed */
++static Stat st;
++
++void
++panic(const char *s)
++{
++  perror(s);
++  exit(1);
++}
++
++
++void
++add_statistics(Stat *s, double x)
++{
++  s->n++;
++  s->sum += x;
++  s->sqr += x*x;
++}
++
++
++void
++print_statistics(Stat *s, const char *title)
++{
++  double avg, std;
++
++  avg = s->sum/s->n;
++  std = sqrt((s->sqr - 2*avg*s->sum + s->n*avg*avg) / s->n);
++  printf("%s: n=%d average=%f std. deviation=%f\n", title, s->n, avg, std);
++}
++
++
++void
++syssim_schedule_callback(disksim_interface_callback_t fn, 
++			 double t, 
++			 void *ctx)
++{
++  next_event = t;
++}
++
++
++/*
++ * de-scehdule a callback.
++ */
++void
++syssim_deschedule_callback(double t, void *ctx)
++{
++  next_event = -1;
++}
++
++void
++syssim_report_completion(double t, struct disksim_request *r, void *ctx)
++{
++  completed = 1;
++  now = t;
++  add_statistics(&st, t - r->start);
++}
++
++int seek_sim(
++		struct disksim_interface *disksim,
++		const int measurements,
++		const size_t sector_size,
++		const int write_flag)
++{
++    double t; 
++    double sum;
++    unsigned long pos=0;
++    int nbytes; 
++    int i; 
++    struct disksim_request r;
++    int base = 0;
++
++    fprintf(stdout, "# Seek distances measured: %d\n", measurements);
++
++    sum = 0;
++    //    for ( base = 0; base < sector_size*measurements; base += sector_size )
++    //    for ( base = 0; base < sector_size*1000; base += 4096 )
++    {
++      pos = 0;
++	for (i=0; i<measurements; i++) 
++	{
++	  r.start = now;
++	  //	  r.flags = DISKSIM_READ;
++	  r.flags = DISKSIM_WRITE;
++	  r.devno = 0;
++	  r.bytecount = sector_size;
++	  //	  r.blkno = base;	  r.blkno = base;
++	  r.blkno = 0;
++	  
++	  /* reset the disk position */
++	  if (write_flag) {
++	    r.flags = DISKSIM_WRITE;
++	  }
++	  
++	  disksim_interface_request_arrive(disksim, now, &r);
++
++	  /* Process events until this I/O is completed */
++	  while(next_event >= 0) {
++	    now = next_event;
++	    next_event = -1;
++	    disksim_interface_internal_event(disksim, now, 0);
++	  }
++
++	  pos = 0;
++
++	  /* save the current time */
++	  
++	  /* lseek(fd, i*sector_size, SEEK_CUR) */
++	  r.start = now;
++	  r.flags = DISKSIM_WRITE;
++	  r.devno = 0;
++	  r.bytecount = sector_size;
++	  r.blkno = i+base/sector_size;
++	  
++	  /* reset the disk position */
++	  if (write_flag) {
++	    r.flags = DISKSIM_WRITE;
++	  }
++	  
++	  t = now;
++	  disksim_interface_request_arrive(disksim, now, &r);
++
++	  /* Process events until this I/O is completed */
++	  while(next_event >= 0) {
++	    now = next_event;
++	    next_event = -1;
++	    disksim_interface_internal_event(disksim, now, 0);
++	  }
++	  
++	  fprintf(stdout, "%d %lf\n", i, now-t);
++	}
++
++      }
++
++    return 0; 
++}
++
++
++
++int
++main(int argc, char *argv[])
++{
++	int nsectors;
++	//	struct stat; 
++	//	struct disksim *disksim, *disksim2;
++	struct stat buf;
++	int len = 8192000;
++	int test_encapsulation;
++	struct disksim_interface* disksim;
++
++	struct gengetopt_args_info args_info; 
++
++	if (argc != 4 || (nsectors = atoi(argv[3])) <= 0) {
++	  fprintf(stderr, "usage: %s <param file> <output file> <#nsectors>\n",
++		  argv[0]);
++	  exit(1);
++	}
++
++	if (stat(argv[1], &buf) < 0)
++      	  panic(argv[1]);
++
++  //	nsectors = args_info.sectors_arg; 
++	test_encapsulation = 0;//args_info.test_encapsulation_flag; 
++
++	disksim = disksim_interface_initialize(argv[1], 
++					       argv[2],
++					       syssim_report_completion,
++					       syssim_schedule_callback,
++					       syssim_deschedule_callback,
++					       0,
++					       0,
++					       0);
++
++	/* This simulates the skippy algorithm */
++	seek_sim(disksim, 
++		 nsectors,
++		 512,
++		 0); 
++
++
++
++	//	if (test_encapsulation) {
++	//		disksim_interface_shutdown(disksim2, now);
++	//	}
++
++	exit(0);
++}
+diff -uNr disksim_orig/disksim-4.0/src/skippy_opts.c disksim-src_64bit/src/skippy_opts.c
+--- disksim_orig/disksim-4.0/src/skippy_opts.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/skippy_opts.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,652 @@
++/*
++  File autogenerated by gengetopt version 2.17
++  generated with the following command:
++  gengetopt -F skippy_opts -S --set-version=0.1 --set-package=disk-extract 
++
++  The developers of gengetopt consider the fixed text that goes in all
++  gengetopt output files to be in the public domain:
++  we make no copyright claims on it.
++*/
++
++/* If we use autoconf.  */
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#include "getopt.h"
++
++#include "skippy_opts.h"
++
++const char *gengetopt_args_info_purpose = "";
++
++const char *gengetopt_args_info_usage = "Usage: disk-extract [OPTIONS]...";
++
++const char *gengetopt_args_info_help[] = {
++  "  -h, --help                Print help and exit",
++  "  -V, --version             Print version and exit",
++  "  -p, --paramfile=STRING    The disksim parameter file to use",
++  "  -o, --outfile=STRING      Output file  (default=`syssim.out')",
++  "  -s, --sectors=INT         Number of sectors  (default=`2676846')",
++  "      --test-encapsulation  Test encapsulation  (default=off)",
++  "      --measurements=INT    Number of measurements to run  (default=`256')",
++  "      --sector-size=INT     Size (bytes) of a single sector  (default=`512')",
++  "      --write               Flag to use reads or writes  (default=off)",
++    0
++};
++
++static
++void clear_given (struct gengetopt_args_info *args_info);
++static
++void clear_args (struct gengetopt_args_info *args_info);
++
++static int
++cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_info *args_info, int override, int initialize, int check_required, const char *additional_error);
++
++static int
++cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
++struct line_list
++{
++  char * string_arg;
++  struct line_list * next;
++};
++
++static struct line_list *cmd_line_list = 0;
++static struct line_list *cmd_line_list_tmp = 0;
++
++static void
++free_cmd_list(void)
++{
++  /* free the list of a previous call */
++  if (cmd_line_list)
++    {
++      while (cmd_line_list) {
++        cmd_line_list_tmp = cmd_line_list;
++        cmd_line_list = cmd_line_list->next;
++        free (cmd_line_list_tmp->string_arg);
++        free (cmd_line_list_tmp);
++      }
++    }
++}
++
++
++static char *
++gengetopt_strdup (const char *s);
++
++static
++void clear_given (struct gengetopt_args_info *args_info)
++{
++  args_info->help_given = 0 ;
++  args_info->version_given = 0 ;
++  args_info->paramfile_given = 0 ;
++  args_info->outfile_given = 0 ;
++  args_info->sectors_given = 0 ;
++  args_info->test_encapsulation_given = 0 ;
++  args_info->measurements_given = 0 ;
++  args_info->sector_size_given = 0 ;
++  args_info->write_given = 0 ;
++}
++
++static
++void clear_args (struct gengetopt_args_info *args_info)
++{
++  args_info->paramfile_arg = NULL;
++  args_info->paramfile_orig = NULL;
++  args_info->outfile_arg = gengetopt_strdup ("syssim.out");
++  args_info->outfile_orig = NULL;
++  args_info->sectors_arg = 2676846;
++  args_info->sectors_orig = NULL;
++  args_info->test_encapsulation_flag = 0;
++  args_info->measurements_arg = 256;
++  args_info->measurements_orig = NULL;
++  args_info->sector_size_arg = 512;
++  args_info->sector_size_orig = NULL;
++  args_info->write_flag = 0;
++  
++}
++
++static
++void init_args_info(struct gengetopt_args_info *args_info)
++{
++  args_info->help_help = gengetopt_args_info_help[0] ;
++  args_info->version_help = gengetopt_args_info_help[1] ;
++  args_info->paramfile_help = gengetopt_args_info_help[2] ;
++  args_info->outfile_help = gengetopt_args_info_help[3] ;
++  args_info->sectors_help = gengetopt_args_info_help[4] ;
++  args_info->test_encapsulation_help = gengetopt_args_info_help[5] ;
++  args_info->measurements_help = gengetopt_args_info_help[6] ;
++  args_info->sector_size_help = gengetopt_args_info_help[7] ;
++  args_info->write_help = gengetopt_args_info_help[8] ;
++  
++}
++
++void
++cmdline_parser_print_version (void)
++{
++  printf ("%s %s\n", CMDLINE_PARSER_PACKAGE, CMDLINE_PARSER_VERSION);
++}
++
++void
++cmdline_parser_print_help (void)
++{
++  int i = 0;
++  cmdline_parser_print_version ();
++
++  if (strlen(gengetopt_args_info_purpose) > 0)
++    printf("\n%s\n", gengetopt_args_info_purpose);
++
++  printf("\n%s\n\n", gengetopt_args_info_usage);
++  while (gengetopt_args_info_help[i])
++    printf("%s\n", gengetopt_args_info_help[i++]);
++}
++
++void
++cmdline_parser_init (struct gengetopt_args_info *args_info)
++{
++  clear_given (args_info);
++  clear_args (args_info);
++  init_args_info (args_info);
++}
++
++static void
++cmdline_parser_release (struct gengetopt_args_info *args_info)
++{
++  
++  if (args_info->paramfile_arg)
++    {
++      free (args_info->paramfile_arg); /* free previous argument */
++      args_info->paramfile_arg = 0;
++    }
++  if (args_info->paramfile_orig)
++    {
++      free (args_info->paramfile_orig); /* free previous argument */
++      args_info->paramfile_orig = 0;
++    }
++  if (args_info->outfile_arg)
++    {
++      free (args_info->outfile_arg); /* free previous argument */
++      args_info->outfile_arg = 0;
++    }
++  if (args_info->outfile_orig)
++    {
++      free (args_info->outfile_orig); /* free previous argument */
++      args_info->outfile_orig = 0;
++    }
++  if (args_info->sectors_orig)
++    {
++      free (args_info->sectors_orig); /* free previous argument */
++      args_info->sectors_orig = 0;
++    }
++  if (args_info->measurements_orig)
++    {
++      free (args_info->measurements_orig); /* free previous argument */
++      args_info->measurements_orig = 0;
++    }
++  if (args_info->sector_size_orig)
++    {
++      free (args_info->sector_size_orig); /* free previous argument */
++      args_info->sector_size_orig = 0;
++    }
++  
++  clear_given (args_info);
++}
++
++int
++cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_info)
++{
++  FILE *outfile;
++  int i = 0;
++
++  outfile = fopen(filename, "w");
++
++  if (!outfile)
++    {
++      fprintf (stderr, "%s: cannot open file for writing: %s\n", CMDLINE_PARSER_PACKAGE, filename);
++      return EXIT_FAILURE;
++    }
++
++  if (args_info->help_given) {
++    fprintf(outfile, "%s\n", "help");
++  }
++  if (args_info->version_given) {
++    fprintf(outfile, "%s\n", "version");
++  }
++  if (args_info->paramfile_given) {
++    if (args_info->paramfile_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "paramfile", args_info->paramfile_orig);
++    } else {
++      fprintf(outfile, "%s\n", "paramfile");
++    }
++  }
++  if (args_info->outfile_given) {
++    if (args_info->outfile_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "outfile", args_info->outfile_orig);
++    } else {
++      fprintf(outfile, "%s\n", "outfile");
++    }
++  }
++  if (args_info->sectors_given) {
++    if (args_info->sectors_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "sectors", args_info->sectors_orig);
++    } else {
++      fprintf(outfile, "%s\n", "sectors");
++    }
++  }
++  if (args_info->test_encapsulation_given) {
++    fprintf(outfile, "%s\n", "test-encapsulation");
++  }
++  if (args_info->measurements_given) {
++    if (args_info->measurements_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "measurements", args_info->measurements_orig);
++    } else {
++      fprintf(outfile, "%s\n", "measurements");
++    }
++  }
++  if (args_info->sector_size_given) {
++    if (args_info->sector_size_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "sector-size", args_info->sector_size_orig);
++    } else {
++      fprintf(outfile, "%s\n", "sector-size");
++    }
++  }
++  if (args_info->write_given) {
++    fprintf(outfile, "%s\n", "write");
++  }
++  
++  fclose (outfile);
++
++  i = EXIT_SUCCESS;
++  return i;
++}
++
++void
++cmdline_parser_free (struct gengetopt_args_info *args_info)
++{
++  cmdline_parser_release (args_info);
++}
++
++
++/* gengetopt_strdup() */
++/* strdup.c replacement of strdup, which is not standard */
++char *
++gengetopt_strdup (const char *s)
++{
++  char *result = NULL;
++  if (!s)
++    return result;
++
++  result = (char*)malloc(strlen(s) + 1);
++  if (result == (char*)0)
++    return (char*)0;
++  strcpy(result, s);
++  return result;
++}
++
++int
++cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_info)
++{
++  return cmdline_parser2 (argc, argv, args_info, 0, 1, 1);
++}
++
++int
++cmdline_parser2 (int argc, char * const *argv, struct gengetopt_args_info *args_info, int override, int initialize, int check_required)
++{
++  int result;
++
++  result = cmdline_parser_internal (argc, argv, args_info, override, initialize, check_required, NULL);
++
++  if (result == EXIT_FAILURE)
++    {
++      cmdline_parser_free (args_info);
++      exit (EXIT_FAILURE);
++    }
++  
++  return result;
++}
++
++int
++cmdline_parser_required (struct gengetopt_args_info *args_info, const char *prog_name)
++{
++  int result = EXIT_SUCCESS;
++
++  if (cmdline_parser_required2(args_info, prog_name, NULL) > 0)
++    result = EXIT_FAILURE;
++
++  if (result == EXIT_FAILURE)
++    {
++      cmdline_parser_free (args_info);
++      exit (EXIT_FAILURE);
++    }
++  
++  return result;
++}
++
++int
++cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error)
++{
++  int error = 0;
++
++  /* checks for required options */
++  if (! args_info->paramfile_given)
++    {
++      fprintf (stderr, "%s: '--paramfile' ('-p') option required%s\n", prog_name, (additional_error ? additional_error : ""));
++      error = 1;
++    }
++  
++  
++  /* checks for dependences among options */
++
++  return error;
++}
++
++int
++cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_info *args_info, int override, int initialize, int check_required, const char *additional_error)
++{
++  int c;	/* Character of the parsed option.  */
++
++  int error = 0;
++  struct gengetopt_args_info local_args_info;
++
++  if (initialize)
++    cmdline_parser_init (args_info);
++
++  cmdline_parser_init (&local_args_info);
++
++  optarg = 0;
++  optind = 0;
++  opterr = 1;
++  optopt = '?';
++
++  while (1)
++    {
++      int option_index = 0;
++      char *stop_char;
++
++      static struct option long_options[] = {
++        { "help",	0, NULL, 'h' },
++        { "version",	0, NULL, 'V' },
++        { "paramfile",	1, NULL, 'p' },
++        { "outfile",	1, NULL, 'o' },
++        { "sectors",	1, NULL, 's' },
++        { "test-encapsulation",	0, NULL, 0 },
++        { "measurements",	1, NULL, 0 },
++        { "sector-size",	1, NULL, 0 },
++        { "write",	0, NULL, 0 },
++        { NULL,	0, NULL, 0 }
++      };
++
++      stop_char = 0;
++      c = getopt_long (argc, argv, "hVp:o:s:", long_options, &option_index);
++
++      if (c == -1) break;	/* Exit from `while (1)' loop.  */
++
++      switch (c)
++        {
++        case 'h':	/* Print help and exit.  */
++          cmdline_parser_print_help ();
++          cmdline_parser_free (&local_args_info);
++          exit (EXIT_SUCCESS);
++
++        case 'V':	/* Print version and exit.  */
++          cmdline_parser_print_version ();
++          cmdline_parser_free (&local_args_info);
++          exit (EXIT_SUCCESS);
++
++        case 'p':	/* The disksim parameter file to use.  */
++          if (local_args_info.paramfile_given)
++            {
++              fprintf (stderr, "%s: `--paramfile' (`-p') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++              goto failure;
++            }
++          if (args_info->paramfile_given && ! override)
++            continue;
++          local_args_info.paramfile_given = 1;
++          args_info->paramfile_given = 1;
++          if (args_info->paramfile_arg)
++            free (args_info->paramfile_arg); /* free previous string */
++          args_info->paramfile_arg = gengetopt_strdup (optarg);
++          if (args_info->paramfile_orig)
++            free (args_info->paramfile_orig); /* free previous string */
++          args_info->paramfile_orig = gengetopt_strdup (optarg);
++          break;
++
++        case 'o':	/* Output file.  */
++          if (local_args_info.outfile_given)
++            {
++              fprintf (stderr, "%s: `--outfile' (`-o') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++              goto failure;
++            }
++          if (args_info->outfile_given && ! override)
++            continue;
++          local_args_info.outfile_given = 1;
++          args_info->outfile_given = 1;
++          if (args_info->outfile_arg)
++            free (args_info->outfile_arg); /* free previous string */
++          args_info->outfile_arg = gengetopt_strdup (optarg);
++          if (args_info->outfile_orig)
++            free (args_info->outfile_orig); /* free previous string */
++          args_info->outfile_orig = gengetopt_strdup (optarg);
++          break;
++
++        case 's':	/* Number of sectors.  */
++          if (local_args_info.sectors_given)
++            {
++              fprintf (stderr, "%s: `--sectors' (`-s') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++              goto failure;
++            }
++          if (args_info->sectors_given && ! override)
++            continue;
++          local_args_info.sectors_given = 1;
++          args_info->sectors_given = 1;
++          args_info->sectors_arg = strtol (optarg, &stop_char, 0);
++          if (!(stop_char && *stop_char == '\0')) {
++            fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
++            goto failure;
++          }
++          if (args_info->sectors_orig)
++            free (args_info->sectors_orig); /* free previous string */
++          args_info->sectors_orig = gengetopt_strdup (optarg);
++          break;
++
++
++        case 0:	/* Long option with no short option */
++          /* Test encapsulation.  */
++          if (strcmp (long_options[option_index].name, "test-encapsulation") == 0)
++          {
++            if (local_args_info.test_encapsulation_given)
++              {
++                fprintf (stderr, "%s: `--test-encapsulation' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++                goto failure;
++              }
++            if (args_info->test_encapsulation_given && ! override)
++              continue;
++            local_args_info.test_encapsulation_given = 1;
++            args_info->test_encapsulation_given = 1;
++            args_info->test_encapsulation_flag = !(args_info->test_encapsulation_flag);
++          }
++          /* Number of measurements to run.  */
++          else if (strcmp (long_options[option_index].name, "measurements") == 0)
++          {
++            if (local_args_info.measurements_given)
++              {
++                fprintf (stderr, "%s: `--measurements' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++                goto failure;
++              }
++            if (args_info->measurements_given && ! override)
++              continue;
++            local_args_info.measurements_given = 1;
++            args_info->measurements_given = 1;
++            args_info->measurements_arg = strtol (optarg, &stop_char, 0);
++            if (!(stop_char && *stop_char == '\0')) {
++              fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
++              goto failure;
++            }
++            if (args_info->measurements_orig)
++              free (args_info->measurements_orig); /* free previous string */
++            args_info->measurements_orig = gengetopt_strdup (optarg);
++          }
++          /* Size (bytes) of a single sector.  */
++          else if (strcmp (long_options[option_index].name, "sector-size") == 0)
++          {
++            if (local_args_info.sector_size_given)
++              {
++                fprintf (stderr, "%s: `--sector-size' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++                goto failure;
++              }
++            if (args_info->sector_size_given && ! override)
++              continue;
++            local_args_info.sector_size_given = 1;
++            args_info->sector_size_given = 1;
++            args_info->sector_size_arg = strtol (optarg, &stop_char, 0);
++            if (!(stop_char && *stop_char == '\0')) {
++              fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
++              goto failure;
++            }
++            if (args_info->sector_size_orig)
++              free (args_info->sector_size_orig); /* free previous string */
++            args_info->sector_size_orig = gengetopt_strdup (optarg);
++          }
++          /* Flag to use reads or writes.  */
++          else if (strcmp (long_options[option_index].name, "write") == 0)
++          {
++            if (local_args_info.write_given)
++              {
++                fprintf (stderr, "%s: `--write' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++                goto failure;
++              }
++            if (args_info->write_given && ! override)
++              continue;
++            local_args_info.write_given = 1;
++            args_info->write_given = 1;
++            args_info->write_flag = !(args_info->write_flag);
++          }
++          
++          break;
++        case '?':	/* Invalid option.  */
++          /* `getopt_long' already printed an error message.  */
++          goto failure;
++
++        default:	/* bug: option not considered.  */
++          fprintf (stderr, "%s: option unknown: %c%s\n", CMDLINE_PARSER_PACKAGE, c, (additional_error ? additional_error : ""));
++          abort ();
++        } /* switch */
++    } /* while */
++
++
++
++  if (check_required)
++    {
++      error += cmdline_parser_required2 (args_info, argv[0], additional_error);
++    }
++
++  cmdline_parser_release (&local_args_info);
++
++  if ( error )
++    return (EXIT_FAILURE);
++
++  return 0;
++
++failure:
++  
++  cmdline_parser_release (&local_args_info);
++  return (EXIT_FAILURE);
++}
++
++static unsigned int
++cmdline_parser_create_argv(const char *cmdline_, char ***argv_ptr, const char *prog_name)
++{
++  char *cmdline, *p;
++  size_t n = 0, j;
++  int i;
++
++  if (prog_name) {
++    cmd_line_list_tmp = (struct line_list *) malloc (sizeof (struct line_list));
++    cmd_line_list_tmp->next = cmd_line_list;
++    cmd_line_list = cmd_line_list_tmp;
++    cmd_line_list->string_arg = gengetopt_strdup (prog_name);
++
++    ++n;
++  }
++
++  cmdline = gengetopt_strdup(cmdline_);
++  p = cmdline;
++
++  while (p && strlen(p))
++    {
++      j = strcspn(p, " \t");
++      ++n;
++      if (j && j < strlen(p))
++        {
++          p[j] = '\0';
++
++          cmd_line_list_tmp = (struct line_list *) malloc (sizeof (struct line_list));
++          cmd_line_list_tmp->next = cmd_line_list;
++          cmd_line_list = cmd_line_list_tmp;
++          cmd_line_list->string_arg = gengetopt_strdup (p);
++
++          p += (j+1);
++          p += strspn(p, " \t");
++        }
++      else
++        {
++          cmd_line_list_tmp = (struct line_list *) malloc (sizeof (struct line_list));
++          cmd_line_list_tmp->next = cmd_line_list;
++          cmd_line_list = cmd_line_list_tmp;
++          cmd_line_list->string_arg = gengetopt_strdup (p);
++
++          break;
++        }
++    }
++
++  *argv_ptr = (char **) malloc((n + 1) * sizeof(char *));
++  cmd_line_list_tmp = cmd_line_list;
++  for (i = (n-1); i >= 0; --i)
++    {
++      (*argv_ptr)[i] = cmd_line_list_tmp->string_arg;
++      cmd_line_list_tmp = cmd_line_list_tmp->next;
++    }
++
++  (*argv_ptr)[n] = NULL;
++
++  free(cmdline);
++  return n;
++}
++
++int
++cmdline_parser_string(const char *cmdline, struct gengetopt_args_info *args_info, const char *prog_name)
++{
++  return cmdline_parser_string2(cmdline, args_info, prog_name, 0, 1, 1);
++}
++
++int
++cmdline_parser_string2(const char *cmdline, struct gengetopt_args_info *args_info, const char *prog_name,
++    int override, int initialize, int check_required)
++{
++  char **argv_ptr = 0;
++  int result;
++  unsigned int argc;
++  
++  argc = cmdline_parser_create_argv(cmdline, &argv_ptr, prog_name);
++  
++  result =
++    cmdline_parser_internal (argc, argv_ptr, args_info, override, initialize, check_required, 0);
++  
++  if (argv_ptr)
++    {
++      free (argv_ptr);
++    }
++
++  free_cmd_list();
++  
++  if (result == EXIT_FAILURE)
++    {
++      cmdline_parser_free (args_info);
++      exit (EXIT_FAILURE);
++    }
++  
++  return result;
++}
++
+diff -uNr disksim_orig/disksim-4.0/src/skippy_opts.h disksim-src_64bit/src/skippy_opts.h
+--- disksim_orig/disksim-4.0/src/skippy_opts.h	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/skippy_opts.h	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,92 @@
++/* skippy_opts.h */
++
++/* File autogenerated by gengetopt version 2.17  */
++
++#ifndef SKIPPY_OPTS_H
++#define SKIPPY_OPTS_H
++
++/* If we use autoconf.  */
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#ifdef __cplusplus
++extern "C" {
++#endif /* __cplusplus */
++
++#ifndef CMDLINE_PARSER_PACKAGE
++#define CMDLINE_PARSER_PACKAGE "disk-extract"
++#endif
++
++#ifndef CMDLINE_PARSER_VERSION
++#define CMDLINE_PARSER_VERSION "0.1"
++#endif
++
++struct gengetopt_args_info
++{
++  const char *help_help; /* Print help and exit help description.  */
++  const char *version_help; /* Print version and exit help description.  */
++  char * paramfile_arg;	/* The disksim parameter file to use.  */
++  char * paramfile_orig;	/* The disksim parameter file to use original value given at command line.  */
++  const char *paramfile_help; /* The disksim parameter file to use help description.  */
++  char * outfile_arg;	/* Output file (default='syssim.out').  */
++  char * outfile_orig;	/* Output file original value given at command line.  */
++  const char *outfile_help; /* Output file help description.  */
++  int sectors_arg;	/* Number of sectors (default='2676846').  */
++  char * sectors_orig;	/* Number of sectors original value given at command line.  */
++  const char *sectors_help; /* Number of sectors help description.  */
++  int test_encapsulation_flag;	/* Test encapsulation (default=off).  */
++  const char *test_encapsulation_help; /* Test encapsulation help description.  */
++  int measurements_arg;	/* Number of measurements to run (default='256').  */
++  char * measurements_orig;	/* Number of measurements to run original value given at command line.  */
++  const char *measurements_help; /* Number of measurements to run help description.  */
++  int sector_size_arg;	/* Size (bytes) of a single sector (default='512').  */
++  char * sector_size_orig;	/* Size (bytes) of a single sector original value given at command line.  */
++  const char *sector_size_help; /* Size (bytes) of a single sector help description.  */
++  int write_flag;	/* Flag to use reads or writes (default=off).  */
++  const char *write_help; /* Flag to use reads or writes help description.  */
++  
++  int help_given ;	/* Whether help was given.  */
++  int version_given ;	/* Whether version was given.  */
++  int paramfile_given ;	/* Whether paramfile was given.  */
++  int outfile_given ;	/* Whether outfile was given.  */
++  int sectors_given ;	/* Whether sectors was given.  */
++  int test_encapsulation_given ;	/* Whether test-encapsulation was given.  */
++  int measurements_given ;	/* Whether measurements was given.  */
++  int sector_size_given ;	/* Whether sector-size was given.  */
++  int write_given ;	/* Whether write was given.  */
++
++} ;
++
++extern const char *gengetopt_args_info_purpose;
++extern const char *gengetopt_args_info_usage;
++extern const char *gengetopt_args_info_help[];
++
++int cmdline_parser (int argc, char * const *argv,
++  struct gengetopt_args_info *args_info);
++int cmdline_parser2 (int argc, char * const *argv,
++  struct gengetopt_args_info *args_info,
++  int override, int initialize, int check_required);
++int cmdline_parser_file_save(const char *filename,
++  struct gengetopt_args_info *args_info);
++
++void cmdline_parser_print_help(void);
++void cmdline_parser_print_version(void);
++
++void cmdline_parser_init (struct gengetopt_args_info *args_info);
++void cmdline_parser_free (struct gengetopt_args_info *args_info);
++
++int cmdline_parser_string (const char *cmdline, struct gengetopt_args_info *args_info,
++  const char *prog_name);
++int cmdline_parser_string2 (const char *cmdline, struct gengetopt_args_info *args_info,
++  const char *prog_name,
++  int override, int initialize, int check_required);
++
++int cmdline_parser_required (struct gengetopt_args_info *args_info,
++  const char *prog_name);
++
++
++#ifdef __cplusplus
++}
++#endif /* __cplusplus */
++#endif /* SKIPPY_OPTS_H */
+diff -uNr disksim_orig/disksim-4.0/src/skippy_sim.c disksim-src_64bit/src/skippy_sim.c
+--- disksim_orig/disksim-4.0/src/skippy_sim.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/skippy_sim.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,167 @@
++/*
++ * A Driver for disksim that generates block requests based on the 
++ * skippy algorithm from~\cite{talagala:extract}
++ */
++
++#include <stdio.h>
++#include <string.h>
++#include <assert.h>
++#include <stdlib.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <math.h>
++//#include "syssim_interface.h"
++#include "disksim_interface.h"
++/*#include "disksim_rand48.h"*/
++#include "disksim_interface_private.h"
++#include "skippy_opts.h"
++
++
++#define	BLOCK	4096
++#define	SECTOR	512 
++#define	BLOCK2SECTOR	(BLOCK/SECTOR)
++
++typedef	struct	{
++  int n;
++  double sum;
++  double sqr;
++} Stat;
++
++
++static double now = 0;		/* current time */
++static double next_event = -1;	/* next event */
++static int completed = 0;	/* last request was completed */
++static Stat st;
++
++void
++panic(const char *s)
++{
++  perror(s);
++  exit(1);
++}
++
++void
++add_statistics(Stat *s, double x)
++{
++  s->n++;
++  s->sum += x;
++  s->sqr += x*x;
++}
++
++void
++print_statistics(Stat *s, const char *title)
++{
++  double avg, std;
++
++  avg = s->sum/s->n;
++  std = sqrt((s->sqr - 2*avg*s->sum + s->n*avg*avg) / s->n);
++  printf("%s: n=%d average=%f std. deviation=%f\n", title, s->n, avg, std);
++}
++
++void
++syssim_schedule_callback(disksim_interface_callback_t fn, 
++			 double t, 
++			 void *ctx)
++{
++  next_event = t;
++}
++
++
++/*
++ * de-scehdule a callback.
++ */
++void
++syssim_deschedule_callback(double t, void *ctx)
++{
++  next_event = -1;
++}
++
++
++void
++syssim_report_completion(double t, struct disksim_request *r, void *ctx)
++{
++  completed = 1;
++  now = t;
++  add_statistics(&st, t - r->start);
++}
++
++int
++main(int argc, char *argv[])
++{
++  int i;
++  int nsectors;
++  struct stat buf;
++  struct disksim_request r;
++  struct disksim_interface *disksim;
++  unsigned long pos=0;
++
++  int measurements;
++  struct stat; 
++  int len = 8192000;
++  int test_encapsulation;
++  struct disksim_interface* iface;  
++  struct gengetopt_args_info args_info; 
++
++  double t;
++  
++  if (argc != 4 || (measurements = atoi(argv[3])) <= 0) {
++    fprintf(stderr, "usage: %s <param file> <output file> <#measurements>\n",
++	    argv[0]);
++    exit(1);
++  }
++
++  if (stat(argv[1], &buf) < 0)
++    panic(argv[1]);
++
++  disksim = disksim_interface_initialize(argv[1], 
++					 argv[2],
++					 syssim_report_completion,
++					 syssim_schedule_callback,
++					 syssim_deschedule_callback,
++					 0,
++					 0,
++					 0);
++
++  /* NOTE: it is bad to use this internal disksim call from external... */
++
++  for (i=1; i < measurements; i++) {
++    r.start = now;
++    //    r.flags = DISKSIM_READ;
++    r.flags = DISKSIM_WRITE;
++    r.devno = 0;
++    
++    pos = pos+i*SECTOR;
++
++    /* NOTE: it is bad to use this internal disksim call from external... */
++    r.blkno =  pos/SECTOR;
++
++    r.bytecount = SECTOR;
++    completed = 0;
++
++    t = now;
++    disksim_interface_request_arrive(disksim, now, &r);
++
++    /* Process events until this I/O is completed */
++    while(next_event >= 0) {
++      now = next_event;
++      next_event = -1;
++      disksim_interface_internal_event(disksim, now, 0);
++    }
++
++    fprintf(stdout, "%d %g\n",i,(now-t)*1000.0);
++
++    if (!completed) {
++      fprintf(stderr,
++	      "%s: internal error. Last event not completed %d\n",
++	      argv[0], i);
++      exit(1);
++    }
++    pos += SECTOR;
++  }
++
++  disksim_interface_shutdown(disksim, now);
++
++  print_statistics(&st, "response time");
++
++  exit(0);
++}
+diff -uNr disksim_orig/disksim-4.0/src/skippy_sim_cur.c disksim-src_64bit/src/skippy_sim_cur.c
+--- disksim_orig/disksim-4.0/src/skippy_sim_cur.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/skippy_sim_cur.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,270 @@
++/*
++ * A Driver for disksim that generates block requests based on the 
++ * skippy algorithm from~\cite{talagala:extract}
++ */
++
++#include <stdio.h>
++#include <string.h>
++#include <assert.h>
++#include <stdlib.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <math.h>
++//#include "syssim_interface.h"
++#include "disksim_interface.h"
++/*#include "disksim_rand48.h"*/
++#include "disksim_interface_private.h"
++#include "skippy_opts.h"
++
++
++#define	BLOCK	4096
++#define	SECTOR	512 
++#define	BLOCK2SECTOR	(BLOCK/SECTOR)
++
++typedef	struct	{
++  int n;
++  double sum;
++  double sqr;
++} Stat;
++
++
++static double now = 0;		/* current time */
++static double next_event = -1;	/* next event */
++static int completed = 0;	/* last request was completed */
++static Stat st;
++
++void
++panic(const char *s)
++{
++  perror(s);
++  exit(1);
++}
++
++void
++add_statistics(Stat *s, double x)
++{
++  s->n++;
++  s->sum += x;
++  s->sqr += x*x;
++}
++
++void
++print_statistics(Stat *s, const char *title)
++{
++  double avg, std;
++
++  avg = s->sum/s->n;
++  std = sqrt((s->sqr - 2*avg*s->sum + s->n*avg*avg) / s->n);
++  printf("%s: n=%d average=%f std. deviation=%f\n", title, s->n, avg, std);
++}
++
++void
++syssim_schedule_callback(disksim_interface_callback_t fn, 
++			 double t, 
++			 void *ctx)
++{
++  next_event = t;
++}
++
++
++/*
++ * de-scehdule a callback.
++ */
++void
++syssim_deschedule_callback(double t, void *ctx)
++{
++  next_event = -1;
++}
++
++
++void
++syssim_report_completion(double t, struct disksim_request *r, void *ctx)
++{
++  completed = 1;
++  now = t;
++  add_statistics(&st, t - r->start);
++}
++
++int
++main(int argc, char *argv[])
++{
++  int i;
++  int nsectors;
++  struct stat buf;
++  struct disksim_request r;
++  struct disksim_interface *disksim;
++  unsigned long pos=0;
++
++  int measurements;
++  struct stat; 
++  int len = 8192000;
++  int test_encapsulation;
++  struct disksim_interface* iface;  
++  struct gengetopt_args_info args_info; 
++
++  double t;
++  
++  if (argc != 4 || (measurements = atoi(argv[3])) <= 0) {
++    fprintf(stderr, "usage: %s <param file> <output file> <#measurements>\n",
++	    argv[0]);
++    exit(1);
++  }
++
++  if (stat(argv[1], &buf) < 0)
++    panic(argv[1]);
++
++  disksim = disksim_interface_initialize(argv[1], 
++					 argv[2],
++					 syssim_report_completion,
++					 syssim_schedule_callback,
++					 syssim_deschedule_callback,
++					 0,
++					 0,
++					 0);
++
++  /* NOTE: it is bad to use this internal disksim call from external... */
++  DISKSIM_srand48(1);
++
++  for (i=0; i < measurements; i++) {
++    r.start = now;
++    r.flags = DISKSIM_READ;
++    r.devno = 0;
++
++    /* NOTE: it is bad to use this internal disksim call from external... */
++    r.blkno =  pos; //BLOCK2SECTOR*(DISKSIM_lrand48()%(nsectors/BLOCK2SECTOR));
++    r.bytecount = SECTOR;
++    completed = 0;
++
++    t = now;
++    disksim_interface_request_arrive(disksim, now, &r);
++
++    /* Process events until this I/O is completed */
++    while(next_event >= 0) {
++      now = next_event;
++      next_event = -1;
++      disksim_interface_internal_event(disksim, now, 0);
++    }
++
++    pos+= SECTOR;
++    fprintf(stdout, "%d %g\n",i,(now-t)*1000.0);
++
++    if (!completed) {
++      fprintf(stderr,
++	      "%s: internal error. Last event not completed %d\n",
++	      argv[0], i);
++      exit(1);
++    }
++  }
++
++  disksim_interface_shutdown(disksim, now);
++
++  print_statistics(&st, "response time");
++
++  exit(0);
++}
++/*
++int skippy_sim(
++	       struct disksim_interface *disksim,
++		const int measurements,
++		const size_t sector_size,
++		const int write_flag)
++{
++    double t; 
++    unsigned long pos=0;
++    unsigned long nbytes; 
++    int i; 
++    struct disksim_request r;
++
++    fprintf(stdout, "# Stepsize distances measured: %d\n", measurements);
++
++    for (i=0; i<measurements; i++) {
++
++    /* save the current time *//*
++	t = syssim_gettime(); 
++	r.start = t;
++	r.flags = DISKSIM_READ;
++	r.devno = 0;
++	pos = pos+i*sector_size; 
++	r.blkno = pos;
++	r.bytecount = sector_size;
++	completed = 0;
++
++	/* lseek(fd, i*sector_size, SEEK_CUR) */
++
++	/* read(fd, buffer, sector_size) */
++	/*	if (write_flag)
++	    nbytes = syssim_write(disksim, pos, sector_size, syssim_gettime()); 
++	    else*/ 
++	//	    nbytes = syssim_read(disksim, pos, sector_size, syssim_gettime()); 
++/*
++	disksim_interface_request_arrive(disksim, t, &r);
++
++	while ( next_event >= 0 )
++	{
++	  t = next_event;
++	  next_event = -1;
++	  disksim_interface_internal_event(disksim, t, 0);
++	}
++
++	if (!completed) {
++	  fprintf(stderr,
++		  "internal error. Last event not completed %d\n",
++		  i);
++	  exit(1);
++	}
++
++	//	assert(nbytes == sector_size);
++
++	pos += sector_size; 
++
++	fprintf(stdout, "%d,    %g\n",i,(syssim_gettime()-t)*1000.0);
++    }
++
++    return 0; 
++}
++
++
++
++int
++main(int argc, char *argv[])
++{
++	int nsectors;
++	struct stat; 
++	int len = 8192000;
++	int test_encapsulation;
++	struct disksim_interface* iface;
++
++	struct gengetopt_args_info args_info; 
++
++	/* Parse the command-line arguments *//*
++	if (cmdline_parser(argc, argv, &args_info) != 0)
++		return (1);
++
++	nsectors = args_info.sectors_arg; 
++	test_encapsulation = args_info.test_encapsulation_flag; 
++
++
++	iface = disksim_interface_initialize(args_info.paramfile_arg,
++					     args_info.outfile_arg,
++					     0,
++					     0,
++					     0,
++					     NULL,
++					     argc,
++					     argv);
++
++					     /* This simulates the skippy algorithm *//*
++	skippy_sim(iface, 
++		   //			args_info.measurements_arg,
++		   //			args_info.sector_size_arg,
++		   9000,		
++		   512,
++		   args_info.write_flag); 
++
++	disksim_interface_shutdown(iface, syssim_gettime());
++
++	//	if (test_encapsulation) {
++	//		disksim_interface_shutdown(disksim2, syssim_gettime());
++	return 0;
++}
++										      */
+diff -uNr disksim_orig/disksim-4.0/src/syssim_interface.c disksim-src_64bit/src/syssim_interface.c
+--- disksim_orig/disksim-4.0/src/syssim_interface.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/syssim_interface.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,221 @@
++/*
++ * DiskSim Storage Subsystem Simulation Environment (Version 3.0)
++ * Revision Authors: John Bucy, Greg Ganger
++ * Contributors: John Griffin, Jiri Schindler, Steve Schlosser
++ *
++ * Copyright (c) of Carnegie Mellon University, 2001, 2002, 2003.
++ *
++ * This software is being provided by the copyright holders under the
++ * following license. By obtaining, using and/or copying this software,
++ * you agree that you have read, understood, and will comply with the
++ * following terms and conditions:
++ *
++ * Permission to reproduce, use, and prepare derivative works of this
++ * software is granted provided the copyright and "No Warranty" statements
++ * are included with all reproductions and derivative works and associated
++ * documentation. This software may also be redistributed without charge
++ * provided that the copyright and "No Warranty" statements are included
++ * in all redistributions.
++ *
++ * NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
++ * CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
++ * EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
++ * TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
++ * OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
++ * MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
++ * TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
++ * COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
++ * OR DOCUMENTATION.
++ *
++ */
++
++
++/*
++ * A sample skeleton for a system simulator that calls DiskSim as
++ * a slave.
++ *
++ * Contributed by Eran Gabber of Lucent Technologies - Bell Laboratories
++ *
++ * Usage:
++ *	syssim <parameters file> <output file> <max. block number>
++ * Example:
++ *	syssim parv.seagate out 2676846
++ */
++
++#include <assert.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <math.h>
++#include "disksim_interface.h"
++#include "syssim_interface.h"
++#include "disksim_rand48.h"
++#include "disksim_global.h"
++
++
++static double now = 0;		/* current time */
++double next_event = -1;	/* next event */
++
++const unsigned long BLOCK_SIZE=4096;
++const unsigned long SECTOR_SIZE=512;
++#define BLOCK2SECTOR (BLOCK_SIZE/SECTOR_SIZE)
++
++/*----- This is the private interface used by disksim_interface ----*/
++
++/*
++ * Schedule next callback at time t.
++ * Note that there is only *one* outstanding callback at any given time.
++ * The callback is for the earliest event.
++ */
++void
++syssim_schedule_callback(void (*f)(void *,double), double t)
++{
++  next_event = t;
++}
++
++
++/*
++ * de-scehdule a callback.
++ */
++void
++syssim_deschedule_callback(void (*f)())
++{
++  next_event = -1;
++}
++
++
++/**
++  * Reports completion back to the system simulator. 
++  *
++  * Internally, we set the completed flag for the request
++  * and update the current simulated time to t.  We may
++  * also want to execute a callback function. 
++  */
++void
++syssim_report_completion(double t, struct disksim_request *r)
++{
++  r->completed = 1;
++  now = t;
++  //add_statistics(&st, t - r->start);
++
++  // We may want to callback to the system simulator
++  // r->notify_completion(t, r);
++}
++
++
++
++/*------ THIS IS THE PUBLIC INTERFACE USED BY SYSTEM SIMULATORS --- */
++/**
++  * @brief Get the simulated time.
++  */
++double syssim_gettime() {
++	return now; 
++}
++
++/**
++  * @brief Read a block of data from the disk.
++  *
++  * @param disksim The disksim structure.
++  * @param blkno   The physical block number on the disk.
++  * @param count   The number of bytes to read starting at the blkno.
++  * @param arrive  The time to schedule the request. 
++  */
++unsigned long syssim_readblock(
++		struct disksim_interface *disksim, 
++		const unsigned long blkno, 
++		const unsigned long count, 
++		double arrive)
++{
++	struct disksim_request r; 
++
++	/* make sure the request arrives later than 'now' */
++	assert(arrive >= syssim_gettime()); 
++
++	memset(&r, 0, sizeof(struct disksim_request));
++
++	/* start */
++	r.start = arrive; 
++
++	/* Read request */
++	r.flags = DISKSIM_READ;
++
++	/* TODO: should we pass this in? */
++	r.devno = 0; 
++
++	/* set the block number to start from */
++	r.blkno = blkno;
++
++	assert(r.blkno >= 0);
++
++	/* set bytes to read */
++	r.bytecount = count;
++
++	//fprintf(stdout, "blkno=%llu, %1.3e\n",(unsigned long long) blkno,
++	//		(double)MS_TO_SYSSIMTIME(arrive));
++
++	/* schedule the request in disksim */
++	r.completed = 0;
++	disksim_interface_request_arrive(disksim, arrive, &r);
++
++	/* Process internal events until this I/O is completed */
++	while(next_event >= 0) {
++		now = next_event;
++		next_event = -1;
++		disksim_interface_internal_event(disksim, syssim_gettime(), 0);
++	}
++
++	if (!r.completed) {
++		fprintf(stderr, "syssim_readblock: internal error. Last read not completed\n");
++		return (off_t)-1;
++	}
++
++	/* read is complete sys_gettime() has current time */
++	return count; 
++}
++
++
++
++
++/**
++  * Simulate a read operation scheduled at time 'arrive'.
++  * The caller uses (syssim_gettime()-arrive) to 
++  * figure out how long the operation took. 
++  *
++  * This function only reads blocks.  If the request
++  * is not block-aligned, this operation will read as 
++  * many blocks as needed to fulfill the request. 
++  *
++  * @param disksim Points to the disksim structure. 
++  * @param pos     The starting offset (from device) for read.  
++  * @param count   The number of bytes to read.
++  * @param arrive  The arrival time for the request. 
++  *
++  * @returns The number of bytes read. 
++  */
++unsigned long syssim_read(
++		struct disksim_interface *disksim, 
++		const unsigned long pos, 
++		const size_t count, 
++		double arrive)
++{
++	struct disksim_request r; 
++	unsigned long sector; 
++	unsigned long nblks; 
++	unsigned long nbytes; 
++	
++	/* Calculate the physical blkno/sector (1 physical blk = 1 sector).
++	 * We assume the sector is 512 bytes. 
++	 */
++	sector = pos/SECTOR_SIZE;
++
++	/* calculate how many blocks to read */
++	nbytes = (pos % SECTOR_SIZE) + count; 
++	nblks = (unsigned long)ceill((double)nbytes/(double)SECTOR_SIZE);
++	r.bytecount = nblks*SECTOR_SIZE;
++	
++	/* read the blocks */
++	syssim_readblock(disksim, sector, nblks*SECTOR_SIZE, arrive); 
++	return count; 
++}
++
+diff -uNr disksim_orig/disksim-4.0/src/syssim_interface.h disksim-src_64bit/src/syssim_interface.h
+--- disksim_orig/disksim-4.0/src/syssim_interface.h	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/syssim_interface.h	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,137 @@
++/*-------------------------------------------------------------------------*/
++/**  @file disksim_interface.h
++ *   
++ *   @brief Prototypes for an interface between disksim and a system
++ *          simulator. 
++ *   
++ *   @author Ron Oldfield (raoldfi\@sandia.gov).
++ *   $Revision: 406 $.
++ *   $Date: 2005-10-07 15:08:29 -0600 (Fri, 07 Oct 2005) $.
++ *
++ */
++
++#include "disksim_interface.h"
++ 
++#ifndef _SYSSIM_INTERFACE_H_
++#define _SYSSIM_INTERFACE_H_
++
++#include <stdio.h>
++#include "disksim_global.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif
++
++#if defined(__STDC__) || defined(__cplusplus)
++
++
++	/*
++	 * Schedule next callback at time t.
++	 * Note that there is only *one* outstanding callback at any given time.
++	 * The callback is for the earliest event.
++	 */
++	extern void syssim_schedule_callback(
++			void (*f)(void *,double), 
++			double t); 
++
++
++	/*
++	 * de-scehdule a callback.
++	 */
++	extern void syssim_deschedule_callback(void (*f)()); 
++
++
++	/**
++	 * Reports completion back to the system simulator. 
++	 *
++	 * Internally, we set the completed flag for the request
++	 * and update the current simulated time to t.  We may
++	 * also want to execute a callback function. 
++	 */
++	extern void syssim_report_completion(double t, struct disksim_request *r); 
++
++
++
++	/*------ THIS IS THE PUBLIC INTERFACE USED BY SYSTEM SIMULATORS --- */
++	/**
++	 * @brief Get the simulated time.
++	 */
++	extern double syssim_gettime(); 
++
++
++	/**
++	 * Simulate a read operation scheduled at time 'arrive'.
++	 * The caller uses (syssim_gettime()-arrive) to 
++	 * figure out how long the operation took. 
++	 *
++	 * This function only reads blocks.  If the request
++	 * is not block-aligned, this operation will read as 
++	 * many blocks as needed to fulfill the request. 
++	 *
++	 * @param disksim Points to the disksim structure. 
++	 * @param pos     The starting offset (from device) for read.  
++	 * @param count   The number of bytes to read.
++	 * @param arrive  The arrival time for the request. 
++	 *
++	 * @returns The number of bytes read. 
++	 */
++	extern unsigned long syssim_readblock(
++			struct disksim_interface *disksim, 
++			const unsigned long blockno, 
++			const unsigned long count, 
++			double arrive); 
++
++	/**
++	 * Simulate a read operation scheduled at time 'arrive'.
++	 * The caller uses (syssim_gettime()-arrive) to 
++	 * figure out how long the operation took. 
++	 *
++	 * This function only reads blocks.  If the request
++	 * is not block-aligned, this operation will read as 
++	 * many blocks as needed to fulfill the request. 
++	 *
++	 * @param disksim Points to the disksim structure. 
++	 * @param pos     The starting offset (from device) for read.  
++	 * @param count   The number of bytes to read.
++	 * @param arrive  The arrival time for the request. 
++	 *
++	 * @returns The number of bytes read. 
++	 */
++          extern unsigned long syssim_read(
++			struct disksim_interface *disksim, 
++			const unsigned long pos, 
++			const size_t count, 
++			double arrive); 
++
++
++	/**
++	 * Simulate a write operation scheduled at time 'arrive'.
++	 * The caller uses (syssim_gettime()-arrive) to 
++	 * figure out how long the operation took. 
++	 *
++	 * This function only reads blocks.  If the request
++	 * is not block-aligned, this operation will read as 
++	 * many blocks as needed to fulfill the request. 
++	 *
++	 * @param disksim Points to the disksim structure. 
++	 * @param pos     The starting offset (from device) for read.  
++	 * @param count   The number of bytes to read.
++	 * @param arrive  The arrival time for the request. 
++	 *
++	 * @returns The number of bytes read. 
++	 */
++	extern unsigned long syssim_write(
++			struct disksim_interface *disksim, 
++			const unsigned long pos, 
++			const size_t count, 
++			double arrive); 
++
++
++#endif
++
++
++#ifdef __cplusplus
++}
++#endif
++
++#endif
+diff -uNr disksim_orig/disksim-4.0/src/syssim_opts.c disksim-src_64bit/src/syssim_opts.c
+--- disksim_orig/disksim-4.0/src/syssim_opts.c	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/syssim_opts.c	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,552 @@
++/*
++  File autogenerated by gengetopt version 2.17
++  generated with the following command:
++  gengetopt -F syssim_opts -S --set-version=0.1 --set-package=disk-extract 
++
++  The developers of gengetopt consider the fixed text that goes in all
++  gengetopt output files to be in the public domain:
++  we make no copyright claims on it.
++*/
++
++/* If we use autoconf.  */
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#include "getopt.h"
++
++#include "syssim_opts.h"
++
++const char *gengetopt_args_info_purpose = "";
++
++const char *gengetopt_args_info_usage = "Usage: disk-extract [OPTIONS]...";
++
++const char *gengetopt_args_info_help[] = {
++  "  -h, --help                Print help and exit",
++  "  -V, --version             Print version and exit",
++  "  -p, --paramfile=STRING    The disksim parameter file to use",
++  "  -o, --outfile=STRING      Output file  (default=`syssim.out')",
++  "  -s, --sectors=INT         Number of sectors  (default=`2676846')",
++  "      --test-encapsulation  Test encapsulation  (default=off)",
++    0
++};
++
++static
++void clear_given (struct gengetopt_args_info *args_info);
++static
++void clear_args (struct gengetopt_args_info *args_info);
++
++static int
++cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_info *args_info, int override, int initialize, int check_required, const char *additional_error);
++
++static int
++cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error);
++struct line_list
++{
++  char * string_arg;
++  struct line_list * next;
++};
++
++static struct line_list *cmd_line_list = 0;
++static struct line_list *cmd_line_list_tmp = 0;
++
++static void
++free_cmd_list(void)
++{
++  /* free the list of a previous call */
++  if (cmd_line_list)
++    {
++      while (cmd_line_list) {
++        cmd_line_list_tmp = cmd_line_list;
++        cmd_line_list = cmd_line_list->next;
++        free (cmd_line_list_tmp->string_arg);
++        free (cmd_line_list_tmp);
++      }
++    }
++}
++
++
++static char *
++gengetopt_strdup (const char *s);
++
++static
++void clear_given (struct gengetopt_args_info *args_info)
++{
++  args_info->help_given = 0 ;
++  args_info->version_given = 0 ;
++  args_info->paramfile_given = 0 ;
++  args_info->outfile_given = 0 ;
++  args_info->sectors_given = 0 ;
++  args_info->test_encapsulation_given = 0 ;
++}
++
++static
++void clear_args (struct gengetopt_args_info *args_info)
++{
++  args_info->paramfile_arg = NULL;
++  args_info->paramfile_orig = NULL;
++  args_info->outfile_arg = gengetopt_strdup ("syssim.out");
++  args_info->outfile_orig = NULL;
++  args_info->sectors_arg = 2676846;
++  args_info->sectors_orig = NULL;
++  args_info->test_encapsulation_flag = 0;
++  
++}
++
++static
++void init_args_info(struct gengetopt_args_info *args_info)
++{
++  args_info->help_help = gengetopt_args_info_help[0] ;
++  args_info->version_help = gengetopt_args_info_help[1] ;
++  args_info->paramfile_help = gengetopt_args_info_help[2] ;
++  args_info->outfile_help = gengetopt_args_info_help[3] ;
++  args_info->sectors_help = gengetopt_args_info_help[4] ;
++  args_info->test_encapsulation_help = gengetopt_args_info_help[5] ;
++  
++}
++
++void
++cmdline_parser_print_version (void)
++{
++  printf ("%s %s\n", CMDLINE_PARSER_PACKAGE, CMDLINE_PARSER_VERSION);
++}
++
++void
++cmdline_parser_print_help (void)
++{
++  int i = 0;
++  cmdline_parser_print_version ();
++
++  if (strlen(gengetopt_args_info_purpose) > 0)
++    printf("\n%s\n", gengetopt_args_info_purpose);
++
++  printf("\n%s\n\n", gengetopt_args_info_usage);
++  while (gengetopt_args_info_help[i])
++    printf("%s\n", gengetopt_args_info_help[i++]);
++}
++
++void
++cmdline_parser_init (struct gengetopt_args_info *args_info)
++{
++  clear_given (args_info);
++  clear_args (args_info);
++  init_args_info (args_info);
++}
++
++static void
++cmdline_parser_release (struct gengetopt_args_info *args_info)
++{
++  
++  if (args_info->paramfile_arg)
++    {
++      free (args_info->paramfile_arg); /* free previous argument */
++      args_info->paramfile_arg = 0;
++    }
++  if (args_info->paramfile_orig)
++    {
++      free (args_info->paramfile_orig); /* free previous argument */
++      args_info->paramfile_orig = 0;
++    }
++  if (args_info->outfile_arg)
++    {
++      free (args_info->outfile_arg); /* free previous argument */
++      args_info->outfile_arg = 0;
++    }
++  if (args_info->outfile_orig)
++    {
++      free (args_info->outfile_orig); /* free previous argument */
++      args_info->outfile_orig = 0;
++    }
++  if (args_info->sectors_orig)
++    {
++      free (args_info->sectors_orig); /* free previous argument */
++      args_info->sectors_orig = 0;
++    }
++  
++  clear_given (args_info);
++}
++
++int
++cmdline_parser_file_save(const char *filename, struct gengetopt_args_info *args_info)
++{
++  FILE *outfile;
++  int i = 0;
++
++  outfile = fopen(filename, "w");
++
++  if (!outfile)
++    {
++      fprintf (stderr, "%s: cannot open file for writing: %s\n", CMDLINE_PARSER_PACKAGE, filename);
++      return EXIT_FAILURE;
++    }
++
++  if (args_info->help_given) {
++    fprintf(outfile, "%s\n", "help");
++  }
++  if (args_info->version_given) {
++    fprintf(outfile, "%s\n", "version");
++  }
++  if (args_info->paramfile_given) {
++    if (args_info->paramfile_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "paramfile", args_info->paramfile_orig);
++    } else {
++      fprintf(outfile, "%s\n", "paramfile");
++    }
++  }
++  if (args_info->outfile_given) {
++    if (args_info->outfile_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "outfile", args_info->outfile_orig);
++    } else {
++      fprintf(outfile, "%s\n", "outfile");
++    }
++  }
++  if (args_info->sectors_given) {
++    if (args_info->sectors_orig) {
++      fprintf(outfile, "%s=\"%s\"\n", "sectors", args_info->sectors_orig);
++    } else {
++      fprintf(outfile, "%s\n", "sectors");
++    }
++  }
++  if (args_info->test_encapsulation_given) {
++    fprintf(outfile, "%s\n", "test-encapsulation");
++  }
++  
++  fclose (outfile);
++
++  i = EXIT_SUCCESS;
++  return i;
++}
++
++void
++cmdline_parser_free (struct gengetopt_args_info *args_info)
++{
++  cmdline_parser_release (args_info);
++}
++
++
++/* gengetopt_strdup() */
++/* strdup.c replacement of strdup, which is not standard */
++char *
++gengetopt_strdup (const char *s)
++{
++  char *result = NULL;
++  if (!s)
++    return result;
++
++  result = (char*)malloc(strlen(s) + 1);
++  if (result == (char*)0)
++    return (char*)0;
++  strcpy(result, s);
++  return result;
++}
++
++int
++cmdline_parser (int argc, char * const *argv, struct gengetopt_args_info *args_info)
++{
++  return cmdline_parser2 (argc, argv, args_info, 0, 1, 1);
++}
++
++int
++cmdline_parser2 (int argc, char * const *argv, struct gengetopt_args_info *args_info, int override, int initialize, int check_required)
++{
++  int result;
++
++  result = cmdline_parser_internal (argc, argv, args_info, override, initialize, check_required, NULL);
++
++  if (result == EXIT_FAILURE)
++    {
++      cmdline_parser_free (args_info);
++      exit (EXIT_FAILURE);
++    }
++  
++  return result;
++}
++
++int
++cmdline_parser_required (struct gengetopt_args_info *args_info, const char *prog_name)
++{
++  int result = EXIT_SUCCESS;
++
++  if (cmdline_parser_required2(args_info, prog_name, NULL) > 0)
++    result = EXIT_FAILURE;
++
++  if (result == EXIT_FAILURE)
++    {
++      cmdline_parser_free (args_info);
++      exit (EXIT_FAILURE);
++    }
++  
++  return result;
++}
++
++int
++cmdline_parser_required2 (struct gengetopt_args_info *args_info, const char *prog_name, const char *additional_error)
++{
++  int error = 0;
++
++  /* checks for required options */
++  if (! args_info->paramfile_given)
++    {
++      fprintf (stderr, "%s: '--paramfile' ('-p') option required%s\n", prog_name, (additional_error ? additional_error : ""));
++      error = 1;
++    }
++  
++  
++  /* checks for dependences among options */
++
++  return error;
++}
++
++int
++cmdline_parser_internal (int argc, char * const *argv, struct gengetopt_args_info *args_info, int override, int initialize, int check_required, const char *additional_error)
++{
++  int c;	/* Character of the parsed option.  */
++
++  int error = 0;
++  struct gengetopt_args_info local_args_info;
++
++  if (initialize)
++    cmdline_parser_init (args_info);
++
++  cmdline_parser_init (&local_args_info);
++
++  optarg = 0;
++  optind = 0;
++  opterr = 1;
++  optopt = '?';
++
++  while (1)
++    {
++      int option_index = 0;
++      char *stop_char;
++
++      static struct option long_options[] = {
++        { "help",	0, NULL, 'h' },
++        { "version",	0, NULL, 'V' },
++        { "paramfile",	1, NULL, 'p' },
++        { "outfile",	1, NULL, 'o' },
++        { "sectors",	1, NULL, 's' },
++        { "test-encapsulation",	0, NULL, 0 },
++        { NULL,	0, NULL, 0 }
++      };
++
++      stop_char = 0;
++      c = getopt_long (argc, argv, "hVp:o:s:", long_options, &option_index);
++
++      if (c == -1) break;	/* Exit from `while (1)' loop.  */
++
++      switch (c)
++        {
++        case 'h':	/* Print help and exit.  */
++          cmdline_parser_print_help ();
++          cmdline_parser_free (&local_args_info);
++          exit (EXIT_SUCCESS);
++
++        case 'V':	/* Print version and exit.  */
++          cmdline_parser_print_version ();
++          cmdline_parser_free (&local_args_info);
++          exit (EXIT_SUCCESS);
++
++        case 'p':	/* The disksim parameter file to use.  */
++          if (local_args_info.paramfile_given)
++            {
++              fprintf (stderr, "%s: `--paramfile' (`-p') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++              goto failure;
++            }
++          if (args_info->paramfile_given && ! override)
++            continue;
++          local_args_info.paramfile_given = 1;
++          args_info->paramfile_given = 1;
++          if (args_info->paramfile_arg)
++            free (args_info->paramfile_arg); /* free previous string */
++          args_info->paramfile_arg = gengetopt_strdup (optarg);
++          if (args_info->paramfile_orig)
++            free (args_info->paramfile_orig); /* free previous string */
++          args_info->paramfile_orig = gengetopt_strdup (optarg);
++          break;
++
++        case 'o':	/* Output file.  */
++          if (local_args_info.outfile_given)
++            {
++              fprintf (stderr, "%s: `--outfile' (`-o') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++              goto failure;
++            }
++          if (args_info->outfile_given && ! override)
++            continue;
++          local_args_info.outfile_given = 1;
++          args_info->outfile_given = 1;
++          if (args_info->outfile_arg)
++            free (args_info->outfile_arg); /* free previous string */
++          args_info->outfile_arg = gengetopt_strdup (optarg);
++          if (args_info->outfile_orig)
++            free (args_info->outfile_orig); /* free previous string */
++          args_info->outfile_orig = gengetopt_strdup (optarg);
++          break;
++
++        case 's':	/* Number of sectors.  */
++          if (local_args_info.sectors_given)
++            {
++              fprintf (stderr, "%s: `--sectors' (`-s') option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++              goto failure;
++            }
++          if (args_info->sectors_given && ! override)
++            continue;
++          local_args_info.sectors_given = 1;
++          args_info->sectors_given = 1;
++          args_info->sectors_arg = strtol (optarg, &stop_char, 0);
++          if (!(stop_char && *stop_char == '\0')) {
++            fprintf(stderr, "%s: invalid numeric value: %s\n", argv[0], optarg);
++            goto failure;
++          }
++          if (args_info->sectors_orig)
++            free (args_info->sectors_orig); /* free previous string */
++          args_info->sectors_orig = gengetopt_strdup (optarg);
++          break;
++
++
++        case 0:	/* Long option with no short option */
++          /* Test encapsulation.  */
++          if (strcmp (long_options[option_index].name, "test-encapsulation") == 0)
++          {
++            if (local_args_info.test_encapsulation_given)
++              {
++                fprintf (stderr, "%s: `--test-encapsulation' option given more than once%s\n", argv[0], (additional_error ? additional_error : ""));
++                goto failure;
++              }
++            if (args_info->test_encapsulation_given && ! override)
++              continue;
++            local_args_info.test_encapsulation_given = 1;
++            args_info->test_encapsulation_given = 1;
++            args_info->test_encapsulation_flag = !(args_info->test_encapsulation_flag);
++          }
++          
++          break;
++        case '?':	/* Invalid option.  */
++          /* `getopt_long' already printed an error message.  */
++          goto failure;
++
++        default:	/* bug: option not considered.  */
++          fprintf (stderr, "%s: option unknown: %c%s\n", CMDLINE_PARSER_PACKAGE, c, (additional_error ? additional_error : ""));
++          abort ();
++        } /* switch */
++    } /* while */
++
++
++
++  if (check_required)
++    {
++      error += cmdline_parser_required2 (args_info, argv[0], additional_error);
++    }
++
++  cmdline_parser_release (&local_args_info);
++
++  if ( error )
++    return (EXIT_FAILURE);
++
++  return 0;
++
++failure:
++  
++  cmdline_parser_release (&local_args_info);
++  return (EXIT_FAILURE);
++}
++
++static unsigned int
++cmdline_parser_create_argv(const char *cmdline_, char ***argv_ptr, const char *prog_name)
++{
++  char *cmdline, *p;
++  size_t n = 0, j;
++  int i;
++
++  if (prog_name) {
++    cmd_line_list_tmp = (struct line_list *) malloc (sizeof (struct line_list));
++    cmd_line_list_tmp->next = cmd_line_list;
++    cmd_line_list = cmd_line_list_tmp;
++    cmd_line_list->string_arg = gengetopt_strdup (prog_name);
++
++    ++n;
++  }
++
++  cmdline = gengetopt_strdup(cmdline_);
++  p = cmdline;
++
++  while (p && strlen(p))
++    {
++      j = strcspn(p, " \t");
++      ++n;
++      if (j && j < strlen(p))
++        {
++          p[j] = '\0';
++
++          cmd_line_list_tmp = (struct line_list *) malloc (sizeof (struct line_list));
++          cmd_line_list_tmp->next = cmd_line_list;
++          cmd_line_list = cmd_line_list_tmp;
++          cmd_line_list->string_arg = gengetopt_strdup (p);
++
++          p += (j+1);
++          p += strspn(p, " \t");
++        }
++      else
++        {
++          cmd_line_list_tmp = (struct line_list *) malloc (sizeof (struct line_list));
++          cmd_line_list_tmp->next = cmd_line_list;
++          cmd_line_list = cmd_line_list_tmp;
++          cmd_line_list->string_arg = gengetopt_strdup (p);
++
++          break;
++        }
++    }
++
++  *argv_ptr = (char **) malloc((n + 1) * sizeof(char *));
++  cmd_line_list_tmp = cmd_line_list;
++  for (i = (n-1); i >= 0; --i)
++    {
++      (*argv_ptr)[i] = cmd_line_list_tmp->string_arg;
++      cmd_line_list_tmp = cmd_line_list_tmp->next;
++    }
++
++  (*argv_ptr)[n] = NULL;
++
++  free(cmdline);
++  return n;
++}
++
++int
++cmdline_parser_string(const char *cmdline, struct gengetopt_args_info *args_info, const char *prog_name)
++{
++  return cmdline_parser_string2(cmdline, args_info, prog_name, 0, 1, 1);
++}
++
++int
++cmdline_parser_string2(const char *cmdline, struct gengetopt_args_info *args_info, const char *prog_name,
++    int override, int initialize, int check_required)
++{
++  char **argv_ptr = 0;
++  int result;
++  unsigned int argc;
++  
++  argc = cmdline_parser_create_argv(cmdline, &argv_ptr, prog_name);
++  
++  result =
++    cmdline_parser_internal (argc, argv_ptr, args_info, override, initialize, check_required, 0);
++  
++  if (argv_ptr)
++    {
++      free (argv_ptr);
++    }
++
++  free_cmd_list();
++  
++  if (result == EXIT_FAILURE)
++    {
++      cmdline_parser_free (args_info);
++      exit (EXIT_FAILURE);
++    }
++  
++  return result;
++}
++
+diff -uNr disksim_orig/disksim-4.0/src/syssim_opts.h disksim-src_64bit/src/syssim_opts.h
+--- disksim_orig/disksim-4.0/src/syssim_opts.h	1969-12-31 16:00:00.000000000 -0800
++++ disksim-src_64bit/src/syssim_opts.h	2010-06-09 14:06:57.000000000 -0700
+@@ -0,0 +1,81 @@
++/* syssim_opts.h */
++
++/* File autogenerated by gengetopt version 2.17  */
++
++#ifndef SYSSIM_OPTS_H
++#define SYSSIM_OPTS_H
++
++/* If we use autoconf.  */
++#ifdef HAVE_CONFIG_H
++#include "config.h"
++#endif
++
++#ifdef __cplusplus
++extern "C" {
++#endif /* __cplusplus */
++
++#ifndef CMDLINE_PARSER_PACKAGE
++#define CMDLINE_PARSER_PACKAGE "disk-extract"
++#endif
++
++#ifndef CMDLINE_PARSER_VERSION
++#define CMDLINE_PARSER_VERSION "0.1"
++#endif
++
++struct gengetopt_args_info
++{
++  const char *help_help; /* Print help and exit help description.  */
++  const char *version_help; /* Print version and exit help description.  */
++  char * paramfile_arg;	/* The disksim parameter file to use.  */
++  char * paramfile_orig;	/* The disksim parameter file to use original value given at command line.  */
++  const char *paramfile_help; /* The disksim parameter file to use help description.  */
++  char * outfile_arg;	/* Output file (default='syssim.out').  */
++  char * outfile_orig;	/* Output file original value given at command line.  */
++  const char *outfile_help; /* Output file help description.  */
++  int sectors_arg;	/* Number of sectors (default='2676846').  */
++  char * sectors_orig;	/* Number of sectors original value given at command line.  */
++  const char *sectors_help; /* Number of sectors help description.  */
++  int test_encapsulation_flag;	/* Test encapsulation (default=off).  */
++  const char *test_encapsulation_help; /* Test encapsulation help description.  */
++  
++  int help_given ;	/* Whether help was given.  */
++  int version_given ;	/* Whether version was given.  */
++  int paramfile_given ;	/* Whether paramfile was given.  */
++  int outfile_given ;	/* Whether outfile was given.  */
++  int sectors_given ;	/* Whether sectors was given.  */
++  int test_encapsulation_given ;	/* Whether test-encapsulation was given.  */
++
++} ;
++
++extern const char *gengetopt_args_info_purpose;
++extern const char *gengetopt_args_info_usage;
++extern const char *gengetopt_args_info_help[];
++
++int cmdline_parser (int argc, char * const *argv,
++  struct gengetopt_args_info *args_info);
++int cmdline_parser2 (int argc, char * const *argv,
++  struct gengetopt_args_info *args_info,
++  int override, int initialize, int check_required);
++int cmdline_parser_file_save(const char *filename,
++  struct gengetopt_args_info *args_info);
++
++void cmdline_parser_print_help(void);
++void cmdline_parser_print_version(void);
++
++void cmdline_parser_init (struct gengetopt_args_info *args_info);
++void cmdline_parser_free (struct gengetopt_args_info *args_info);
++
++int cmdline_parser_string (const char *cmdline, struct gengetopt_args_info *args_info,
++  const char *prog_name);
++int cmdline_parser_string2 (const char *cmdline, struct gengetopt_args_info *args_info,
++  const char *prog_name,
++  int override, int initialize, int check_required);
++
++int cmdline_parser_required (struct gengetopt_args_info *args_info,
++  const char *prog_name);
++
++
++#ifdef __cplusplus
++}
++#endif /* __cplusplus */
++#endif /* SYSSIM_OPTS_H */
+diff -uNr disksim_orig/disksim-4.0/utils/params/Makefile disksim-src_64bit/utils/params/Makefile
+--- disksim_orig/disksim-4.0/utils/params/Makefile	2008-05-11 14:30:54.000000000 -0700
++++ disksim-src_64bit/utils/params/Makefile	2010-06-09 14:06:57.000000000 -0700
+@@ -31,16 +31,16 @@
+ 
+ include .paths
+ 
+-DISKSIM_CFLAGS=-I../../src
+-DISKSIM_LDFLAGS=-L../../src -ldisksim
++DISKSIM_CFLAGS=-m32 -I../../src
++DISKSIM_LDFLAGS=-m32 -L../../src -ldisksim
+ 
+-CFLAGS = -g \
++CFLAGS = -g -m32\
+         $(DISKSIM_CFLAGS) \
+         $(DISKMODEL_CFLAGS) \
+         $(LIBPARAM_CFLAGS) \
+         $(LIBDDBG_CFLAGS) 
+ 
+-LDFLAGS = $(DISKSIM_LDFLAGS) \
++LDFLAGS = -m32 $(DISKSIM_LDFLAGS) \
+ 	  $(DISKMODEL_LDFLAGS) \
+           $(LIBPARAM_LDFLAGS) \
+           $(LIBDDBG_LDFLAGS) -lm

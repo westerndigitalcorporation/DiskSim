@@ -1,0 +1,129 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE global
+HEADER \#include "../disksim_global.h"
+HEADER \#include <libddbg/libddbg.h>
+RESTYPE int
+PROTO int disksim_global_loadparams(struct lp_block *b);
+
+PARAM Init Seed				I	0 
+INIT disksim->seedval = i;
+INIT DISKSIM_srand48(disksim->seedval);
+# INIT fprintf (outputfile, "Init Seed: PID (%d)\n", disksim->seedval);
+
+This specifies the initial seed for the random number generator.
+The initial seed value is applied at the very beginning of the 
+simulation and is used during the initialization phase (e.g.,~for 
+determining initial rotational positions).  Explicitly specifying the 
+random generator seed enables experiment repeatability.
+
+PARAM Init Seed with time		I	0 
+TEST RANGE(i,0,1)
+INIT if(i) { disksim->seedval = DISKSIM_time(); }
+If a nonzero value is provided, DiskSim will use the current system 
+time to initialize the ``Init Seed'' parameter.
+
+PARAM Real Seed				I	0 
+INIT disksim->seedval = i;
+
+The `real' seed value is applied after the initialization phase
+and is used during the simulation phase (e.g.,~for synthetic 
+workload generation).  This allows multiple synthetic workloads 
+(with different simulation seeds) to be run on equivalent 
+configurations (i.e.,~with identical initial seeds, 
+as specified above).
+
+
+PARAM Real Seed with time		I	0 
+TEST RANGE(i,0,1)
+INIT disksim->seedval = DISKSIM_time();
+If a nonzero value is provided, DiskSim will use the current system 
+time to initialize the ``Real Seed'' parameter.
+
+
+# in milliseconds
+PARAM Statistic warm-up time		D	0 
+TEST (d >= 0)
+INIT disksim->warmup_event = (timer_event *) getfromextraq(); 
+INIT disksim->warmup_event->type = TIMER_EXPIRED; 
+INIT disksim->warmup_event->time = d * (double) 1000.0; 
+INIT disksim->warmup_event->func = &disksim->timerfunc_disksim;
+This specifies the amount of simulated time after which the statistics
+will be reset.
+
+PARAM Statistic warm-up IOs		I	0
+TEST (i >= 0)
+INIT disksim->warmup_iocnt = i;
+This specifies the number of I/Os after which the statistics will be reset.
+
+PARAM Stat definition file		S	1 
+INIT char *path = lp_search_path(lp_cwd, s);
+INIT if(!path) {
+INIT   ddbg_assert2(0, "Couldn't find statdefs file in path");
+INIT }
+INIT else {
+INIT   statdeffile = fopen(path, "r");
+INIT   ddbg_assert2(statdeffile != 0, "failed to open statdefs file!");
+INIT }
+
+This specifies the name of the input file containing the
+specifications for the statistical distributions to collect.  This
+file allows the user to control the number and sizes of histogram bins
+into which data are collected.  This file is mandatory.
+Section~\ref{output.statdefs} describes its use.
+
+PARAM Output file for trace of I/O requests simulated		S	0
+INIT if( NULL != (OUTIOS = fopen(s, "w"))) {
+INIT     strcpy(disksim->outiosfilename, s);
+INIT     fprintf(OUTIOS, "simtime,devno,blkno,blkcnt,flags,queueDepth,tagID,curr\n" );
+INIT }
+
+This specifies the name of the output file to contain a trace of disk
+request arrivals (in the default ASCII trace format described in
+Section~\ref{input.traces}).  This allows instances of synthetically
+generated workloads to be saved and analyzed after the simulation
+completes.  This is particularly useful for analyzing (potentially
+pathological) workloads produced by a system-level model.
+
+
+PARAM Detailed execution trace		S	0
+INIT if( NULL != (disksim->exectrace = fopen(s, "w"))) {
+INIT     disksim->exectrace_fn = strdup( s );
+INIT     fprintf(disksim->exectrace, "simtime,tagID,devno,blkno,blkcnt,flags,time\n" );
+INIT     fflush(disksim->exectrace);
+INIT }
+
+This specifies the name of the output file to contain a detailed trace
+of system execution -- req issue/completion, etc.
+
+

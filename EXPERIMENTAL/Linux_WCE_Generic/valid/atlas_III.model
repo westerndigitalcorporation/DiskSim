@@ -1,0 +1,209 @@
+dm_disk QUANTUM_QM39100TD-SW_model {
+   Number of data surfaces = 10,
+   Number of cylinders = 8057,
+   Block count = 17783250,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 7,
+      Rangesize for sparing = 1,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 615,
+            Blocks per track = 256,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 128000,
+            Skew for track switch = 75.000000,
+            Skew for cylinder switch = 86.000000,
+            Number of spares = 0,
+            slips = [
+               272037,
+               1464716,
+               1467276,
+               1508869
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 616,
+            Last cylinder number = 1823,
+            Blocks per track = 252,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 74.000000,
+            Skew for cylinder switch = 85.000000,
+            Number of spares = 0,
+            slips = [
+               406795,
+               406796,
+               406797,
+               589274,
+               589275,
+               591794,
+               599352,
+               1035697,
+               1190435,
+               1354801,
+               1367405,
+               1502250,
+               1570676,
+               1999037,
+               2773978,
+               2773979,
+               2773980,
+               594314,
+               596834,
+               586755,
+               601875,
+               584236,
+               604396,
+               581717,
+               606917
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1824,
+            Last cylinder number = 3375,
+            Blocks per track = 240,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 71.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [
+               1539463,
+               1639406,
+               1913779,
+               2828533,
+               3366781
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3376,
+            Last cylinder number = 4143,
+            Blocks per track = 238,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 70.000000,
+            Skew for cylinder switch = 81.000000,
+            Number of spares = 0,
+            slips = [
+               413741,
+               438564,
+               763719,
+               813699,
+               838463,
+               874162
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4144,
+            Last cylinder number = 5199,
+            Blocks per track = 224,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 65.000000,
+            Skew for cylinder switch = 75.000000,
+            Number of spares = 0,
+            slips = [
+               451189,
+               1073879,
+               1154587,
+               1156827,
+               1933162,
+               2287972,
+               2323796
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5200,
+            Last cylinder number = 5975,
+            Blocks per track = 208,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 61.000000,
+            Skew for cylinder switch = 71.000000,
+            Number of spares = 0,
+            slips = [
+               865580,
+               1134869
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 5976,
+            Last cylinder number = 6583,
+            Blocks per track = 196,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 57.000000,
+            Skew for cylinder switch = 67.000000,
+            Number of spares = 0,
+            slips = [
+               208490,
+               372067
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 6584,
+            Last cylinder number = 7343,
+            Blocks per track = 182,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 53.000000,
+            Skew for cylinder switch = 62.000000,
+            Number of spares = 0,
+            slips = [
+               559442,
+               560014
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 7344,
+            Last cylinder number = 8056,
+            Blocks per track = 168,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 49.000000,
+            Skew for cylinder switch = 57.000000,
+            Number of spares = 0,
+            slips = [
+               175954,
+               390386,
+               1039498
+            ],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = extracted,
+      Single cylinder seek time = 1.663000,
+      Full seek curve = atlas_III.seek,
+      Full strobe seek time = 15.360000,
+      Add. write settling delay = 0.000000,
+#      First ten seek times = [
+#         1.660000,
+#         1.760000,
+#         1.770000,
+#         1.820000,
+#         1.990000,
+#         2.090000,
+#         2.140000,
+#         2.200000,
+#         2.220000,
+#         2.350000
+#      ],
+      Head switch time = 0.999000,
+      Rotation speed (in rpms) = 7200,
+      Percent error in rpms = 0.000000
+   }
+} # end of QUANTUM_QM39100TD-SW_model spec
+

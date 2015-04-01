@@ -1,0 +1,226 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE ioqueue
+HEADER \#include "../disksim_ioqueue.h"
+RESTYPE struct ioq *
+PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+
+PARAM Scheduling policy			I	1 
+TEST RANGE(i,MINSCHED,MAXSCHED)
+INIT result->base.sched_alg = i;
+
+This specifies the primary scheduling algorithm employed for selecting
+the next request to be serviced.  A large set of algorithms have been
+implemented, ranging from common choices like First-Come-First-Served
+(FCFS) and Shortest-Seek-Time-First (SSTF) to new algorithms like
+Shortest-Positioning-(w/Cache)-Time-First (described in
+\cite{Worthington94}).  See Table \ref{sched_algs} for the list of
+algorithms provided.
+
+PARAM Cylinder mapping strategy		I	1 
+TEST RANGE(i,0,6)
+INIT result->cylmaptype = i;
+
+This specifies the level of detail of physical data layout information
+available to the scheduler.
+
+0~indicates that the only information available to the scheduler are
+the logical block numbers specified in the individual requests.
+
+1~indicates that the scheduler has access to information about zone
+boundaries, the number of physical sectors/zone, and the number of
+physical sectors/track in each zone.
+
+2~indicates that the scheduler also has access to the layout of spare
+sectors or tracks in each zone.
+
+3~indicates that the scheduler also has access to the list of any
+slipped sectors/tracks.
+
+4~indicates that the scheduler also has access to the list of any
+remapped sectors/tracks, thereby providing an exact data layout
+(logical-to-physical mapping) for the disk.
+
+5~indicates that the scheduler uses the cylinder number given to it
+with the request, allowing experiments with arbitrary mappings.  In
+particular, some traces include the cylinder number as part of the
+request record.
+
+6~indicates that the scheduler only has access to (an approximation
+of) the mean number of sectors per cylinder.  The value used in this
+case is that specified in the disk parameter ``Avg. sectors per
+cylinder.''
+
+PARAM Write initiation delay		D	1 
+TEST d >= 0
+INIT result->writedelay = d;
+
+This specifies an approximation of the write request processing
+overhead(s) performed prior to any mechanical positioning delays.
+This value is used by scheduling algorithms that select the order of
+request service based (at least in part) on expected positioning
+delays.
+
+PARAM Read initiation delay		D	1 
+TEST d >= 0
+INIT result->readdelay = d;
+
+This specifies an approximation of the read request processing
+overhead performed prior to any mechanical positioning delays.  This
+value is used by scheduling algorithms that select the order of
+request service based (at least in part) on expected positioning
+delays.
+
+
+PARAM Sequential stream scheme		I	1 
+INIT result->seqscheme = i;
+
+The integer value is interpreted as a boolean bitfield.  It specifies
+the type of sequential stream detection and/or request concatenation
+performed by the scheduler (see \cite{Worthington95a} for additional
+details).
+
+Bit~0 indicates whether or not sequential read requests are
+concatenated by the scheduler.
+
+Bit~1 indicates whether or not sequential write requests are
+concatenated by the scheduler.
+
+Bit~2 indicates whether or not sequential read requests are always
+scheduled together.
+
+Bit~3 indicates whether or not sequential write requests are always
+scheduled together.
+
+Bit~4 indicates whether or not sequential requests of any kind
+(e.g.,~interleaved reads and writes) are always scheduled together.
+
+
+PARAM Maximum concat size		I	1 
+TEST i >= 0
+INIT result->concatmax = i;
+
+This specifies the maximum request size resulting from concatenation of
+sequential requests.  That is, if the sum of the sizes of the two
+requests to be concatenated exceeds this value, the concatenation will
+not be performed by the scheduler.
+
+PARAM Overlapping request scheme	I	1 
+TEST RANGE(i,0,2) 
+INIT result->comboverlaps = i;
+
+This specifies the scheduler's policy for dealing with overlapping
+requests.  
+
+0~indicates that overlapping requests are treated as independent.
+
+1~indicates that requests that are completely overlapped by a
+completed request that arrived after them are subsumed by that
+request.
+
+2~augments this policy by also allowing read requests that arrive
+after the completed overlapping request to be subsumed by it, since
+the necessary data are known.  This support was included for
+experiments in \cite{Ganger95} in order to partially demonstrate the
+correctness problems of open workloads (e.g.,~feedback-free request
+traces).  In most real systems, overlapping requests are almost never
+concurrently outstanding.
+
+PARAM Sequential stream diff maximum	I	1 
+TEST RANGE(i,0,2)
+INIT result->seqstreamdiff = i;
+
+This specifies the maximum distance between two ``sequential'' requests in
+a sequential stream.  This allows requests with a small stride or an
+occasional ``skip'' to still be considered for inclusion in a
+sequential stream.
+
+
+# ?? doesn't seem to be used
+PARAM Scheduling timeout scheme		I	1 
+# TEST RANGE(i,0,2)
+INIT if(disksim->verbosity > 0) fprintf(stderr, "** warning: ignoring \"Scheduling timeout scheme\" \n");
+
+This specifies the type of multi-queue timeout scheme implemented.
+
+0~indicates that requests are not moved from the {\it base} queue to a
+higher-priority queue because of excessive queueing delays.  
+
+1~indicates that requests in the base queue whose queueing delays exceed
+the specified timeout value (see below) will be moved to one of two
+higher-priority queues (the {\it timeout} queue or the {\it priority}
+queue) based on the scheduling priority scheme (see below).
+
+
+2~indicates that requests in the base queue whose queueing
+delays exceed half of the specified timeout value (see below) will be moved to
+the next higher priority queue (the timeout queue).  Furthermore, such 
+requests will be moved to the highest priority queue (the priority queue) 
+if their total queueing delays exceed the specified timeout value (see below).
+
+PARAM Timeout time/weight		I	1 
+TEST i >= 0
+INIT result->to_time = i;
+
+This specifies either the timeout value (in seconds) for excessive
+queueing delays or the time/aging factor used in calculating request
+priorities for various age-sensitive scheduling algorithms.  The
+time/aging factor is additive for some algorithms and multiplicative
+for others.
+
+PARAM Timeout scheduling		I	1 
+TEST RANGE(i,0,21)
+INIT result->timeout.sched_alg = i;
+
+This specifies the scheduling algorithm employed for selecting the next
+request to be serviced from the {\it timeout} queue.  The options are
+the same as those available for the ``Scheduling policy'' parameter
+above.
+
+PARAM Scheduling priority scheme	I	1 
+TEST RANGE(i,0,1)
+INIT result->pri_scheme = i;
+
+This specifies whether or not requests flagged as high priority
+(i.e.,~time-critical or time-limited requests \cite{Ganger93}) are
+automatically placed in the highest-priority queue (the {\it priority}
+queue).
+
+PARAM Priority scheduling		I	1 
+TEST RANGE(i,0,21)
+INIT result->priority.sched_alg = i;
+
+This specifies the scheduling algorithm employed for selecting the next
+request to be serviced from the {\it priority} queue.  The options are
+the same as those available for the ``Scheduling policy'' parameter
+above.

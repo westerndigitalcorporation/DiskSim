@@ -1,0 +1,101 @@
+MEMSMODEL - version 1.0
+
+Authors: Steve Schlosser and John Linwood Griffin - 1999 - 2005
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+
+Summary
+-=-=-=-
+
+The MEMSMODEL library provides a model of a MEMS-based storage device
+described by Carley et al., and used in all of our systems research
+over the past five years.  See http://www.pdl.cmu.edu/MEMS/ for a
+summary of research and links to papers.  The model is configurable,
+and is generally integrated into the DiskSim simulator.  The seek
+model can be configured to be either our piecewise-linear model or a
+more general solution described by Hong et al.  The library gathers a
+wide variety of statistics on seek time, transfer time, energy used,
+number of read/write tips engaged, etc.
+
+Components/Features
+-=-=-=-=-=-=-=-=-=-
+
+MEMSMODEL implements two different seek time calculation functions.
+The first is a piecewise-linear calculation of seek time, described in
+our SIGMETRICS paper from 2000.  The second is a general solution,
+described by Bo Hong from UC Santa Cruz.  Experimentation has shown
+that they give nearly identical results, although it has not been
+rigorously tested across many workloads.  The seek functions are
+implemented in mems_internals.c, mems_piecewise_seek.c, and
+mems_hong_seek.c.  These are built into the mems_internals library,
+and can be exercised independent of DiskSim.
+
+MEMSMODEL is interfaced to DiskSim through mems_disksim.c and
+mems_event.c.  The event loop in mems_event.c simulates requests being
+executed by the MEMS model.  It has become pretty complicated over
+time, but is based on the DiskSim simpledisk model
+(disksim_simpledisk.c).
+
+Many statistics are gathered while the simulation runs, and the
+results are output in the DiskSim output file.
+
+Overall seek time
+X seek time
+Y seek time
+Initial turnaround time
+Streaming turnaround time
+Subtrack accesses
+Tips per access
+Number of spinups
+Number of spindowns
+Inactive time
+Buffer accesses
+Per-request energy
+Total energy
+Servicing energy
+Startup energy
+Idle energy
+Inactive energy
+
+An interesting feature of MEMSMODEL is its ability to access a batch
+of requests using parallel read/write tips, even if those requests are
+not to contiguous LBNs.  Batched requests are marked as such when
+delivered to DiskSim, and MEMSMODEL will not begin executing them
+until all of the requests in the batch have arrived.  If the requested
+LBNs are at the same X/Y offset, then the model will access them with
+parallel read/write tips, up to the number of tips that can be active
+concurrently.  If there are not enough tips or if some of the LBNs are
+at different X/Y offsets, then the simulator will access as many as it
+can at once, and access those that remain in subsequent passes.
+
+There is a simple re-use buffer, which is disabled in this version.
+There is also rudimentary support for prefetching, which is also
+disabled.
+
+Configuration parameters
+-=-=-=-=-=-=-=-=-=-=-=-=-
+
+Please see the user's manual for a description of each of the model's
+parameters.
+
+Using the library
+-=-=-=-=-=-=-=-=-
+
+We have used the library in two different ways: as part of a
+stand-alone program to study seek time dynamics of MEMS-based storage
+devices and their dependence on various design parameters, and as part
+of DiskSim to compare the performance of MEMS-based storage devices
+and disk drives.  There is an example of how to generate basic seek
+curves for each model in the tests/ directory.  The memsvalid script
+in the disksim/valid directory will run some sample simulations
+through DiskSim.  There are also sample configuration files in that
+directory.
+
+Known bugs
+-=-=-=-=-=-
+
+Batches of parallel writes causes crashes - just use reads instead.
+
+Buffer
+
+Prefetching

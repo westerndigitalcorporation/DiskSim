@@ -1,0 +1,155 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE synthgen
+HEADER \#include "../disksim_synthio.h"
+RESTYPE synthio_generator **
+# this is a dummy that should never be called
+PROTO int disksim_synthgen_loadparams(struct lp_block *b);
+
+PARAM Storage capacity per device	I	1 
+TEST i > 0
+INIT (*result)->sectsperdisk = i;
+
+This specifies the number of unique storage addresses per storage device
+(in the corresponding device's unit of access) accessible to
+generators of this type.
+
+
+PARAM devices				LIST	1 
+TEST !loadsynthdevs((*result), l)
+
+This specifies the set of storage devices accessible to generators of
+this type.  The devices may be either the names of individual devices
+in a ``parts'' logorg or the name of an ``array'' logorg.
+
+PARAM Blocking factor			I	1 
+TEST i > 0
+INIT (*result)->blocksize = i;
+
+This specifies a unit of access for generated requests that is a multiple
+of the storage devices' unit of access.  All generated request
+starting addresses and sizes will be a multiple of this value.
+
+PARAM Probability of sequential access		D	1 
+TEST RANGE(d,0.0,1.0)
+INIT (*result)->probseq = d;
+
+This specifies the probability that a generated request is sequential to
+the immediately previous request.  A sequential request starts at the
+address immediately following the last address accessed by the
+previously generated request.
+
+
+PARAM Probability of local access		D	1 
+TEST RANGE(d,0.0,1.0)
+INIT (*result)->probloc = d;
+
+This specifies the probability that a generated request is ``local'' to
+the immediately previous request.  A local request begins some short
+distance away from the previous request's starting address, where the
+distance is computed via a random variable definition described below.
+
+PARAM Probability of read access		D	1 
+TEST RANGE(d,0.0,1.0)
+INIT (*result)->probread = d;
+
+This specifies the probability that a generated request is a read.
+
+PARAM Probability of time-critical request	D	1 
+TEST RANGE(d,0.0,1.0)
+INIT (*result)->probtmcrit = d;
+
+This specifies the probability that a generated request is time-critical.
+That is, the corresponding generator process ``blocks'' and waits for
+the request to complete before continuing with its sequence of work
+(i.e., its next think time) \cite{Ganger93,Ganger95}.
+
+PARAM Probability of time-limited request	D	1 
+TEST RANGE(d,0.0,1.0)
+INIT (*result)->probtmlim = d;
+
+This specifies the probability that a generated request is
+time-limited. That is, the corresponding generator process ``blocks''
+and waits for the request to complete (if it is not already complete)
+after a given amount of think time (specified by the below ``time
+limit'' parameters) \cite{Ganger93,Ganger95}.
+
+
+# first list item is dist'n type remainder is dist'n parameters 
+PARAM Time-limited think times		LIST	1 
+TEST !loaddistn(l, &(*result)->tmlimit)
+
+This is a random variable distribution specifying the time limit for a
+time-limited request.  Note that the generated time limit (i.e., the
+computation time occuring before the generator process ``blocks'' and
+waits for the request to complete) may differ from the actual time
+limit (due to CPU contention).
+
+
+PARAM General inter-arrival times	LIST	1 
+TEST !loaddistn(l, &(*result)->genintr)
+
+This is a random variable distribution specifying the inter-request think time
+preceding the generated request if the generated request's starting
+address is unrelated to the previous request's starting address (i.e.,
+if the generated request's address is ``random'' rather than
+``sequential'' or ``local'').
+
+PARAM Sequential inter-arrival times	LIST	1 
+TEST !loaddistn(l, &(*result)->seqintr)
+
+This is a random variable distribution specifying the inter-request think
+time preceding the generated request if the generated request's
+starting address is ``sequential'' to the previous request's starting
+address.
+
+PARAM Local inter-arrival times		LIST	1 
+TEST !loaddistn(l, &(*result)->locintr)
+
+This is a random variable distribution specifying the inter-request think time
+preceding the generated request if the generated request's starting
+address is ``local'' to the previous request's starting address.
+
+PARAM Local distances			LIST	1 
+TEST !loaddistn(l, &(*result)->locdist)
+
+This is a random variable distribution specifying the distance from the
+previous request's starting address when generating a ``local''
+request's starting address.
+
+
+PARAM Sizes				LIST	1 
+TEST !loaddistn(l, &(*result)->sizedist)
+
+This is a random variable distribution specifying the request size.
+

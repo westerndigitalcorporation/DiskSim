@@ -1,0 +1,125 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE ctlr
+HEADER \#include "../disksim_ctlr.h"
+RESTYPE struct controller *
+PROTO struct controller *disksim_ctlr_loadparams(struct lp_block *b);
+PROTO struct cache_if *disksim_cache_loadparams(struct lp_block *b);
+PROTO struct ioq *disksim_ioqueue_loadparams(struct lp_block *b, int printqueuestats, int printcritstats, int printidlestats, int printintarrstats, int printsizestats);
+
+PARAM type				I	1 
+TEST RANGE(i,1,3)
+INIT result->type = i;
+
+This specifies the type of controller.  1~indicates a simple
+controller that acts as nothing more than a bridge between two buses,
+passing everything straight through to the other side.  2~indicates a
+very simple, driver-managed controller based roughly on the NCR
+53C700.  3~indicates a more complex controller that decouples
+lower-level storage component peculiarities from higher-level
+components (e.g.,~device drivers).  The complex controller queues and
+schedules its outstanding requests and possibly contains a cache.  As
+indicated below, it requires several parameters in addition to those
+needed by the simpler controllers.
+
+
+PARAM Scale for delays			D	1 
+TEST d >= 0.0
+INIT result->timescale = d;
+
+This specifies a multiplicative scaling factor for the various
+processing delays incurred by the controller.  Default overheads for
+the 53C700-based controller and the more complex controller are
+hard-coded into the ``read\_specs'' procedure of the controller module
+(and are easily changed).  For the simple pass-thru controller, the
+scale factor represents the per-message propagation delay (because the
+hard-coded value is 1.0).  0.0 results in no controller overheads or
+delays.  When the overheads/delays of the controller(s) cannot be
+separated from those of the disk(s), as is usually the case for
+single-point tracing of complete systems, the various disk
+overhead/delay parameter values should be populated and this parameter
+should be set to~0.0.
+
+
+PARAM Bulk sector transfer time		D	1 
+TEST (d >= 0.0)
+INIT result->blktranstime = d;
+
+This specifies the time (in milliseconds) necessary to transfer a
+single 512-byte block to, from or through the controller.
+Transferring one block over the bus takes the maximum of this time,
+the block transfer time specified for the bus itself, and the block
+transfer time specified for the component on the other end of the bus
+transfer.
+
+
+PARAM Maximum queue length		I	1 
+TEST (i >= 0)
+INIT result->maxoutstanding = i + 1;
+
+This specifies the maximum number of requests that can be concurrently
+outstanding at the controller.  The device driver discovers this value
+during initialization and respects it during operation.  For the
+simple types of controllers (see above parameter description), 0 is
+assumed.
+
+
+PARAM Print stats			I	1 
+TEST RANGE(i,0,1)
+INIT result->printstats = i;
+
+This specifies whether or not statistics will be reported for the
+controller.  It is meaningless for the simple types of controllers
+(see above parameter description), as no statistics are collected.
+
+
+PARAM Scheduler				BLOCK	0 
+TEST result->queue = (struct ioq *)disksim_ioqueue_loadparams(blk, disksim->ctlrinfo->ctl_printqueuestats, disksim->ctlrinfo->ctl_printcritstats, disksim->ctlrinfo->ctl_printidlestats, disksim->ctlrinfo->ctl_printintarrstats,disksim->ctlrinfo->ctl_printsizestats)
+# INIT ioqueue_initialize(result->queue, 0);
+
+This is an ioqueue; see section \ref{param.queue}
+
+PARAM Cache				BLOCK	0  
+TEST result->cache = disksim_cache_loadparams(blk)
+A block cache; see section \ref{param.cache}
+
+
+PARAM Max per-disk pending count	I	0 
+TEST i >= 0
+INIT result->maxdiskqsize = i;
+
+This specifies the maximum number of requests that the controller can
+have outstanding to each attached disk (i.e.,~the maximum number of
+requests that can be dispatched to a single disk).  This parameter
+only affects the interaction of the controller with its attachments;
+it is not visible to the device driver.

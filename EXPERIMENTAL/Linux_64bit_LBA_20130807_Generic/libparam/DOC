@@ -1,0 +1,456 @@
+
+libparam came from the the disksim parameter file parser.
+
+This document is divided into two sections, the first for users of
+applications that use libparam and the second for developers using
+libparam in new applications.
+
+Still to document:
+the concrete syntax
+definition vs instantiation
+"inheritance"
+
+say a little about:
+parse tree structs and functions
+
+
+
+For the user:
+
+In a libparam parameter file, you provide a number of blocks of
+configuration information for the application.  You first _define_
+blocks, you can _specialize_ blocks you've already defined and then
+you _instantiate_ blocks to hand them off to the application.
+
+
+Blocks
+
+# comments start with a '#' and continue to the end of the line
+blockname {
+   param name = value,
+   another name = another value,
+   .
+   .
+   .
+   the last param = the last value   # note no trailing ',' here
+}
+
+Parameter names may contain spaces but not ',' or '='.  Multiple
+spaces will be reduced to a single space and leading and trailing
+spaces will be eaten.  Parameter names are case-sensitive.
+
+e.g. a parameter named "  foo  bar " will be reduced to  "foo bar"
+
+Values may be:
+1.  decimal or '0x'-prefixed hexadecimal integers.
+2.  strtod() format floats
+3.  strings.  In this version, strings may not contain any whitespace,
+semicolons, curly or square braces, colons, '?', '='.  Quoted/escaped
+strings may be supported in a future version.
+4.  Lists.  Lists are of the form 
+[ l1, l2, <...> , ln ]
+The following notation is supported for automatically expanding string
+values in list elements:  if you want to create a list of string
+values element1 through element100, you can use:
+[ element1 .. element100 ] 
+which will be expanded to
+[ element1, element2, element3, <...>, element99, element100 ]
+You can mix '..' expansions with other elements so 
+[ element14, element23, element29 .. element32, element213 ] 
+is ok.
+5.  Other blocks.
+
+Block definitions.  Blocks are defined by
+blockname typename { <...> }
+
+Your application will provide a number of basic groups of configurable
+parameters called _modules_.  You fill these in by defining a block
+for that module name.  
+
+The application might export a module 'HEAD' 
+
+head1 HEAD {
+  material = stone
+}
+
+# typename can also be the name of a block you've already defined, e.g.
+
+head2 head1 {
+  expression = frown
+}
+
+head2 is now really
+
+head2 HEAD {
+  material = stone,
+  expression = frown
+}
+
+You can also override parameters previously set:
+
+head3 head2 {
+  expression = smile
+}
+
+So now head3 is
+
+head3 HEAD {
+  material = stone,
+  expression = smile
+}
+
+
+The application doesn't see anything we've done up to this point.
+To "pass off" a block to the application, we must _instantiate_ the
+block.  This is done by 
+instantiate <list> as <blockname> 
+where <list> is a list of one or more names to instantiate the defined
+block <blockname> with.
+
+e.g.
+
+instantiate [ Head1, Head2 ] as head1
+
+creates two head1s called Head1 and Head2.  
+
+'..'-expansion is allowed here so
+instantiate [ Head1 .. Head100 ] as head1 
+creates 100 head1s as you might expect.
+
+Each module defines the set of parameters which are configurable,
+whether or not they are required and what types of values they may
+take.  Consult your application's documentation for a list of modules
+and their parameters.  Providing blocks that do not meet the module's
+requirements will typically result in a run-time error for the
+application; it should provide an informative error message as to why
+the given block is not ok.
+
+Some applications (e.g. DiskSim) may also automatically load modules
+defined with a particular name.  See the application's documentation
+for a list of such modules.
+
+
+For the programmer:
+
+What libparam provides:
+
+1.  A concrete syntax for describing nested structures, lists, etc.
+2.  A lex/yacc parser for the syntax.
+3.  A parse tree format which the parser outputs.
+4.  A number of utility functions for manipulating parse trees.
+5.  Pretty-printing unparse functions for parse trees.
+6.  Perl scripts to produce stub code from a user-provided module
+description.
+
+Central to libparam is the notion of a block; a block is just a
+collection of name-value assignments.  In the concrete syntax, a block
+is delimited by curly braces and preceeded by a module name.  As a
+user of libparam, you must provide a description of all of your
+modules that you want to be able to input with libparam.  These module
+descriptions list all of the parameters that each module may take,
+what their types are and some code to do something with the value once
+its been input.
+
+
+What a modspec (module specification) file looks like.
+
+The modspec file begins with two lines
+MODULE <module name>
+HEADER  <code headers>
+RESTYPE <type of result>
+PROTO <module loader function prototype>
+
+If this module is used at top level -- i.e. not as a sub-block
+of another module -- whenever a block for this module is instantiated,
+the function described by PROTO will be called-back with the
+parse-tree of the module.  You must provide this function but libparam
+generates stub code to do most of the work; typically, you must only
+allocate your structure and then do any extra sanity-checking
+or cleanup after the stub code finishes filling in your structure from
+the parse tree.
+
+HEADER lines are output verbatim to the beginning of 
+package_module_param.c
+
+RESTYPE is the type of the object that is passed to the lp_loadparams
+to be initialized.
+
+
+For each parameter, PARAM and INIT lines are mandatory.  TEST and
+DEPEND lines are optional.  Any text that isn't a comment or directive
+up to the next PARAM line will be regarded as inline documentation and
+be output into a .tex file with some fancy formatting that explains
+the module, name and type of the parameter and whether or not it is
+mandatory.
+
+
+# '#' comments here, too, # can be escaped with \
+# PARAM line fields are TAB delimited since <name> might contain
+# spaces
+PARAM <name> <type> <mandatory?> 
+TEST <C code to determine if the value is valid>
+The stub code generated defines the following variables which 
+you may use in your code:
+d for a double
+i for an int
+s for a string
+l for a list
+blk for a block
+
+The object being initialized is called 'result' in the stub code.
+
+The test code must be a C expression that can be a predicate for 'if'
+i.e. 
+TEST i == 3
+will yield stub code:
+if(i == 3) {
+  // do INIT step
+}
+else {
+  // print an error message
+} 
+
+
+lp_loadparams() takes the target object, the block of parameters and
+the module descriptor struct and fills in the object with the contents
+of the block of parameters according to the loader code referenced by
+the module descriptor.
+
+You will typically call lp_loadparams() from your own initialization
+function which will allocate the structures and do any
+post-processing.  You should get warnings if the stub code accidently
+shadows something.
+
+INIT  <C code to do something with the value> 
+DEPEND <name of another parameter>
+
+Don't create cyclic dependencies!  The generated stub code uses a
+stack to handle the dependencies so deps can have sub-deps and so on
+up to a static stack size limit.
+
+<optional doc data>
+
+e.g.
+
+MODULE head
+PARAPM zardoz_head *zardoz_head_loadparams(struct lp_block *b)
+
+PARAM Material		S	1
+TEST !strcmp(s, "granite") || !strcmp(s, "marble")
+INIT if(!strcmp(s, "granite")) { result->material = GRANITE; }
+INIT else if(!strcmp(s, "marble)) { result->material = MARBLE; }
+INIT else { assert(0); /* the TEST should have caught this! */ }
+
+In Zardoz, heads may be constructed from a number of materials.  Legal
+values are "granite" or "marble."
+
+
+
+What mod.pl does:
+
+For your package p, for each module m described by m.modspec, mod.pl
+outputs p_m_param.h, p_m_param.c and p_m_param.tex
+
+p_m_param.h contains:
+
+- an enum to define numeric codes for the parameters "p_m_param_t"
+These symbols are obtained by converting all leters to upper case,
+mashing multiple spaces into single spaces and then replacing spaces
+with underscores and eliminating other characters that are not allowed
+in C symbol names.  
+
+e.g. "A Silly param." appearing in module "vortex" in package "zardoz"
+would become ZARDOZ_VORTEX_A_SILLY_PARAM
+
+You may have noticed that if you have two parameter names that differ
+only in capitialization, the resulting symbols after the above
+transformation will be the same.  For this reason, you *should not*
+define multiple parameters that differ only in capitalization!
+
+- an array of parameter structs "p_m_params", indexed by p_m_param_t
+- a symbol "P_M_MAX" which is the number of elements in p_m_params
+
+- a module struct "p_m_mod" which contains:
+  the module's name,
+  a pointer to the parameter array
+  the number of parameters
+  a function pointer to your loader function
+  an pointer to the loader function table in p_m_param.c
+  an pointer to the dependency tabe in p_m_param.c
+
+
+p_m_param.c contains:
+
+#include "p_m_param.h"
+
+the contents of any other HEADER lines in the module specification
+
+For each parameter P:
+
+  a function void P_loader(restype result, argtyp argname)
+  where argtype is one of int, double, char *, struct dm_list * or
+  struct dm_block * and is named i, d, s, l or blk respectively
+  
+  a function int P_depend(char *bv)
+  which takes a bitvector of the parameters already successfully loaded
+  and returns -1 if this parameter has no unmet dependencies or the
+  numeric code (p_m_param_t) of an unmet dependency
+
+  an array P_M_loaders of all of the loader functions in
+  p_m_param_t order
+
+  an array P_M_deps of all of the dependency functions 
+
+
+What make_modules_h.pl does:
+
+Generates modules.h from all of p_m_params.h
+
+modules.h contains:
+- an array p_mods containing pointers to each of the module structs in
+the package
+- an enum "p_mod_t"  assigning numeric codes for the modules
+- a symbol P_MAX_MODULE which is the highest such code
+it also #includes all of the other p_m_param.h headers for each module
+m in package p.
+
+
+
+
+
+
+
+
+Basic usage:
+
+1.  Create a subdirectory.  Not strictly necessary but you will
+probably be happier later if you do.  For this example, we'll call it
+"modules".
+
+2.  Decide on a package name for your piece of software.  
+"Zardoz"
+
+3.  Generate one or more modspec files in the directory.
+head.modspec
+vortex.modspec
+gun.modspec
+
+4.  Set up a Makefile in the modules directory:
+PACKAGE=zardoz
+LIBPARAM=/path/to/libparam/scripts
+PARAM_PROTO = head.modspec vortex.modspec gun.modspec
+PARAM_CODE = $(PARAM_PROTO:%.modspec=$(PACKAGE)_%_param.c)
+PARAM_HEADERS = $(PARAM_PROTO:%.modspec=$(PACKAGE)_%_param.h)
+$(PARAM_CODE): $(PACKAGE)_%_param.c: %.modspec
+        $(LIBPARAM)/mod.pl $(PACKAGE) $<
+        indent $@ || true
+# The indent step isn't necessary but makes the files look nice.
+# GNU indent sometimes complains about "unterminated string constant";
+# this is not an error as far as we know
+
+modules.h: $(PARAM_HEADERS)
+        $(LIBPARAM)/make_modules_h.pl $(PACKAGE) *.modspec > modules.h
+
+
+5.  Run make in the modules directory.  
+
+6.  Now attach the stub code to your code
+e.g. in head.modspec, we have the head loader function
+
+#include "modules/modules.h"
+
+zardoz_head *zardoz_head_loadparams(struct lp_block *b) {
+	zardoz_head *result = malloc(sizeof(zardoz_head));
+	lp_loadparams(result, b, &zardoz_head_mod);
+	/* maybe do some extra checks here */
+	return result;
+}	
+
+7.  In zardoz's initialization code, you will need to register all of
+zardoz's libparam modules with libparam.  This can be accomplished by:
+
+#include "modules/modules.h"
+for(c = 0; c <= ZARDOZ_MAX_MODULE; c++) {
+   lp_register_module(zardoz_mods[c]);
+}
+
+If zardoz also uses the library "crystal" which also uses libparam,
+register crystal's modules here as well:
+
+#include <crystal/modules/modules.h>
+for(c = 0; c <= CRYSTAL_MAX_MODULE; c++) {
+   lp_register_module(crystal_mods[c]);
+}
+
+Its ok that the enum module codes overlap in the different modules.h
+files; internal codes get dynamically assigned when you
+lp_register_module().
+
+now do 
+lp_init_typetbl();
+to do some final initialization steps once you've registered all of
+your modules.
+
+Now you can load in an input file with lp_loadfile().  At a minimum:
+
+lp_loadfile(filehandle, 0, 0, filename, 0, 0);
+
+where filehandle is a stdio.h FILE and filename is a char * with the
+file name.  We just use the file name for some internal book-keeping
+so you can pass whatever you want there.
+
+"instantiate" lines in your input will be processed as they are
+encountered.  Put another way: your loader function is only called
+when a module is instantiated, not when its only defined.
+
+What this means:
+
+foo FOO {
+  # stuff
+}
+
+bar BAR {
+  # more stuff
+}
+
+instantiate [ foo1 ] as foo
+
+none of the BAR loader code will be invoked until you instantiate a
+bar.  Consequently, if foo's loader code depends on something on bar,
+you'll need to instantiate a dummy bar before you instantiate foo.
+
+
+Advanced topics:
+
+Parameter overrides.  This is an artifact from DiskSim but potentially
+useful elsewhere.  If you want to override parameter assignments from
+the file, give a char ** as the 5th arg to lp_instantiate and the
+length of that array as the 6th arg.  The array is a list of overrides
+which are interpreted as (name,param,value) triples.  name is the
+instantiate-time name of the block, param is a parameter in the block
+and value is a new value.  
+
+
+
+Recreating the top-level input from the parse tree:
+
+pass the address of an int and a struct lp_tlt ** to lp_loadfile:
+
+FILE *infile, *outfile;
+char *filename = "foo";
+int tlts_len;
+struct lp_tlt **tlts;
+/* tlt stands for "Top Level Thing" */
+
+lp_loadfile(infile, &tlts, &tlts_len, filename);
+
+now unparse it with
+
+lp_unparse_tlts(tlts, tlts_len, outfile, filename);
+
+The point of the filename parameter is so we can tag things internally
+and avoid unparsing past "source <file>" boundaries; this will exactly
+recreate the top-level inputfile rather than the result of inlining
+all of the sourced files into it.
+
+

@@ -1,0 +1,45 @@
+#!/bin/sh
+
+echo ""
+echo "G1 MEMS Device - synthetic workload (avg. resp. should be about 2.00 ms)"
+../src/disksim mems.g1.parv mems.g1.nospring.outv ascii 0 1 mems0 "Spring constant factor" 0.00
+grep "IOdriver Response time average" mems.g1.nospring.outv
+
+echo ""
+echo "G2 MEMS Device - synthetic workload (avg. resp. should be about 1.18 ms)"
+../src/disksim mems.g2.parv mems.g2.nospring.outv ascii 0 1 mems0 "Spring constant factor" 0.00
+grep "IOdriver Response time average" mems.g2.nospring.outv
+
+echo ""
+echo "G3 MEMS Device - synthetic workload (avg. resp. should be about 0.87 ms)"
+../src/disksim mems.g3.parv mems.g3.nospring.outv ascii 0 1 mems0 "Spring constant factor" 0.00
+grep "IOdriver Response time average" mems.g3.nospring.outv
+
+echo ""
+echo "G1 MEMS Device with 75% springs - synthetic workload (avg. resp. should be about 2.01 ms)"
+../src/disksim mems.g1.parv mems.g1.outv ascii 0 1 mems0 "Spring constant factor" 0.75
+grep "IOdriver Response time average" mems.g1.outv
+
+echo ""
+echo "G2 MEMS Device with 75% springs - synthetic workload (avg. resp. should be about 1.16 ms)"
+../src/disksim mems.g2.parv mems.g2.outv ascii 0 1 mems0 "Spring constant factor" 0.75
+grep "IOdriver Response time average" mems.g2.outv
+
+echo ""
+echo "G3 MEMS Device with 75% springs - synthetic workload (avg. resp. should be about 0.85 ms)"
+../src/disksim mems.g3.parv mems.g3.outv ascii 0 1 mems0 "Spring constant factor" 0.75
+grep "IOdriver Response time average" mems.g3.outv
+
+#echo ""
+#echo "Set of MEMS arrays - synthetic workload (avg. resp. should be about 3.5ms) BROKEN!!"
+#../src/disksim memsarrays.parv memsarrays.outv ascii 0 1
+#grep "Overall I/O System Response time average" memsarrays.outv
+
+ 
+#echo ""
+#echo "MEMS device as cache for disk - synthetic workload (avg. resp. should be about 19.2 ms)"
+#../src/disksim memscache.parv memscache.outv ascii 0 1
+#grep "Overall I/O System Response time average" memscache.outv
+
+echo ""
+

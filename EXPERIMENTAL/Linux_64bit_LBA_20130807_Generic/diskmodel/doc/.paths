@@ -1,0 +1,41 @@
+# libdisksim 
+export LIBDISKSIM_PREFIX=../../
+export LIBDISKSIM_INCL=$(LIBDISKSIM_PREFIX)/include
+export LIBDISKSIM_CFLAGS=-I$(LIBDISKSIM_INCL)
+export LIBDISKSIM_LDPATH=$(LIBDISKSIM_PREFIX)/lib
+export LIBDISKSIM_LDFLAGS=-L$(LIBDISKSIM_LDPATH) -ldisksim
+
+# disksim internals (for memsmodel, etc)
+export DISKSIM_PREFIX=../../src/
+export DISKSIM_INCL=$(DISKSIM_PREFIX)/
+export DISKSIM_CFLAGS=-I$(DISKSIM_INCL)
+export DISKSIM_LDPATH=$(DISKSIM_PREFIX)/
+export DISKSIM_LDFLAGS=-L$(DISKSIM_LDPATH) -ldisksim
+
+# path to diskmodel
+export DISKMODEL_PREFIX=../../diskmodel
+export DISKMODEL_INCL=$(DISKMODEL_PREFIX)/include
+export DISKMODEL_CFLAGS=-I$(DISKMODEL_INCL)
+export DISKMODEL_LDPATH=$(DISKMODEL_PREFIX)/lib
+export DISKMODEL_LDFLAGS=-L$(DISKMODEL_LDPATH) -ldiskmodel
+
+# path to libparam
+export LIBPARAM_PREFIX=../../libparam
+export LIBPARAM_INCL=$(LIBPARAM_PREFIX)/include
+export LIBPARAM_CFLAGS=-I$(LIBPARAM_INCL)
+export LIBPARAM_LDPATH=$(LIBPARAM_PREFIX)/lib
+export LIBPARAM_LDFLAGS=-L$(LIBPARAM_LDPATH) -lparam
+
+# libtrace
+export LIBDDBG_PREFIX=../../libddbg
+export LIBDDBG_INCL=$(LIBDDBG_PREFIX)/include
+export LIBDDBG_CFLAGS=-I$(LIBDDBG_INCL)
+export LIBDDBG_LDPATH=$(LIBDDBG_PREFIX)/lib
+export LIBDDBG_LDFLAGS=-L$(LIBDDBG_LDPATH) -lddbg
+
+# path to memsmodel
+export MEMSMODEL_PREFIX=../../memsmodel
+export MEMSMODEL_INCL=$(MEMSMODEL_PREFIX)/include
+export MEMSMODEL_CFLAGS=-I$(MEMSMODEL_INCL)
+export MEMSMODEL_LDPATH=$(MEMSMODEL_PREFIX)/lib
+export MEMSMODEL_LDFLAGS=-L$(MEMSMODEL_LDPATH) -lmemsmodel

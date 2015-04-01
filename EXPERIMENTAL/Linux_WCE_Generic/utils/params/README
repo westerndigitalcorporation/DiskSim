@@ -1,0 +1,68 @@
+
+[ The following may be useful as a starting point for those in need of
+automatically converting old DiskSim parameter files into the new
+format.  We have not used it in years so YMMV.  John Bucy, May, 2007 ]
+
+Here are some scripts that do most of the legwork of converting old
+DiskSim v2 setups to the libparam/disksim v3 format. 
+
+If you want to convert a disksim v2 spec that *does not* use the
+raw_layout patch, you want convert_diskspec_g1.pl (below); if it
+*does* use the raw_layout patch, you want convert_diskspec_g2.pl.
+
+This directory (disksim/utils/params) needs to be in your PATH if you
+want to run the scripts in another directory.  Additionally,
+convert_raw.pl uses the diskmodel "layout_g3_tools" so
+diskmodel/layout_g3_tools needs to be in your path as well.
+
+e.g. if you checked out the disksim suite using the pdl_setup script in ~/src
+
+export PATH=$PATH:~/src/disksim/diskmodel/layout_g3_tools:~/src/disksim/utils/params
+
+gen_parv.pl: generate a generic disksim parameter file for a disk by
+substituting parameters into a template. STDIN is the template
+(e.g. parv.template), STDOUT is the new parv file.
+
+e.g. 
+gen_parv.pl foo.diskspecs < parv.template > foo.parv
+
+will generate foo.parv from parv.template and the disk parameters in
+foo.diskspecs.
+
+
+convert_diskspec_g1.pl: wrapper for convert-diskspec.pl and
+convert_diskspec (below) -- converts from a v2 diskspec to a v3
+diskspec and model.
+
+e.g. 
+convert_diskspec_g1.pl ../source/cheetah-godfather.diskspecs \
+  cheetah9LP.diskspecs cheetah9LP.model SEAGATE_ST9LP
+
+will read cheetah-godfather.diskspecs (disksim v2 format) and output
+cheetah9LP.diskspecs (disksim v3/libparam) and cheetah9LP.model
+(diskmodel/libparam).  The disksim_disk in cheetah9LP.diskspecs will
+be named SEAGATE_ST9LP and the dm_disk in cheetah9LP.model will be
+named SEAGATE_ST9LP_model.
+
+
+convert_diskspec_g2.pl: wrapper above along with g2 analysis, etc, to
+generate a g2 model and v3 diskspec from a v2/raw layout diskspec.
+The diskmodel/layout_g3_tools directory must be in $PATH for this
+to work.
+
+e.g. 
+convert_diskspec_g2.pl ../source/k3.diskspecs ../source/k3.layout.mappings\
+   QUANTUM_ATLAS10K3_36_SC_34421544649 atlas-k3.diskspecs atlas-k3.model
+
+will read k3.diskspecs (disksim v2, raw_layout) and k3.layout.mappings
+(list of all LBN-to-PBN mappings, output by dixtrac/dx_layout) and
+output atkas-k3.diskspecs and atlas-k3.model as above.
+
+
+
+disksim_v2_to_libparam.pl: syntactically transform a v2 diskspec into
+libparam-format (STDIN to STDOUT)
+
+libparam_to_v3: uses libparam to convert a "v2 diskspec in libparam
+format" into a v3 diskspec and g1 model.
+

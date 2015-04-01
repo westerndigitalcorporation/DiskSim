@@ -1,0 +1,9 @@
+set terminal postscript
+set output "@FILE@"
+set yrange[0:1.2]
+set xrange[0:30]
+set xlabel "Time (ms)"
+set ylabel "Cumulative distribution"
+set title "@FULLNAME@\n @RMS@\n @WORKLOAD@ (@DATE@)"
+plot "@DSCDF@" using 1:4 title "disksim" with lines,  "@TRACECDF@" using 1:4 title "@NAME@" with lines
+

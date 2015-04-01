@@ -1,0 +1,73 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE iomap
+HEADER \#include "../disksim_iosim.h"
+RESTYPE int
+PROTO int disksim_iomap_loadparams(struct lp_block *b);
+
+PARAM tracedev		I	1
+INIT tracemap[result] = i;
+
+This specifies the traced device affected by this mapping.
+
+PARAM simdev		S	1
+TEST getdevbyname(s, &tracemap1[result], 0, 0)
+
+This specifies the simulated device such requests should access.
+
+PARAM locScale		I	1
+TEST (i > 0) && (!(512 % i) || !(i % 512))
+INIT tracemap2[result] = i;
+
+This specifies a value by which a traced disk request location is multiplied to
+generate the starting location (in bytes) of the simulated disk
+request.  For example, if the input trace specifies locations in terms
+of 512-byte sectors, a value of 512 would result in an equivalent
+logical space of requests.
+
+PARAM sizeScale		I	1
+TEST i > 0
+INIT tracemap3[result] = i;
+
+This specifies a value by which a traced disk request size is
+multiplied to generate the size (in bytes) of the simulated disk
+request.
+
+PARAM offset		I	0
+TEST i >= 0		
+INIT tracemap4[result] = i;
+
+This specifies a value to be added to each simulated request's
+starting location.  This is especially useful for combining multiple
+trace devices' logical space into the space of a single simulated
+device.

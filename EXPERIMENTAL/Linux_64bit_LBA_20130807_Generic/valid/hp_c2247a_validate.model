@@ -1,0 +1,186 @@
+dm_disk HP_C2247A_validate_model {
+   Number of data surfaces = 13,
+   Number of cylinders = 2051,
+   Block count = 2054864,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 1,
+      Rangesize for sparing = 1,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 558,
+            Blocks per track = 96,
+            Offset of first block = 0,
+            Empty space at zone front = 1632,
+            Skew for track switch = 14,
+            Skew for cylinder switch = 32,
+            Number of spares = 325,
+            slips = [
+               468,
+               526,
+               1204,
+               1861,
+               2447,
+               2680,
+               3098,
+               3683,
+               4880,
+               4919,
+               6952,
+               7095
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 559,
+            Last cylinder number = 760,
+            Blocks per track = 92,
+            Offset of first block = 14,
+            Empty space at zone front = 0,
+            Skew for track switch = 13,
+            Skew for cylinder switch = 30,
+            Number of spares = 130,
+            slips = [
+               231,
+               868,
+               1125,
+               1458,
+               1479,
+               1492
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 761,
+            Last cylinder number = 901,
+            Blocks per track = 88,
+            Offset of first block = 73,
+            Empty space at zone front = 0,
+            Skew for track switch = 13,
+            Skew for cylinder switch = 29,
+            Number of spares = 65,
+            slips = [
+               585,
+               996,
+               1401,
+               1810
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 902,
+            Last cylinder number = 1051,
+            Blocks per track = 84,
+            Offset of first block = 80,
+            Empty space at zone front = 0,
+            Skew for track switch = 12,
+            Skew for cylinder switch = 28,
+            Number of spares = 78,
+            slips = [
+               582,
+               595,
+               699
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1052,
+            Last cylinder number = 1193,
+            Blocks per track = 80,
+            Offset of first block = 52,
+            Empty space at zone front = 0,
+            Skew for track switch = 12,
+            Skew for cylinder switch = 27,
+            Number of spares = 52,
+            slips = [
+               569,
+               1098,
+               1518
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1194,
+            Last cylinder number = 1519,
+            Blocks per track = 72,
+            Offset of first block = 0,
+            Empty space at zone front = 0,
+            Skew for track switch = 11,
+            Skew for cylinder switch = 24,
+            Number of spares = 104,
+            slips = [
+               693,
+               1489,
+               3102,
+               3115
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1520,
+            Last cylinder number = 1793,
+            Blocks per track = 64,
+            Offset of first block = 32,
+            Empty space at zone front = 0,
+            Skew for track switch = 10,
+            Skew for cylinder switch = 22,
+            Number of spares = 78,
+            slips = [
+               1980,
+               1993,
+               3505
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1794,
+            Last cylinder number = 2050,
+            Blocks per track = 56,
+            Offset of first block = 30,
+            Empty space at zone front = 0,
+            Skew for track switch = 9,
+            Skew for cylinder switch = 19,
+            Number of spares = 65,
+            slips = [
+               1512,
+               2506,
+               3320
+            ],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = hplplus10,
+      Single cylinder seek time = 0.200000,
+      Average seek time = 1.100000,
+      Full strobe seek time = 2.300000,
+      Add. write settling delay = 0.650000,
+      HPL seek equation values = [
+         300,
+         3.810000,
+         0.330000,
+         7.750000,
+         0.005900,
+         -1.000000
+      ],
+      First ten seek times = [
+         2.890000,
+         3.680000,
+         3.810000,
+         3.980000,
+         4.270000,
+         4.650000,
+         4.520000,
+         4.650000,
+         4.820000,
+         4.990000
+      ],
+      Head switch time = 0.890000,
+      Rotation speed (in rpms) = 5400,
+      Percent error in rpms = 0.000000
+   }
+} # end of HP_C2247A_validate_model spec
+

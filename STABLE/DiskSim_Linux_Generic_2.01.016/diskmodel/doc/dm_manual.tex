@@ -1,0 +1,72 @@
+\documentclass{article}
+\setlength{\textwidth}{6in}
+\setlength{\oddsidemargin}{0in}
+\setlength{\evensidemargin}{0in}
+
+\newcommand{\lpnamewidth}{2 in}
+\newcommand{\lpmodwidth}{1.5 in}
+
+\begin{document}
+\title{Diskmodel}
+\maketitle
+
+\section{Overview}
+\input{dm_intro.tex}
+\input{dm_units.tex}
+\input{dm_api.tex}
+\input{dm_param.tex}
+
+
+\section{Installation}
+To Build Diskmodel:
+
+1.  build libparam and libtrace 
+
+2.  edit .paths in the diskmodel source directory to reflect where
+you built libparam and libtrace
+
+3.  'make' in the diskmodel directory
+
+\section{Typical use with libparam}
+
+'make all' sets up include and lib subdirectories such that
+you may use 
+\begin{verbatim}-I$(DISKMODEL_PREFIX)/include \end{verbatim}
+with the preprocessor and 
+\begin{verbatim}#include<diskmodel/dm.h> \end{verbatim} etc.  Similarly, 
+\begin{verbatim}-L$(DISKMODEL_PREFIX)/lib -ldiskmodel \end{verbatim} 
+with the linker where \texttt{DISKMODEL\_PREFIX} is the top-level
+source directory where you built diskmodel.
+
+
+1.  register diskmodel libparam modules with libparam. e.g.
+\begin{verbatim}
+#include <diskmodel/modules/modules.h>
+for(i = 0; i <= DM_MAX_MODULE; i++) {
+  lp_register_module(dm_mods[i]);
+}
+\end{verbatim}
+
+2.  use \texttt{lp\_loadfile()} to load a model file
+
+3.  use \texttt{lp\_instantiate()} to instantiate a model from the
+input file.  The result of the instantiation is a \texttt{struct
+dm\_disk\_if *}
+
+e.g. \texttt{struct dm\_disk\_if *disk = lp\_instantiate(...);}
+
+
+4.  Access methods through d.
+e.g. \texttt{dm\_time\_t seektime = d->mech->dm\_seek\_time(...)}
+
+
+\input{dm_bib.tex}
+
+\end{document}
+
+
+
+
+
+
+

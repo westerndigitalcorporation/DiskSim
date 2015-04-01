@@ -1,0 +1,45 @@
+#!/bin/sh
+
+#-- Get the tree to its most clean state
+if [ -f ./Makefile ]; then
+    make clean_config
+    if [ $? -ne 0 ]; then
+        echo '--- make clean_config failed ---'
+        exit
+    fi
+fi
+if [ -x ./configure ]; then
+    rm ./configure
+fi
+
+#-- Test autoconf
+autoconf
+if [ $? -ne 0 ]; then
+    echo '--- autoconf failed ---'
+    exit
+fi
+
+#-- Test configure
+./configure
+if [ $? -ne 0 ]; then
+    echo '--- configure failed ---'
+    exit
+fi
+
+#-- Test making dependencies
+# Removed - target depend deprecated
+# make depend
+# if [ $? -ne 0 ]; then
+#    echo '--- make depend failed ---'
+#    exit
+# fi
+
+#-- Test making everything
+make all
+if [ $? -ne 0 ]; then
+    echo '--- make all failed ---'
+    exit
+fi
+
+#-- Finished
+echo 'Build successful.'

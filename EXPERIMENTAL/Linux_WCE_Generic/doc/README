@@ -1,0 +1,11 @@
+This directory contains a copy of the user's manual for Disksim 2.0,
+released in 1999 (disksim-doc.ps).  While it is out of date, it could
+provide some useful background.  
+
+Outline.txt describes the innards of Disksim 2.0 in some detail, with
+information on the flow of events, memory management, and some changes
+that were made before the release of 2.0.  It is also out of date, but
+could provide some insight to future developers.
+
+The disksim4-manual.pdf is a copy of the  user's manual for Disksim 4.0.
+

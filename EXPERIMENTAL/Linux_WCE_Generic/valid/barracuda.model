@@ -1,0 +1,204 @@
+dm_disk SEAGATE_ST32171W_model {
+   Number of data surfaces = 5,
+   Number of cylinders = 5172,
+   Block count = 4110000,
+   Layout Model = dm_layout_g1 {
+      LBN-to-PBN mapping scheme = 0,
+      Sparing scheme used = 8,
+      Rangesize for sparing = 6,
+      Zones = [
+         dm_layout_g1_zone {
+            First cylinder number = 0,
+            Last cylinder number = 1127,
+            Blocks per track = 186,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 37.000000,
+            Skew for cylinder switch = 52.000000,
+            Number of spares = 88,
+            slips = [
+               112508,
+               113430,
+               114351,
+               303401,
+               304322,
+               305243,
+               338539,
+               339460,
+               340452
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 1129,
+            Last cylinder number = 2352,
+            Blocks per track = 185,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 37.000000,
+            Skew for cylinder switch = 52.000000,
+            Number of spares = 88,
+            slips = [
+               740235,
+               741151,
+               742067,
+               742068,
+               742069,
+               742070,
+               742983,
+               742984,
+               742985,
+               742986,
+               743979,
+               744895,
+               985358,
+               986274,
+               987190
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2354,
+            Last cylinder number = 2761,
+            Blocks per track = 177,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 35.000000,
+            Skew for cylinder switch = 49.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 2763,
+            Last cylinder number = 3098,
+            Blocks per track = 170,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 34.000000,
+            Skew for cylinder switch = 47.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3100,
+            Last cylinder number = 3387,
+            Blocks per track = 163,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 32.000000,
+            Skew for cylinder switch = 46.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3389,
+            Last cylinder number = 3700,
+            Blocks per track = 157,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 31.000000,
+            Skew for cylinder switch = 44.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 3702,
+            Last cylinder number = 4013,
+            Blocks per track = 148,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 29.000000,
+            Skew for cylinder switch = 41.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4015,
+            Last cylinder number = 4326,
+            Blocks per track = 141,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 28.000000,
+            Skew for cylinder switch = 39.000000,
+            Number of spares = 88,
+            slips = [
+               133034,
+               133733,
+               133734,
+               133735,
+               134431
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4328,
+            Last cylinder number = 4615,
+            Blocks per track = 135,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 27.000000,
+            Skew for cylinder switch = 38.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4617,
+            Last cylinder number = 4928,
+            Blocks per track = 126,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 25.000000,
+            Skew for cylinder switch = 35.000000,
+            Number of spares = 88,
+            slips = [
+               10320,
+               10944,
+               11520
+            ],
+            defects = []
+         },
+         dm_layout_g1_zone {
+            First cylinder number = 4930,
+            Last cylinder number = 5171,
+            Blocks per track = 119,
+            Offset of first block = 0.000000,
+            Empty space at zone front = 0,
+            Skew for track switch = 23.000000,
+            Skew for cylinder switch = 33.000000,
+            Number of spares = 88,
+            slips = [],
+            defects = []
+         }
+      ]
+   },
+   Mechanical Model = dm_mech_g1 {
+      Access time type = trackSwitchPlusRotation,
+      Seek type = extracted,
+      Single cylinder seek time = 1.943000,
+      Full seek curve = barracuda.seek,
+      Full strobe seek time = 16.679000,
+      Add. write settling delay = 0.000000,
+#      First ten seek times = [
+#         1.940000,
+#         1.960000,
+#         1.930000,
+#         2.170000,
+#         2.180000,
+#         2.330000,
+#         2.340000,
+#         2.330000,
+#         2.330000,
+#         2.350000
+#      ],
+      Head switch time = 0.100000,
+      Rotation speed (in rpms) = 7200,
+      Percent error in rpms = 0.000000
+   }
+} # end of SEAGATE_ST32171W_model spec
+

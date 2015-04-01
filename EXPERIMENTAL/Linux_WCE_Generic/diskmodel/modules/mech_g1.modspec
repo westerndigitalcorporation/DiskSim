@@ -1,0 +1,233 @@
+
+# diskmodel (version 1.0)
+# Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this
+# software, you agree that you have read, understood, and will comply
+# with the following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty"
+# statements are included with all reproductions and derivative works
+# and associated documentation. This software may also be
+# redistributed without charge provided that the copyright and "No
+# Warranty" statements are included in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH
+# RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT
+# INFRINGEMENT.  COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE
+# OF THIS SOFTWARE OR DOCUMENTATION.  
+ 
+
+
+MODULE mech_g1
+HEADER \#include "../mech_g1.h"
+HEADER \#include "../mech_g1_private.h"
+RESTYPE struct dm_mech_g1 *
+PROTO struct dm_mech_if *dm_mech_g1_loadparams(struct lp_block *b, int *num);
+
+
+PARAM Access time type			S	1 
+INIT if(!strcmp(s, "constant")) { } 
+INIT else if(!strcmp(s, "averageRotation")) { 
+INIT   result->acctime = AVGROTATE; 
+INIT } 
+INIT else if(!strcmp(s, "trackSwitchPlusRotation")) { 
+INIT   result->acctime = SKEWED_FOR_TRACK_SWITCH; 
+INIT } 
+INIT else { 
+INIT   fprintf(stderr, "*** error: Unknown access time type: %s\n", s); 
+INIT   ddbg_assert(0);
+INIT }
+
+This specifies the method for computing mechanical delays.  Legal values
+are \texttt{constant} which indicates a fixed per-request access time
+(i.e.,~actual mechanical activity is not modeled),
+\texttt{averageRotation} which indicates that seek activity should be
+modeled but rotational latency is assumed to be equal to one half of
+a rotation (the statistical mean for random disk access) and
+\texttt{trackSwitchPlusRotation} which indicates that both seek and
+rotational activity should be modeled.
+
+
+PARAM Constant access time		D	0 
+TEST d >= 0.0
+INIT result->acctime = d;
+
+Provides the constant access time to be used if the access time type
+is set to constant.
+
+
+PARAM Seek type				S	1 
+INIT if(!strcmp(s, "constant")) {
+INIT   result->seektime = SEEK_CONST;
+INIT }
+INIT else if(!strcmp(s, "linear")) {
+INIT   result->seektime = SEEK_3PT_LINE;
+INIT }
+INIT else if(!strcmp(s, "curve")) { 
+INIT   result->seektime = SEEK_3PT_CURVE;
+INIT }
+INIT else if(!strcmp(s, "hpl")) {
+INIT   result->seektime = SEEK_HPL;
+INIT }
+INIT else if(!strcmp(s, "hplplus10")) {
+INIT   result->seektime = SEEK_1ST10_PLUS_HPL;
+INIT }
+INIT else if(!strcmp(s, "extracted")) {
+INIT   result->seektime = SEEK_EXTRACTED;
+INIT }
+INIT else {
+INIT   fprintf(stderr, "*** error: Unknown seek type: %s\n", s);
+INIT   ddbg_assert(0);
+INIT }
+INIT result->seekfn   = dm_mech_g1_seekfns[result->seektime];
+
+
+This specifies the method for computing seek delays.  
+Legal values are the following:
+
+\texttt{linear} indicates that the single-cylinder seek time, the average
+seek time, and the full-strobe seek time parameters should be used to
+compute the seek time via linear interpolation.
+
+\texttt{curve} indicates that the same three parameters should be used
+with the seek equation described in \cite{Lee93} (see Section
+\ref{seek.lee}).
+
+
+\texttt{constant} indicates a fixed per-request seek time.  The
+\texttt{Constant seek time} parameter must be provided.
+
+\texttt{hpl} indicates that the six-value \texttt{HPL seek equation values}
+parameter (see below) should be used with the seek equation described
+in \cite{Ruemmler94} (see below).
+
+\texttt{hplplus10} indicates that the six-value \texttt{HPL seek
+equation values} parameter (see below) should be used with the seek
+equation described in \cite{Ruemmler94} for all seeks greater than
+10~cylinders in length.  For smaller seeks, use the 10-value
+\texttt{First ten seek times} parameter (see below) as in
+\cite{Worthington94}.
+
+\texttt{extracted} indicates that a more complete seek curve (provided
+in a separate file) should be used, with linear interpolation used to
+compute the seek time for unspecified distances.  If
+\texttt{extracted} layout is used, the parameter \texttt{Full seek curve}
+(below) must be provided.
+
+
+PARAM Average seek time			D	0 
+TEST d >= 0.0
+INIT result->seekavg = d;
+
+The mean time necessary to perform a random seek
+
+PARAM Constant seek time		D	0 
+TEST d >= 0.0
+INIT result->seektime = d;
+
+For the ``constant'' seek type (above).
+
+PARAM Single cylinder seek time		D	0 
+TEST d >= 0.0
+INIT result->seekone = d;
+
+This specifies the time necessary to seek to an adjacent cylinder.
+
+
+PARAM Full strobe seek time		D	0 
+TEST d >= 0.0
+INIT result->seekfull = d;
+
+This specifies the full-strobe seek time (i.e.,~the time to seek from the
+innermost cylinder to the outermost cylinder).
+
+# filename for now (dm_mech_g1_read_extracted_seek_curve()) 
+# eventually list of (distance : I, time : D) pairs 
+
+PARAM Full seek curve			S	0 
+DEPEND Seek type
+INIT result->seektime = SEEK_EXTRACTED;
+INIT dm_mech_g1_read_extracted_seek_curve(s, 
+INIT				    &result->xseekcnt, 
+INIT			            &result->xseekdists,  
+INIT				    &result->xseektimes); 
+INIT
+
+The name of the input file containing the seek curve data.
+The format of this file is described below.
+
+
+PARAM Add. write settling delay		D	1 
+INIT result->seekwritedelta = dm_time_dtoi(d);
+
+This specifies the additional time required to precisely settle the
+read/write head for writing (after a seek or head switch).  As this
+parameter implies, the seek times computed using the above parameter
+values are for read access.
+
+PARAM Head switch time			D	1 
+TEST d >= 0.0 
+INIT result->headswitch = dm_time_dtoi(d);
+
+This specifies the time required for a head switch (i.e.,~activating a
+different read/write head in order to access a different media
+surface).
+
+PARAM Rotation speed (in rpms)		I	1 
+TEST i > 0
+INIT result->rpm = i;
+This specifies the rotation speed of the disk platters in rpms.
+
+PARAM Percent error in rpms		D	1 
+TEST RANGE(d, 0.0, 100.0)
+INIT result->rpmerr = d;
+
+This specifies the maximum deviation in the rotation speed specified
+above.  During initialization, the rotation speed for each
+disk is randomly chosen from a uniform distribution of the specified
+rotation speed $\pm$ the maximum allowed error.  
+
+%(as computed from this parameter's value).
+
+This feature may be deprecated and should be avoided.
+
+
+PARAM First ten seek times		LIST	0 
+DEPEND Seek type
+TEST !do_1st10_seeks(result,l)
+
+This is a list of ten floating-point numbers specifying the seek time for seek
+distances of 1~through 10~cylinders.
+
+PARAM HPL seek equation values		LIST	0  
+DEPEND Seek type
+TEST !do_hpl_seek(result,l)
+
+This is a list containing six numbers specifying the variables 
+$V_1$ through $V_6$ of the seek equation described in \cite{Ruemmler94}
+(see below).
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,116 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE cachedev
+HEADER \#include "disksim_cachedev.h"
+RESTYPE struct cache_dev *
+PROTO struct cache_if *disksim_cachedev_loadparams(struct lp_block *b);
+
+PARAM Cache size		I	1 
+TEST i >= 0
+INIT if(result->validmap || result->dirtymap) { fprintf(stderr, "*** ignoring repeat cache size definition.\n"); } else { result->size = i; result->validmap = (bitstr_t *) DISKSIM_malloc(bitstr_size(result->size)); result->dirtymap = (bitstr_t *) DISKSIM_malloc(bitstr_size(result->size)); ASSERT ((result->validmap != NULL) && (result->dirtymap != NULL)); }
+
+This specifies the total size of the cache in blocks.
+
+
+PARAM Max request size		I	1 
+TEST i >= 0
+INIT result->maxreqsize = i;
+
+This specifies the maximum request size to be served by the cache.  This
+value does not actually affect the simulated cache's behavior.
+Rather, higher-level system components (e.g.,~the device driver in
+DiskSim) acquire this information at initialization time and break up
+larger requests to accommodate it.  0~indicates that there is no
+maximum request size.
+
+PARAM Write scheme		I	1 
+TEST RANGE(i,CACHE_WRITE_MIN,CACHE_WRITE_MAX)
+INIT result->writescheme = i;
+
+This specifies the policy for handling write requests.  
+
+1~indicates that new data are always synchronously written to the
+backing store before indicating completion.
+
+2~indicates a write-through scheme where requests are immediately
+initiated for writing out the new data to the backing store, but the
+original write requests are considered complete as soon as the new
+data is cached.
+
+3~indicates a write-back scheme where completions are reported
+immediately and dirty blocks are held in the cache for some time
+before being written out to the backing store.
+
+
+PARAM Flush policy		I	1 
+TEST RANGE(i,CACHE_FLUSH_MIN,CACHE_FLUSH_MAX)
+INIT result->flush_policy = i;
+
+This specifies the policy for flushing dirty blocks to the backing store
+(assuming a write-back scheme for handling write requests).
+
+0~indicates that dirty blocks are written back ``on demand''
+(i.e.,~only when the allocation/replacement policy needs to reclaim
+them).
+
+1~indicates write-back requests are periodically initiated for all
+dirty cache blocks.
+
+PARAM Flush period		D	1 
+TEST d >= 0
+INIT result->flush_period = d;
+
+This specifies the time between periodic write-backs of all dirty cache
+blocks (assuming a periodic flush policy).
+
+PARAM Flush idle delay		D	1 
+TEST (d >= 0) || (d == -1.0)
+INIT result->flush_idledelay = d;
+
+This specifies the amount of contiguous idle time that must be observed
+before background write-backs of dirty cache blocks are initiated.
+Any front-end request processing visible to the cache resets the idle
+timer.  -1.0~indicates that idle background flushing is disabled.
+
+# !!! Both of these devices MUST be instantiated before a cachedev
+# is instantiated, otherwise, getdevbyname() will fail, etc.
+
+PARAM Cache device		S	1 
+TEST getdevbyname(s, &result->cache_devno, 0, 0)
+
+The device used for the cache.
+
+PARAM Cached device		S	1 
+TEST getdevbyname(s, &result->real_devno, 0, 0)
+
+The device whose data is being cached.

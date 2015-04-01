@@ -1,0 +1,16 @@
+Design and implementation of DualSeek table
+
+Verion-1: labelled as @4.1, which takes the 4th column in the *.seek as the write-seek-time, It is faster for changing, than version-2 ( @4.2 see below comment)
+The constraint is that write-seek-time and read-seek-time must have the same length in array;
+One sample dual-seek table is attached.
+
+For backward compatibility, it will automatically detect whether a seek table is Single-seek or Dual-seek, and set a flag (int iFlagDualSeekProfile in mech_g1.h)
+
+Single-seek: *.seek file has 2 or 3 columns
+Dual-seek: *.seek has 4 columns.
+
+Definition of dual-seek table:
+Column-1: seek-distance in data-cylinder difference
+Column-2: read-seek-time in ms
+Column-3: StD of seek-time (we see most of the seek table has 2 columns, except Mator-300g)
+Column-4: write-seek-time in ms

@@ -1,0 +1,70 @@
+
+\subsection{Types and Units}
+
+All math in diskmodel is performed using integer arithmetic.  Angles
+identified as points on a circle divided into discrete units.  Time is
+represented as multiples of some very small time base.  Diskmodel
+exports the types \texttt{dm\_time\_t} and \texttt{dm\_angle\_t} to
+represent these quantities.  Diskmodel exports functions
+\texttt{dm\_time\_itod}, \texttt{dm\_time\_dtoi} (likewise for angles)
+for converting between doubles and the native format.  The time
+function converts to and from milliseconds; the angle function
+converts to and from a fraction of a circle.  \texttt{dm\_time\_t} and
+\texttt{dm\_angle\_t} should be regarded as opaque and may change over
+time.  Diskmodel is sector-size agnostic in that it assumes that
+sectors are some fixed size but does not make any assumption about
+what that size is.
+
+\subsubsection{Three Zero Angles}
+
+When considering the angular offset of a sector on a track, there are
+at least three plausible candidates for a ``zero'' angle.  The first
+is ``absolute'' zero which is the same on every track on the disk.
+For various reasons, this zero may not coincide with a sector
+boundary on a track.  This motivates the second 0 which we will refer
+to as $0_t$ (t for ``track'') which is the angular offset of the first
+sector boundary past 0 on a track.  Because of skews and defects, the
+lowest lbn on the track may not lie at $0_t$.  We call the angle of
+the lowest sector on the track $0_l$ (l for ``logical'' or ``lbn'').
+
+\subsubsection{Two Zero Sectors}
+
+Similarly, when numbering the sectors on a track, it is reasonable to
+call either the sector at $0_t$ or the one at $0_l$ ``sector 0.''
+$0_t$ corresponds to directly to the physical location of sectors on a
+track whereas $0_l$ corresponds to logical layout.  Diskmodel works in
+both systems and the following function descriptions identify which
+numbering a given function uses.
+
+\subsubsection{Example}
+
+Consider a disk with 100 sectors per track, 2 heads, a head switch
+skew of 10 sectors and a cylinder switch skew of 20 sectors. $(x,y,z)$
+denotes cylinder $x$, head $y$ and sector $z$.\\
+
+\begin{tabular}{l|l|l}
+LBN & $0_l$ PBN & $0_t$ PBN \\
+\cline{1-3}
+0 & (0,0,0) & (0,0,0) \\
+\multicolumn{3}{c}{$\vdots$} \\
+99 & (0,0,99) & (0,0,99) \\
+100 &  (0,1,0) & (0,1,10) \\
+101 &  (0,1,1) & (0,1,11) \\
+\multicolumn{3}{c}{$\vdots$} \\
+189 & (0,1,89) & (0,1,99) \\
+190 & (0,1,90) & (0,1,0) \\
+191 & (0,1,91) & (0,1,1) \\
+199 & (0,1,99) & (0,1,9) \\
+\end{tabular}\\
+
+Note that a sector is $3.6$ degrees wide.\\
+
+\begin{tabular}{l|l|l}
+Cylinder & Head & $0_l$ angle \\
+\cline{1-3}
+0 & 0 & 0 degrees \\
+0 & 1 & 36 degrees \\
+1 & 0 & 72 degrees \\
+1 & 1 & 108 degrees \\
+2 & 0 & 180 degrees \\
+\end{tabular}

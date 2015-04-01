@@ -1,0 +1,42 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(dixtrac.h)
+
+dnl AC_CONFIG_HEADER(config.h)
+
+dnl Checks for programs.
+AC_PROG_MAKE_SET
+AC_PROG_CC
+AC_PROG_RANLIB
+AC_CHECK_PROGS(PERL, perl)
+
+dnl AC_CHECK_PROGS(MV, mv)
+AC_CHECK_PROGS(AR, ar)
+AC_CHECK_PROGS(RM, rm)
+AC_CHECK_PROGS(WC, wc)
+
+dnl Checks for libraries.
+AC_CHECK_LIB(cam,cam_open_pass)
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(stdarg.h)
+AC_CHECK_HEADERS(malloc.h)
+AC_CHECK_HEADERS(sys/time.h)
+AC_CHECK_HEADERS(errno.h)
+AC_CHECK_HEADERS(sys/poll.h)
+AC_CHECK_HEADERS(unistd.h)
+AC_CHECK_HEADERS(sys/types.h)
+AC_CHECK_HEADERS(fcntl.h)
+AC_CHECK_HEADERS(sys/ioctl.h)
+AC_CHECK_HEADERS(math.h)
+AC_CHECK_HEADERS(getopt.h)
+AC_CHECK_HEADERS(linux/version.h)
+AC_CHECK_HEADERS(camlib.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_C_CONST
+AC_C_INLINE
+
+AC_CONFIG_HEADERS(config.h)
+
+AC_OUTPUT(Makefile)

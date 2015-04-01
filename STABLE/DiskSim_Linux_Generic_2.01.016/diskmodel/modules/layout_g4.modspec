@@ -1,0 +1,86 @@
+# diskmodel (version 1.1)
+# Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2003-2005
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this
+# software, you agree that you have read, understood, and will comply
+# with the following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty"
+# statements are included with all reproductions and derivative works
+# and associated documentation. This software may also be
+# redistributed without charge provided that the copyright and "No
+# Warranty" statements are included in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH
+# RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT
+# INFRINGEMENT.  COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE
+# OF THIS SOFTWARE OR DOCUMENTATION.  
+ 
+MODULE layout_g4
+HEADER \#include "../layout_g4.h"
+RESTYPE struct dm_layout_g4 *
+PROTO struct dm_layout_if *dm_layout_g4_loadparams(struct lp_block *, struct dm_disk_if *);
+
+
+PARAM TP	LIST	1
+INIT g4_load_tp(result, l);
+
+s0,  -- lowest sector number on the track
+sn,  -- highest sector number on the track
+spt  -- physical spt on the track
+
+Indicates a range of lbns [0,n] map to sectors [s0,sn] on a track.
+This will almost always be [0,n-1,n] where n is the phsyical SPT.
+
+PARAM IDX			LIST	1
+DEPEND TP
+INIT g4_load_idx(result, l);
+
+IDX contains a list of g4 layout index nodes which are themselves
+represented as lists of integers.  The inner lists contain the index
+entries which have 8 fields as follows:
+
+lbn,       -- the lbn of the first instance, relative to the parent
+cyl,       -- the lowest cylinder in the first instance, relative to the parent
+runlen,    -- the number of lbns this entry covers
+cylrunlen, -- the number of cylinders for this entry
+len,       -- the number of lbns in one instance of the child
+cyllen,    -- the number of cylinders covered by one instance 
+childtype, -- whether the child is an index node (IDX) or track pattern (TP)
+child      -- index of the child node in IDX or TP
+
+The entries are given inline so the inner lists will have a multiple
+of 8 entries.
+
+The last index node (last entry in the outer list) is the "root" index
+node that covers all of the LBN and cylinder space.
+
+
+PARAM Slips			LIST	1
+INIT g4_load_slips(result, l);
+
+A list of slip locations.  Each slip location is described by 2
+integers, the first being the logical offset (lbn) and the second
+being the number of LBNs are slipped.
+
+
+
+PARAM Remaps			LIST	1
+INIT g4_load_remaps(result, l);
+
+A list of remapped defects.  Each remap is described by 6 integers:
+LBN, -- logical offset of remapped location
+len, -- number of contiguous sectors remapped
+cylinder, head, sector,  -- remap destination
+spt -- physical SPT on destination track
+

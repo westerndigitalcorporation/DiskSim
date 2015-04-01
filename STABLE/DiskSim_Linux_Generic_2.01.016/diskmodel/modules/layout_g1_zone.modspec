@@ -1,0 +1,172 @@
+
+# diskmodel (version 1.0)
+# Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this
+# software, you agree that you have read, understood, and will comply
+# with the following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty"
+# statements are included with all reproductions and derivative works
+# and associated documentation. This software may also be
+# redistributed without charge provided that the copyright and "No
+# Warranty" statements are included in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH
+# RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT
+# INFRINGEMENT.  COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE
+# OF THIS SOFTWARE OR DOCUMENTATION.  
+ 
+
+
+
+MODULE layout_g1_zone
+HEADER \#include "../layout_g1.h"
+RESTYPE struct dm_layout_g1_band *
+PROTO int dm_layout_g1_zone_loadparams(struct lp_block *b);
+
+PARAM First cylinder number		I	1 
+TEST i >= 0
+INIT result->startcyl = i;
+
+This specifies the first physical cylinder in the zone.
+
+PARAM Last cylinder number		I	1  
+TEST i >= 0
+INIT result->endcyl = i;
+
+This specifies the last physical cylinder in the zone.
+
+PARAM Blocks per track			I	1  
+TEST i > 0
+INIT result->blkspertrack = i;
+INIT result->sector_width = ((long long)1 << 32) / result->blkspertrack;
+
+This specifies the number of sectors (independent of logical-to-physical
+mappings) on each physical track in the zone.
+
+PARAM Offset of first block		D	1 
+DEPEND Blocks per track
+# DEPEND Skew units
+INIT {
+INIT   switch(result->skew_units) {
+INIT   case DM_SU_REVOLUTIONS:
+INIT     result->firstblkangle = dm_angle_dtoi(d);
+INIT     break;
+INIT   case DM_SU_SECTORS:
+INIT   default:
+INIT     result->firstblkangle = (int)d * result->sector_width;
+INIT     break;
+INIT   }
+INIT }
+
+This specifies the physical offset of the first logical sector in the
+zone.  Physical sector 0 of every track is assumed to begin at the
+same angle of rotation.  This may be in either sectors or revolutions
+according to the ``Skew units'' parameter.
+
+PARAM Skew units			S	0 
+INIT if(!strcmp(s, "revolutions")) { result->skew_units = DM_SU_REVOLUTIONS; } 
+INIT else if(!strcmp(s, "sectors")) { result->skew_units = DM_SU_SECTORS; }
+INIT else { ddbg_assert(0); }
+
+Default is \texttt{sectors}.  This value overrides any set in the
+surrounding layout block.
+
+
+PARAM Empty space at zone front		I	1 
+INIT result->deadspace = i;
+
+This specifies the size of the ``management area'' allocated at the
+beginning of the zone for internal data structures.  This area can not
+be accessed during normal activity and is not part of the disk's
+logical-to-physical mapping.
+
+
+PARAM Skew for track switch		D	0 
+DEPEND Blocks per track
+
+INIT {
+INIT   switch(result->skew_units) {
+INIT   case DM_SU_REVOLUTIONS:
+INIT     result->trackskew = dm_angle_dtoi(d);
+INIT     break;
+INIT   case DM_SU_SECTORS:
+INIT   default:
+INIT     result->trackskew = (int)d * result->sector_width;
+INIT     break;
+INIT   }
+INIT }
+
+This specifies the number of physical sectors that are skipped when
+assigning logical block numbers to physical sectors at a track
+crossing point.  Track skew is computed by the manufacturer to
+optimize sequential access. This may be in either sectors or
+revolutions according to the ``Skew units'' parameter.
+
+ 
+PARAM Skew for cylinder switch		D	0 
+DEPEND Blocks per track
+
+INIT {
+INIT   switch(result->skew_units) {
+INIT   case DM_SU_REVOLUTIONS:
+INIT     result->cylskew = dm_angle_dtoi(d);
+INIT     break;
+INIT   case DM_SU_SECTORS:
+INIT   default:
+INIT     result->cylskew = (int)d * result->sector_width;
+INIT     break;
+INIT   }
+INIT }
+
+This specifies the number of physical sectors that are skipped when
+assigning logical block numbers to physical sectors at a cylinder
+crossing point.  Cylinder skew is computed by the manufacturer to
+optimize sequential access. This may be in either sectors or
+revolutions according to the ``Skew units'' parameter.
+
+
+PARAM Number of spares			I	1 
+INIT result->sparecnt = i;
+
+This specifies the number of spare storage locations -- sectors or tracks,
+depending on the sparing scheme chosen -- allocated per region of
+coverage which may be a track, cylinder, or zone, depending on the
+sparing scheme.  For example, if the sparing scheme is 1, indicating
+that spare tracks are allocated at the end of the zone, the value of
+this parameter indicates how many spare tracks have been allocated for
+this zone.
+
+# SLIPBLOCK contains NUM values 
+PARAM slips				LIST	1 
+TEST !getslips(result, l)
+
+This is a list of lbns for previously detected defective media
+locations -- sectors or tracks, depending upon the sparing scheme
+chosen -- that were skipped-over or ``slipped'' when the
+logical-to-physical mapping was last created.  Each integer in the
+list indicates the slipped (defective) location.
+
+# DEFECTBLOCK contains NUM values interpreted as (logphy) pairs
+PARAM defects				LIST	1 
+TEST !getdefects(result, l)
+
+This list describes previously detected defective media
+locations -- sectors or tracks, depending upon the sparing scheme
+chosen -- that have been remapped to alternate physical locations.
+The elements of the list are interpreted as pairs wherein the first
+number is the original (defective) location and the second number
+indicates the replacement location.  Note that these locations
+will both be either a physical sector number or a physical track
+number, depending on the sparing scheme chosen.

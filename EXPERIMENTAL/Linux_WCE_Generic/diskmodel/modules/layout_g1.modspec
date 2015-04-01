@@ -1,0 +1,119 @@
+# diskmodel (version 1.0)
+# Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this
+# software, you agree that you have read, understood, and will comply
+# with the following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty"
+# statements are included with all reproductions and derivative works
+# and associated documentation. This software may also be
+# redistributed without charge provided that the copyright and "No
+# Warranty" statements are included in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH
+# RESPECT TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT
+# INFRINGEMENT.  COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE
+# OF THIS SOFTWARE OR DOCUMENTATION.  
+ 
+MODULE layout_g1
+HEADER \#include "../layout_g1.h"
+RESTYPE struct dm_layout_g1 *
+PROTO struct dm_layout_if *dm_layout_g1_loadparams(struct lp_block *b, struct dm_disk_if *d);
+
+
+PARAM LBN-to-PBN mapping scheme		I	1 
+TEST RANGE(i,0,LAYOUT_MAX)
+INIT result->mapping = i; 
+
+This specifies the type of LBN-to-PBN mapping used by the disk.
+
+0 indicates that the conventional mapping scheme is used:
+LBNs advance along the 0th track of the 0th cylinder, then along the
+1st track of the 0th cylinder, thru the end of the 0th cylinder, then
+to the 0th track of the 1st cylinder, and so forth.
+
+1 indicates that the conventional mapping scheme is modified slightly,
+such that cylinder switches do not involve head switches.  Thus, after
+LBNs are assigned to the last track of the 0th cylinder, they are
+assigned to the last track of the 1st cylinder, the next-to-last track
+of the 1st cylinder, thru the 0th track of the 1st cylinder.  LBNs are
+then assigned to the 0th track of the 2nd cylinder, and so on
+(``first cylinder is normal'').
+
+2 is like 1 except that the serpentine pattern does not reset at the
+beginning of each zone; rather, even cylinders are always ascending and
+odd cylinders are always descending.
+
+PARAM Sparing scheme used		I	1 
+TEST RANGE(i,NO_SPARING,MAXSPARESCHEME)
+INIT result->sparescheme = i;
+
+This specifies the type of sparing used by the disk.  Later parameters determine
+where spare space is allocated.
+0~indicates that no spare sectors are allocated.  
+
+1~indicates that entire tracks of spare sectors are allocated at the ``end''
+
+of some or all zones (sets of cylinders).
+
+2~indicates that spare sectors are allocated at the ``end'' of each cylinder.
+
+3~indicates that spare sectors are allocated at the ``end'' of each track.
+
+4~indicates that spare sectors are allocated at the ``end'' of each cylinder
+and that slipped sectors do not utilize these spares (more spares are located
+at the ``end'' of the disk).
+
+5~indicates that spare sectors are allocated at the ``front'' of each cylinder.
+
+6~indicates that spare sectors are allocated at the ``front'' of each cylinder
+and that slipped sectors do not utilize these spares (more spares are located
+at the ``end'' of the disk).
+
+7~indicates that spare sectors are allocated at the ``end'' of the disk.
+
+8~indicates that spare sectors are allocated at the ``end'' of each range
+of cylinders.
+
+9~indicates that spare sectors are allocated at the ``end'' of each zone.
+
+10~indicates that spare sectors are allocated at the ``end'' of each zone
+and that slipped sectors do not use these spares (more spares are located
+at the ``end'' of the disk).
+
+
+PARAM Rangesize for sparing		I	1 
+TEST  i > 0
+INIT result->rangesize = i;
+
+This specifies the range (e.g., of cylinders) over which spares are
+allocated and maintained.  Currently, this value is relevant only for
+disks that use ``sectors per cylinder range'' sparing schemes.
+
+
+PARAM Skew units			S	0 
+INIT if(!strcmp(s, "revolutions")) { result->skew_units = DM_SU_REVOLUTIONS; } 
+INIT else if(!strcmp(s, "sectors")) { result->skew_units = DM_SU_SECTORS; }
+INIT else { ddbg_assert(0); }
+
+This sets the units with which units are input: \texttt{revolutions} or
+\texttt{sectors}.  The ``disk-wide'' value set here may be overridden
+per-zone.  The default unit is \texttt{sectors}.
+
+PARAM Zones				LIST	1 
+TEST disk_load_zones(l,result)
+
+This is a list of zone block values describing the zones/bands of the disk.
+
+

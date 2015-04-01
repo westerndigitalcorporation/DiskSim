@@ -1,0 +1,85 @@
+
+# DiskSim Storage Subsystem Simulation Environment (Version 4.0)
+# Revision Authors: John Bucy, Greg Ganger
+# Contributors: John Griffin, Jiri Schindler, Steve Schlosser
+#
+# Copyright (c) of Carnegie Mellon University, 2001-2008.
+#
+# This software is being provided by the copyright holders under the
+# following license. By obtaining, using and/or copying this software,
+# you agree that you have read, understood, and will comply with the
+# following terms and conditions:
+#
+# Permission to reproduce, use, and prepare derivative works of this
+# software is granted provided the copyright and "No Warranty" statements
+# are included with all reproductions and derivative works and associated
+# documentation. This software may also be redistributed without charge
+# provided that the copyright and "No Warranty" statements are included
+# in all redistributions.
+#
+# NO WARRANTY. THIS SOFTWARE IS FURNISHED ON AN "AS IS" BASIS.
+# CARNEGIE MELLON UNIVERSITY MAKES NO WARRANTIES OF ANY KIND, EITHER
+# EXPRESSED OR IMPLIED AS TO THE MATTER INCLUDING, BUT NOT LIMITED
+# TO: WARRANTY OF FITNESS FOR PURPOSE OR MERCHANTABILITY, EXCLUSIVITY
+# OF RESULTS OR RESULTS OBTAINED FROM USE OF THIS SOFTWARE. CARNEGIE
+# MELLON UNIVERSITY DOES NOT MAKE ANY WARRANTY OF ANY KIND WITH RESPECT
+# TO FREEDOM FROM PATENT, TRADEMARK, OR COPYRIGHT INFRINGEMENT.
+# COPYRIGHT HOLDERS WILL BEAR NO LIABILITY FOR ANY USE OF THIS SOFTWARE
+# OR DOCUMENTATION.
+
+
+
+
+MODULE bus
+HEADER \#include "../disksim_bus.h"
+RESTYPE struct bus *
+PROTO struct bus *disksim_bus_loadparams(struct lp_block *b, int *num);
+
+PARAM type				I	1
+TEST RANGE(i,1,2)
+INIT result->type = i;
+
+This specifies the type of bus.  1~indicates an exclusively-owned
+(tenured) bus (i.e.,~once ownership is acquired, the owner gets 100\%
+of the bandwidth available until ownership is relinquished
+voluntarily).  2~indicates a shared bus where multiple bulk transfers
+are interleaved (i.e.,~each gets a fraction of the total bandwidth).
+
+PARAM Arbitration type			I	1
+TEST RANGE(i,1,2)
+INIT result->arbtype = i;
+
+This specifies the type of arbitration used for exclusively-owned buses
+(see above parameter description).  1~indicates slot-based priority
+(e.g.,~SCSI buses), wherein the order of attachment determines
+priority (i.e.,~the first device attached has the highest priority).
+2~indicates First-Come-First-Served (FCFS) arbitration, wherein bus
+requests are satisfied in arrival order.
+
+
+PARAM Arbitration time			D	1
+TEST (d >= 0.0)
+INIT result->arbtime = d;
+
+This specifies the time (in milliseconds) required to make
+an arbitration decision.
+
+PARAM Read block transfer time		D	1
+TEST (d >= 0.0)
+INIT result->readblktranstime = d;
+
+This specifies the time in milliseconds required to transfer a single
+512-byte block in the direction of the device driver / host.
+
+PARAM Write block transfer time		D	1
+TEST (d >= 0.0)
+INIT result->writeblktranstime = d;
+
+This specifies the time (in milliseconds) required to transfer a single
+512-byte block in the direction of the disk drives.
+
+PARAM Print stats			I	1 
+INIT result->printstats = i; 
+
+This specifies whether or not the collected statistics are reported.
+

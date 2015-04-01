@@ -1,0 +1,218 @@
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+IO_ACCESS_ARRIVE
+
+This is the first step.
+Initializes the reqinfo structure.
+Re-schedules the event as s DEVICE_OVERHEAD_COMPLETE at simtime + overhead.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+DEVICE_OVERHEAD_COMPLETE
+
+Overhead is complete.
+Adds request to the sled's ioqueue.
+
+If WRITE
+   Schedule a MEMS_BUS_INITIATE event at the current time.
+   Set bus_pending in the current request's mems_reqinfo structure.
+   
+If READ
+   If all of the blocks are already buffered
+      Pull the request out of the sled's ioqueue.
+      Set it as having completed the media transfer.
+      Schedule a MEMS_BUS_INITIATE event at the current time.
+      Set bus_pending in the current request's mems_reqinfo structure.
+      Free the current event.
+      Return.
+   Else
+      Call send_disconnect.
+
+If this is a batched request, the batch is complete
+   If WRITE
+      Schedule a MEMS_BUS_INITIATE event at the current time
+      Set bus_pending in the current request's mems_reqinfo structure.
+   Else
+      Call send_disconnect().
+
+If the sled is MEMS_SLED_INACTIVE
+   Schedule a new MEMS_SLED_SCHEDULE event at the current time plus
+     startup_time_ms
+   Set the sled as being MEMS_SLED_ACTIVE.
+   Update the spinup/spindown statistics.
+   Update the energy statistics.
+Else if the sled is MEMS_SLED_IDLE
+   Schedule a new MEMS_SLED_SCHEDULE event at the current time.
+   Remove the sled->active_request from the intq. (WHY?)
+   Set the sled->active_request to be NULL.
+   Figure out where the sled is at this point in time after having
+     been idle and update the sled's position.
+   Update energy statistics.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_SLED_SCHEDULE
+
+If sled is idle and the inactive_delay has passed
+   Set sled->lastreq_comptime to be the current time.
+   Set the sled to the center position.
+   Set the sled as inactive.
+   Free the current event.
+   Update the spinup/spindown statistics.
+   Return.
+Else if the sled is idle but the inactive_delay has NOT passed
+     Set the sled as being active.
+     Remove the active_request from the intq (WHY?).
+     Set the sled->active_request to be NULL.
+
+If there is no active_request
+   Set sled->active_request to the next request from the sled's
+     ioqueue.
+   If that's not NULL
+      If there is more than one request in this batch
+	 Call mems_update_reqinfo().
+      Make a copy of the active_request event since it gets passed
+         around as the request is serviced.
+      Throw out old prefetch info.
+
+If there is an active_request after all of that
+   Update each extent with the next blocks that should be accessed.
+   
+Else
+   There's nothing to do.
+   If inactive_delay has NOT passed
+      Set lastreq_comptime to the current time.
+      Set the sled as being IDLE.
+      Keep a pointer to this event "just in case".
+      Re-schedule this event as a MEMS_SLED_SCHEDULE at inactive_delay_ms
+        in the future.
+   Else if inactive_delay has passed
+	Set lastreq_comptime to the current time.
+	Set the sled at the centermost position.
+	Set the sled as INACTIVE.
+	Free the current event.
+	Update spinup/spindown statistics.
+	Return.
+
+Schedule this event as a MEMS_SLED_SEEK.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_SLED_SEEK
+
+Find the seek time to both the up and down positions, and choose the
+  direction with the shortest seek time.
+Re-schedule this event as a MEMS_SLED_SERVO.
+Update the sled's position.
+Update energy statistics.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_SLED_SERVO
+
+Calculate the time to access the servo bits.
+If there is an active request
+   Re-schedule this event as a MEMS_SLED_DATA.
+Else
+   Re-schedule this event as a MEMS_SLED_SCHEDULE.
+
+If there is an active request and it's a WRITE
+   If there is no data to be written yet in any of the extents
+      Re-schedule this event as a MEMS_SLED_SCHEDULE.
+
+Update the sled's position.
+Update energy statistics.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_SLED_DATA
+
+Calculate the time to access the sector.
+Re-schedule this event as a MEMS_SLED_UPDATE.
+Update the sled's position.
+Update energy statistics.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_SLED_UPDATE
+
+If there is an active_request
+   Go through each extent and update completed_block_media.
+      If the extent is for a READ and the bus is not already pending
+	 Schedule a new MEMS_BUS_INITIATE event.
+	 Set bus_pending.
+      If the extent's media transfer is complete
+	 If the bus transfer is complete
+	    Remove the extent from the extent list.
+	    Update the batch stats.
+	    Call mems_request_complete() for the extent's request.
+	    Free the request.
+	    Free the extent.
+   If all of the media transfer is done
+      Free the active_request.
+      Set lastreq_comptime.
+      Set active_request to NULL.
+
+Re-schedule this event as a MEMS_SLED_SCHEDULE.
+	    
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+IO_INTERRUPT_COMPLETE
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_BUS_INITIATE
+
+Choose an extent to start transferring over the bus.
+If there isn't already a request on the device's dataxfer_req, set
+   this one as the one.
+   Call send_reconnect().
+Else
+   Insert this event at the end of the dataxfer_queue.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_BUS_TRANSFER
+
+Re-schedule this event as a MEMS_BUS_UPDATE.
+Call device_get_blktranstime() to get the transfer time.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+MEMS_BUS_UPDATE
+
+Update the last block transfered in the bus_extent.
+
+If the bus_extent's bus transfer is complete
+   If media access is also complete
+      Remove extent from extent list.
+      Call mems_request_complete().
+      Free bus_extent->request.
+      Free bus_extent.
+   Check for more extents that need bus transfers.
+   If there are NO more extents that need bus transfer
+      Set dataxfer_req to NULL.
+      If the request was a READ and there are no more extents
+	 Free the reqinfo structure.
+   Else
+      Set the bus_extent to be the new extent pointer.
+Else if the request is a read but the media hasn't finished yet
+   Set dataxfer_req to be NULL.
+   Set bus_pending to be FALSE.
+
+If there is no dataxfer_req
+   If there is a request waiting in the dataxfer_queue
+      Pull off the first request.
+      Call send_reconnect().
+   Else
+      Call send_disconnect().
+   Free the current event.
+   Return.
+
+Re-schedule this event as a MEMS_BUS_TRANSFER.
+
+-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
+IO_QLEN_MAXCHECK
+
+Some crappy function that only gets called once.
