@@ -10,6 +10,6 @@ This release of disksim takes the 4.0 release from PDL and makes the following c
 ### Utilities and Features:
   - Command Logging and tagging for more verbose simulation debugging
   - Model layout tools – Provides a simple user interface to check conversion from LBA to PBA
-  - WCE experimental code base – The original disksim does not provide for a write cache enabled mode, this currently does not support idle cache flushing, hence its 'experimental' tag
+  - WCE experimental code base – The original disksim does not provide for a write cache enabled mode, this currently does not support idle cache flushing, hence the 'EXPERIMENTAL' directory
 
 ### Many bug fixes throughout the code base
