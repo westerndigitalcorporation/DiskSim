@@ -30,6 +30,8 @@ MODULE layout_g1
 HEADER \#include "../layout_g1.h"
 RESTYPE struct dm_layout_g1 *
 PROTO struct dm_layout_if *dm_layout_g1_loadparams(struct lp_block *b, struct dm_disk_if *d);
+PROTO struct dm_layout_g1;
+PROTO int disk_load_zones(struct lp_list *l, struct dm_layout_g1 *layout);
 
 
 PARAM LBN-to-PBN mapping scheme		I	1 

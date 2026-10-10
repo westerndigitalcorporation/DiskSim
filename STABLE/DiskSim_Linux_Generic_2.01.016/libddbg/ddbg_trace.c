@@ -73,6 +73,9 @@ struct ddbg_class {
   BITVECTOR(instances, DDBG_MAX_INSTANCE);
 };
 
+void bit_zero(unsigned char *bits, int nbits);
+void bit_setall(unsigned char *bits, int nbits);
+
 static struct ddbg_class *ddbg_classes = 0;
 static int ddbg_classes_len = 0;
 static int ddbg_class_max = 0;
