@@ -34,6 +34,12 @@ HEADER \#include "../mech_g1.h"
 HEADER \#include "../mech_g1_private.h"
 RESTYPE struct dm_mech_g1 *
 PROTO struct dm_mech_if *dm_mech_g1_loadparams(struct lp_block *b, int *num);
+PROTO \#include <stdint.h>
+PROTO void dm_mech_g1_read_extracted_seek_curve(char *filename, int *cntptr, int **distsptr, int64_t **timesptr);
+
+PROTO struct dm_mech_g1;
+PROTO int do_1st10_seeks(struct dm_mech_g1 *result, struct lp_list *l);
+PROTO int do_hpl_seek(struct dm_mech_g1 *result, struct lp_list *l);
 
 
 PARAM Access time type			S	1 

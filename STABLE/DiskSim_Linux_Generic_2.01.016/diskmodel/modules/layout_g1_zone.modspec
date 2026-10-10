@@ -34,6 +34,9 @@ MODULE layout_g1_zone
 HEADER \#include "../layout_g1.h"
 RESTYPE struct dm_layout_g1_band *
 PROTO int dm_layout_g1_zone_loadparams(struct lp_block *b);
+PROTO struct dm_layout_g1_band;
+PROTO int getslips(struct dm_layout_g1_band *z, struct lp_list *l);
+PROTO int getdefects(struct dm_layout_g1_band *z, struct lp_list *l);
 
 PARAM First cylinder number		I	1 
 TEST i >= 0

@@ -30,6 +30,8 @@ MODULE layout_g2
 HEADER \#include "../layout_g2.h"
 RESTYPE struct dm_layout_g2 *
 PROTO struct dm_layout_if *dm_layout_g2_loadparams(struct lp_block *, struct dm_disk_if *parent);
+PROTO struct dm_layout_g2;
+PROTO void g2_load_zones(struct dm_layout_g2 *l, struct lp_list *zl);
 
 PARAM Layout Map File			S	1
 INIT result->mapfile = strdup(s);

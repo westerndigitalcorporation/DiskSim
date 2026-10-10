@@ -30,6 +30,11 @@ MODULE layout_g4
 HEADER \#include "../layout_g4.h"
 RESTYPE struct dm_layout_g4 *
 PROTO struct dm_layout_if *dm_layout_g4_loadparams(struct lp_block *, struct dm_disk_if *);
+PROTO struct dm_layout_g4;
+PROTO int g4_load_tp(struct dm_layout_g4 *r, struct lp_list *l);
+PROTO int g4_load_idx(struct dm_layout_g4 *r, struct lp_list *l);
+PROTO int g4_load_slips(struct dm_layout_g4 *r, struct lp_list *l);
+PROTO int g4_load_remaps(struct dm_layout_g4 *r, struct lp_list *l);
 
 
 PARAM TP	LIST	1
