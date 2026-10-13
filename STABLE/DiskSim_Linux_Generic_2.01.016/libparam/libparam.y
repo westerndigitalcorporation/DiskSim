@@ -37,6 +37,7 @@
 #include "libparam.h"
 
 #define YYERROR_VERBOSE
+int libparamlex(void);
 
 void yyerror (char *s) {
   fprintf(stderr, "*** error: on line %d of %s: ", lp_lineno, lp_filename);
