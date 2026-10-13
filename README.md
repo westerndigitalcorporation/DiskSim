@@ -21,3 +21,15 @@ Claude Code updated the original Western Digital repo to work with modern compil
 - Older GCC (13 and earlier): the original code should already build there with warnings. My fix should also work, because the added prototypes are plain valid C that matches the existing definitions. I haven't tested that either.
 
 Basically speaking, it added prototypes to C files and PROTO to Bison files for generating C files.
+
+The only discrepancy in the validation tests is a ~10% difference between expected and actual average response times for ASCII input (`STABLE/valid/ascii.parv`).
+
+```Shell
+ASCII input (avg. resp should be about 13.8 msec)
+DiskSim v2.01.016
+IOdriver Response time average: 	12.438219
+```
+
+## Notice
+
+I have verified nothing regarding the experimental side of the repo!  Only the stable side.
