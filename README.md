@@ -20,7 +20,7 @@ Claude Code updated the original Western Digital repo to work with modern compil
 - Where the problem starts: GCC 14. That's the release that turned implicit declarations and incompatible pointer types into errors, so the original code fails on GCC 14 as well as 15. I haven't tried GCC 14 myself, so that part comes from my knowledge of the compiler change, not from a test.
 - Older GCC (13 and earlier): the original code should already build there with warnings. My fix should also work, because the added prototypes are plain valid C that matches the existing definitions. I haven't tested that either.
 
-Basically speaking, it added prototypes to C files and PROTO to Bison files for generating C files.
+Basically speaking, it added prototypes to C files and PROTO to .modspec files to help generate modular C files.  Without these changes, the newer compilers give errors.
 
 The only discrepancy in the validation tests is a ~10% difference between expected and actual average response times for ASCII input (`STABLE/valid/ascii.parv`).
 
